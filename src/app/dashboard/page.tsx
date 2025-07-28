@@ -124,22 +124,14 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Intraday Data</CardTitle>
-            {updateManager.status.intraday.needsUpdate ? (
-              <AlertCircle className="h-4 w-4 text-orange-600" />
-            ) : (
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            )}
+            <Clock className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {updateManager.status.intraday.needsUpdate ? (
-                <span className="text-orange-600">Needs Update</span>
-              ) : (
-                <span className="text-green-600">Up to Date</span>
-              )}
+              <span className="text-blue-600">Cronjob Managed</span>
             </div>
             <p className="text-xs text-gray-500">
-              Market hours: 9:00 AM - 3:45 PM IST
+              Updates via cronjob.org at 9:00 AM and 3:45 PM IST
             </p>
           </CardContent>
         </Card>
@@ -222,36 +214,37 @@ export default function DashboardPage() {
               <div>
                 <p className="font-medium">Market Data</p>
                 <p className="text-sm text-gray-600">
-                  Updates at 9:00 AM and 3:45 PM IST on trading days
+                  Managed by cronjob.org at 9:00 AM and 3:45 PM IST
                 </p>
               </div>
               <div className="space-x-2">
                 <Button 
-                  onClick={updateManager.checkIntradayStatus}
-                  variant="outline"
-                  disabled={updateManager.isLoading}
-                >
-                  Check Status
-                </Button>
-                <Button 
                   onClick={updateManager.triggerIntradayUpdate}
                   disabled={updateManager.isLoading}
                 >
-                  Update Now
+                  Manual Update
                 </Button>
               </div>
             </div>
 
-            <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-              <div className="text-sm">
-                <span className="font-medium">Last checked: </span>
-                {formatDateTime(updateManager.status.intraday.lastChecked)}
+            {updateManager.status.intraday.lastUpdateResult && (
+              <div className="bg-gray-50 p-3 rounded-lg space-y-2">
+                <div className="text-sm">
+                  <span className="font-medium">Last update: </span>
+                  {formatDateTime(updateManager.status.intraday.lastChecked)}
+                </div>
+                <div className="text-sm">
+                  <span className="font-medium">Updated: </span>
+                  {updateManager.status.intraday.lastUpdateResult.data?.updatedCount || 0} stocks
+                </div>
+                {updateManager.status.intraday.lastUpdateResult.data?.failedCount > 0 && (
+                  <div className="text-sm text-red-600">
+                    <span className="font-medium">Failed: </span>
+                    {updateManager.status.intraday.lastUpdateResult.data.failedCount} stocks
+                  </div>
+                )}
               </div>
-              <div className="text-sm">
-                <span className="font-medium">Oldest data: </span>
-                {formatDateTime(updateManager.status.intraday.oldestUpdate)}
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

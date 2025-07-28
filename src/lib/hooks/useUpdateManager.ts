@@ -16,8 +16,7 @@ export interface UpdateManagerStatus {
     } | null;
   };
   intraday: {
-    needsUpdate: boolean;
-    oldestUpdate: string | null;
+    lastUpdateResult: any | null;
     lastChecked: string | null;
   };
   isInitialized: boolean;
@@ -36,8 +35,7 @@ export const useUpdateManager = () => {
       stats: null
     },
     intraday: {
-      needsUpdate: false,
-      oldestUpdate: null,
+      lastUpdateResult: null,
       lastChecked: null
     },
     isInitialized: false
@@ -46,44 +44,13 @@ export const useUpdateManager = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check for intraday updates on login
-  const checkIntradayOnLogin = useCallback(async () => {
-    if (!isSignedIn) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log('User logged in, checking intraday update requirements...');
-      
-      // Check if intraday update is needed
-      await intradayUpdates.checkUpdateStatus();
-      
-      // If update is needed, trigger it
-      if (intradayUpdates.status?.needsUpdate) {
-        console.log('Intraday update needed, triggering update...');
-        await intradayUpdates.triggerUpdate();
-      } else {
-        console.log('Intraday data is up to date');
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      setError(errorMessage);
-      console.error('Error checking intraday updates on login:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isSignedIn, intradayUpdates]);
-
   // Initialize updates when user signs in
   useEffect(() => {
     if (isSignedIn && user && !status.isInitialized) {
       console.log('Initializing update manager for user:', user.id);
       
-      // Check intraday updates on login
-      checkIntradayOnLogin();
-      
       // Real-time updates are already auto-started by useRealTimeUpdates hook
+      // Intraday updates are now handled by cronjob.org
       
       setStatus(prev => ({
         ...prev,
@@ -99,7 +66,7 @@ export const useUpdateManager = () => {
         isInitialized: false
       }));
     }
-  }, [isSignedIn, user, status.isInitialized, checkIntradayOnLogin, realTimeUpdates]);
+  }, [isSignedIn, user, status.isInitialized, realTimeUpdates]);
 
   // Update status based on real-time hook
   useEffect(() => {
@@ -116,17 +83,16 @@ export const useUpdateManager = () => {
 
   // Update status based on intraday hook
   useEffect(() => {
-    if (intradayUpdates.status) {
+    if (intradayUpdates.lastUpdateResult) {
       setStatus(prev => ({
         ...prev,
         intraday: {
-          needsUpdate: intradayUpdates.status!.needsUpdate,
-          oldestUpdate: intradayUpdates.status!.oldestUpdate,
-          lastChecked: intradayUpdates.status!.currentTime
+          lastUpdateResult: intradayUpdates.lastUpdateResult,
+          lastChecked: new Date().toISOString()
         }
       }));
     }
-  }, [intradayUpdates.status]);
+  }, [intradayUpdates.lastUpdateResult]);
 
   // Manual controls
   const startRealTimeUpdates = useCallback(() => {
@@ -150,15 +116,6 @@ export const useUpdateManager = () => {
     return await intradayUpdates.triggerUpdate();
   }, [isSignedIn, intradayUpdates]);
 
-  const checkIntradayStatus = useCallback(async () => {
-    if (!isSignedIn) {
-      setError('Please sign in to check intraday status');
-      return;
-    }
-    
-    await intradayUpdates.checkUpdateStatus();
-  }, [isSignedIn, intradayUpdates]);
-
   return {
     status,
     isLoading: isLoading || realTimeUpdates.isLoading || intradayUpdates.isLoading,
@@ -169,8 +126,5 @@ export const useUpdateManager = () => {
     startRealTimeUpdates,
     stopRealTimeUpdates,
     triggerIntradayUpdate,
-    checkIntradayStatus,
-    // Force intraday check (useful for testing)
-    checkIntradayOnLogin
   };
 };

@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { users, userStocks, stocks } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { currentUser } from '@clerk/nextjs/server';
-import { StockDataService } from './stockDataService';
+
 
 export interface CreateUserParams {
   clerkId: string;
@@ -13,7 +13,7 @@ export interface CreateUserParams {
 
 export class UserService {
   /**
-   * Create or get user from Clerk data and trigger intraday data update if needed
+   * Create or get user from Clerk data
    */
   static async createOrGetUser(userData: CreateUserParams) {
     try {
@@ -49,17 +49,7 @@ export class UserService {
         user = newUser[0];
       }
 
-      // Check and update intraday data if needed (async, don't wait for completion)
-      // This runs in the background to avoid blocking user login
-      StockDataService.updateAllIntradayDataIfNeeded()
-        .then(result => {
-          if (result.updated && result.count) {
-            console.log(`Background update: ${result.message}`);
-          }
-        })
-        .catch(error => {
-          console.error('Background intraday data update failed:', error);
-        });
+      // Removed background intraday data update - now handled by cronjob.org
 
       return user;
     } catch (error) {
