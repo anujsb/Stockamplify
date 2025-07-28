@@ -78,12 +78,41 @@ export async function GET(request: NextRequest) {
 
     // If not found in DB, search Yahoo Finance
     try {
-      const yahooResults = await YahooFinanceService.searchStocks(searchTerm);
-      // Filter for Indian stocks only (NSE/BSE or region IN)
+      let yahooResults = await YahooFinanceService.searchStocks(searchTerm);
+      
+      // If the search term looks like a bank name (ends with I, C, etc.), try adding BANK suffix
+      if (searchTerm.toUpperCase().endsWith('I') || searchTerm.toUpperCase().endsWith('C')) {
+        const bankResults = await YahooFinanceService.searchStocks(searchTerm + 'BANK');
+        yahooResults = [...yahooResults, ...bankResults];
+      }
+      // Filter for Indian stocks only (NSI/BSE or region IN) and prioritize actual stocks over mutual funds
       const filteredYahooResults = yahooResults.filter(result => {
         const ex = result.exchange?.toUpperCase();
         const region = result.region?.toUpperCase();
-        return ex === 'NSE' || ex === 'BSE' || region === 'IN';
+        const quoteType = result.quoteType?.toUpperCase();
+        
+        // Only include Indian exchanges
+        const isIndianExchange = ex === 'NSI' || ex === 'BSE' || region === 'IN';
+        
+        // Prioritize EQUITY over MUTUALFUND, FUTURE, etc.
+        const isPreferredType = quoteType === 'EQUITY';
+        
+        // Filter out mutual funds and other non-stock instruments
+        const isNotMutualFund = quoteType !== 'MUTUALFUND';
+        
+        return isIndianExchange && isNotMutualFund;
+      });
+      
+      // Sort results to prioritize EQUITY stocks first
+      filteredYahooResults.sort((a, b) => {
+        const aIsEquity = a.quoteType?.toUpperCase() === 'EQUITY';
+        const bIsEquity = b.quoteType?.toUpperCase() === 'EQUITY';
+        
+        if (aIsEquity && !bIsEquity) return -1;
+        if (!aIsEquity && bIsEquity) return 1;
+        
+        // If both are same type, sort by score if available
+        return (b.score || 0) - (a.score || 0);
       });
       // Format Yahoo results to match our interface
       const formattedYahooResults = filteredYahooResults.slice(0, 10).map(result => ({
@@ -95,7 +124,7 @@ export async function GET(request: NextRequest) {
         marketClose: '15:30',
         timezone: 'Asia/Kolkata',
         currency: 'INR',
-        exchange: result.exchange,
+        exchange: result.exchange === 'NSI' ? 'NSE' : result.exchange,
         sector: result.sector,
         industry: result.industry,
         source: 'yahoo' as const
