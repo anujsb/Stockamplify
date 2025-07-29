@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserService } from '@/lib/services/userService';
 import { auth } from '@clerk/nextjs/server';
+import { eq, and } from 'drizzle-orm';
 
 // Define the response type for clarity and type safety
 interface PortfolioResponse {
@@ -46,6 +47,52 @@ export async function GET(req: NextRequest): Promise<NextResponse<PortfolioRespo
       { success: false, error: 'Internal server error' },
       { status: 500 }
     );
+  }
+}
+
+// POST /api/portfolio - Add stock to user's portfolio
+export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResponse>> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await UserService.getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    const body = await req.json();
+    const { symbol, quantity, buyPrice } = body;
+    if (!symbol || !quantity || !buyPrice) {
+      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Find the stock in the DB (by symbol, prefer NSE, fallback to BSE)
+    const stock = await (async () => {
+      const { db } = await import('@/lib/db');
+      const { stocks } = await import('@/lib/db/schema');
+      // Try NSE first
+      let found = await db.select().from(stocks).where(and(eq(stocks.symbol, symbol), eq(stocks.exchange, 'NSE'))).limit(1);
+      if (found.length === 0) {
+        // Try BSE
+        found = await db.select().from(stocks).where(and(eq(stocks.symbol, symbol), eq(stocks.exchange, 'BSE'))).limit(1);
+      }
+      return found[0];
+    })();
+
+    if (!stock) {
+      return NextResponse.json({ success: false, error: 'Stock not found in database' }, { status: 404 });
+    }
+
+    // Add stock to user's portfolio
+    await UserService.addStockToPortfolio(user.id, stock.id, Number(quantity), Number(buyPrice));
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error('Error in POST /api/portfolio:', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
 
