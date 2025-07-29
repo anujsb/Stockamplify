@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { useUser } from '@clerk/nextjs';
+import PortfolioTable from '@/components/portfolio/PortfolioTable'
 
 
 const PortfolioPage = () => {
@@ -31,9 +32,8 @@ const PortfolioPage = () => {
                     </div>
                 </header>
                 {/* Body */}
-                <main className=''>
-                    
-                    PortfolioPage
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <PortfolioTable />
                 </main>
             </div>
         </div>
