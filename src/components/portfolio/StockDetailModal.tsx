@@ -37,12 +37,20 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="w-full min-w-max ">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <div>
-                            <div className="text-xl font-bold">{stock.stock.symbol}</div>
-                            <div className="text-sm text-gray-600">{stock.stock.name}</div>
+                    <DialogTitle className="flex items-center justify-between gap-4 mt-4">
+                        <div className="flex-1">
+                            <div className="text-xl font-bold text-foreground">{stock.stock.symbol}</div>
+                            <div className="text-sm text-muted-foreground">{stock.stock.name}</div>
                         </div>
-                        <Badge variant="outline">{stock.stock.exchange}</Badge>
+
+                        <div className="flex items-center gap-3">
+                            <div className="text-right">
+                                <div className="text-lg font-semibold">${stock.currentPrice}</div>
+                                <Badge variant="outline" className="shrink-0">
+                                    {stock.stock.exchange}
+                                </Badge>
+                            </div>
+                        </div>
                     </DialogTitle>
                 </DialogHeader>
 
