@@ -96,6 +96,36 @@ export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResp
   }
 }
 
+// DELETE /api/portfolio - Delete stock from user's portfolio
+export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioResponse>> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    const user = await UserService.getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
+    }
+    // Find the portfolio entry and ensure it belongs to the user
+    // Remove by portfolio row id (userStocks.id)
+    const result = await UserService.removeStockFromPortfolioById(user.id, Number(id));
+    if (result.success) {
+      return NextResponse.json({ success: true }, { status: 200 });
+    } else {
+      return NextResponse.json({ success: false, error: result.error || 'Failed to remove stock' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Error in DELETE /api/portfolio:', error);
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 // Optionally, handle unsupported methods (for edge runtime or custom routing)
 export function handler(req: NextRequest) {
   if (req.method !== 'GET') {

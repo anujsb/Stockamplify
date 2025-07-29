@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { users, userStocks, stocks } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { currentUser } from '@clerk/nextjs/server';
+import { stockRealTimePrice } from '@/lib/db/schema';
 
 
 export interface CreateUserParams {
@@ -159,10 +160,12 @@ export class UserService {
             symbol: stocks.symbol,
             name: stocks.name,
             exchange: stocks.exchange,
-          }
+          },
+          currentPrice: stockRealTimePrice.price,
         })
         .from(userStocks)
         .leftJoin(stocks, eq(userStocks.stockId, stocks.id))
+        .leftJoin(stockRealTimePrice, eq(userStocks.stockId, stockRealTimePrice.stockId))
         .where(eq(userStocks.userId, userId));
     } catch (error) {
       console.error('Error getting user portfolio:', error);
@@ -185,6 +188,27 @@ export class UserService {
     } catch (error) {
       console.error('Error removing stock from portfolio:', error);
       throw new Error('Failed to remove stock from portfolio');
+    }
+  }
+
+  /**
+   * Remove stock from user's portfolio by portfolio row id (userStocks.id)
+   */
+  static async removeStockFromPortfolioById(userId: number, portfolioId: number) {
+    try {
+      // Only delete if the row belongs to the user
+      const result = await db
+        .delete(userStocks)
+        .where(and(eq(userStocks.userId, userId), eq(userStocks.id, portfolioId)))
+        .returning();
+      if (result.length > 0) {
+        return { success: true };
+      } else {
+        return { success: false, error: 'Not found or not authorized' };
+      }
+    } catch (error) {
+      console.error('Error removing stock from portfolio by id:', error);
+      return { success: false, error: 'Failed to remove stock from portfolio' };
     }
   }
 }
