@@ -74,15 +74,15 @@ const OverViewTab = ({ item }: { item: any }) => {
                                     <span className="text-sm text-gray-600">Company</span>
                                     <span className="text-sm font-medium">{item.stock.name}</span>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between gap-4">
                                     <span className="text-sm text-gray-600">Ticker</span>
                                     <span className="text-sm font-medium">{item.stock.symbol}</span>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between gap-4">
                                     <span className="text-sm text-gray-600">Sector</span>
                                     <span className="text-sm font-medium">{item.stock.sector}</span>
                                 </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between gap-4">
                                     <span className="text-sm text-gray-600">Industry</span>
                                     <span className="text-sm font-medium">{item.stock.industry}</span>
                                 </div>
