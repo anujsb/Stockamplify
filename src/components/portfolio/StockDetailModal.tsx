@@ -44,7 +44,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <div className="text-lg font-semibold">${stock.currentPrice}</div>
+                                <div className="text-lg font-semibold">₹{Number(stock.realTimePrice.price).toFixed(2)}</div>
                                 <Badge variant="outline" className="shrink-0">
                                     {stock.stock.exchange}
                                 </Badge>

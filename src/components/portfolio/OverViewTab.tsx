@@ -5,8 +5,8 @@ import { AlertCircle, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
 const OverViewTab = ({ item }: { item: any }) => {
     const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
-    const currentValue = item.currentPrice * item.quantity;
-    const gainLoss = item.currentPrice * item.quantity - item.buyPrice * item.quantity;
+    const currentValue = item.realTimePrice.price * item.quantity;
+    const gainLoss = item.realTimePrice.price * item.quantity - item.buyPrice * item.quantity;
     // const gainLossPercentage = ((gainLoss / (stock.buyPrice * stock.quantity)) * 100).toFixed(2);
     const gainLossPercentage = (gainLoss / (item.buyPrice * item.quantity)) * 100;
 
@@ -37,19 +37,20 @@ const OverViewTab = ({ item }: { item: any }) => {
                         <div className="text-center p-3 bg-orange-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Gain/Loss</p>
                             <p className={`text-lg font-bold ${gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {gainLoss}
+                                {Number(gainLoss).toFixed(2)}
                             </p>
                         </div>
                         <div className="text-center p-3 bg-indigo-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Gain/Loss %</p>
                             <p className={`text-lg font-bold ${gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {gainLossPercentage}
+                                {Number(gainLossPercentage).toFixed(2)}
+
                             </p>
                         </div>
                         <div className="text-center p-3 bg-yellow-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Est. Yearly Return</p>
                             <p className="text-lg font-bold text-yellow-600">
-                                {gainLossPercentage * 1.2}
+                                {Number(gainLossPercentage * 1.2).toFixed(2)}
                             </p>
                             <p className="text-xs text-gray-500">Est. yearly</p>
                         </div>
