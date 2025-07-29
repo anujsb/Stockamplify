@@ -1,11 +1,14 @@
 import { Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
+import StockDetailModal from './StockDetailModal';
 
 const PortfolioTable = () => {
     const [portfolio, setPortfolio] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [selectedStock, setSelectedStock] = useState<any>(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
 
     useEffect(() => {
@@ -68,6 +71,16 @@ const PortfolioTable = () => {
         }
     };
 
+    const handleRowClick = (stock: any) => {
+        setSelectedStock(stock);
+        setShowDetailModal(true);
+    };
+
+    const handleCloseDetailModal = () => {
+        setShowDetailModal(false);
+        setSelectedStock(null);
+    };
+
     return (
         <div>
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -100,7 +113,11 @@ const PortfolioTable = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {portfolio.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
+                                <tr 
+                                    key={item.id} 
+                                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                                    onClick={() => handleRowClick(item)}
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">{item.stock?.symbol}</div>
                                         <div className="text-gray-500">{item.stock?.name}</div>
@@ -150,6 +167,11 @@ const PortfolioTable = () => {
                     </table>
                 </div>
             </div>
+            <StockDetailModal 
+                open={showDetailModal} 
+                onClose={handleCloseDetailModal} 
+                stock={selectedStock} 
+            />
         </div>
     )
 }

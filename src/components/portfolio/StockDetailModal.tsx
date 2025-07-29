@@ -1,0 +1,106 @@
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown, BarChart3, Brain, Newspaper, Calculator, Activity } from 'lucide-react';
+import OverViewTab from '@/components/portfolio/OverViewTab';
+import ChartTab from '@/components/portfolio/ChartTab';
+import AiAnalysisTab from '@/components/portfolio/AiAnalysisTab';
+import NewsAndActionsTab from './NewsAndActionsTab';
+import FinancialTab from './FinancialTab';
+import TechnicalTab from './TechnicalTab';
+
+interface StockDetailModalProps {
+    open: boolean;
+    onClose: () => void;
+    stock: any; // Portfolio item with stock data
+}
+
+const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stock }) => {
+    if (!stock) return null;
+
+    const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
+    const formatPercentage = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+
+    const calculateGainLoss = () => {
+        const currentValue = Number(stock.currentPrice) * stock.quantity;
+        const buyValue = Number(stock.buyPrice) * stock.quantity;
+        const gainLoss = currentValue - buyValue;
+        const gainLossPercentage = (gainLoss / buyValue) * 100;
+        return { gainLoss, gainLossPercentage };
+    };
+
+    const { gainLoss, gainLossPercentage } = calculateGainLoss();
+
+    return (
+        <Dialog open={open} onOpenChange={onClose}>
+            <DialogContent className="w-full min-w-max ">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <div>
+                            <div className="text-xl font-bold">{stock.stock.symbol}</div>
+                            <div className="text-sm text-gray-600">{stock.stock.name}</div>
+                        </div>
+                        <Badge variant="outline">{stock.stock.exchange}</Badge>
+                    </DialogTitle>
+                </DialogHeader>
+
+                <Tabs defaultValue="overview" className="w-full">
+                    <TabsList className="grid w-full grid-cols-6">
+                        <TabsTrigger value="overview" className="flex items-center gap-1">
+                            <BarChart3 className="h-4 w-4" />
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="chart" className="flex items-center gap-1">
+                            <Activity className="h-4 w-4" />
+                            Chart
+                        </TabsTrigger>
+                        <TabsTrigger value="ai-analysis" className="flex items-center gap-1">
+                            <Brain className="h-4 w-4" />
+                            AI Analysis
+                        </TabsTrigger>
+                        <TabsTrigger value="news" className="flex items-center gap-1">
+                            <Newspaper className="h-4 w-4" />
+                            News
+                        </TabsTrigger>
+                        <TabsTrigger value="financials" className="flex items-center gap-1">
+                            <Calculator className="h-4 w-4" />
+                            Financials
+                        </TabsTrigger>
+                        <TabsTrigger value="technicals" className="flex items-center gap-1">
+                            <TrendingUp className="h-4 w-4" />
+                            Technicals
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="overview" className="space-y-4 p-6">
+                        <OverViewTab stock={stock} />
+                    </TabsContent>
+
+                    <TabsContent value="chart" className="space-y-4 p-6">
+                        <ChartTab />
+                    </TabsContent>
+
+                    <TabsContent value="ai-analysis" className="space-y-4 p-6">
+                        <AiAnalysisTab />
+                    </TabsContent>
+
+                    <TabsContent value="news" className="space-y-4 p-6">
+                        <NewsAndActionsTab />
+                    </TabsContent>
+
+                    <TabsContent value="financials" className="space-y-4 p-6">
+                        <FinancialTab />
+                    </TabsContent>
+
+                    <TabsContent value="technicals" className="space-y-4 p-6">
+                        <TechnicalTab />
+                    </TabsContent>
+                </Tabs>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+export default StockDetailModal; 
