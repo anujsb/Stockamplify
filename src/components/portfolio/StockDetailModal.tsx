@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, BarChart3, Brain, Newspaper, Calculator, Activity } from 'lucide-react';
 import OverViewTab from '@/components/portfolio/OverViewTab';
@@ -83,7 +82,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-4 p-6">
-                        <OverViewTab stock={stock} />
+                        <OverViewTab item={stock} />
                     </TabsContent>
 
                     <TabsContent value="chart" className="space-y-4 p-6">

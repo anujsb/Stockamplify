@@ -113,8 +113,8 @@ const PortfolioTable = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {portfolio.map((item) => (
-                                <tr 
-                                    key={item.id} 
+                                <tr
+                                    key={item.id}
                                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                                     onClick={() => handleRowClick(item)}
                                 >
@@ -167,10 +167,10 @@ const PortfolioTable = () => {
                     </table>
                 </div>
             </div>
-            <StockDetailModal 
-                open={showDetailModal} 
-                onClose={handleCloseDetailModal} 
-                stock={selectedStock} 
+            <StockDetailModal
+                open={showDetailModal}
+                onClose={handleCloseDetailModal}
+                stock={selectedStock}
             />
         </div>
     )

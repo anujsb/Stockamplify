@@ -36,7 +36,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<PortfolioRespo
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    const portfolio = await UserService.getUserPortfolio(user.id);
+    const portfolio = await UserService.getUserPortfolioWithDetails(user.id);
     return NextResponse.json(
       { success: true, data: convertBigIntToString(portfolio) },
       { status: 200 }

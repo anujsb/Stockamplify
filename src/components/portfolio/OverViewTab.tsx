@@ -1,14 +1,14 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatPercentage } from '@/lib/utils/stockUtils';
-import { TrendingDown, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
-const OverViewTab = ({ stock }: { stock: any }) => {
+const OverViewTab = ({ item }: { item: any }) => {
     const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
-    const currentValue = stock.currentPrice * stock.quantity;
-    const gainLoss = stock.currentPrice * stock.quantity - stock.buyPrice * stock.quantity;
+    const currentValue = item.currentPrice * item.quantity;
+    const gainLoss = item.currentPrice * item.quantity - item.buyPrice * item.quantity;
     // const gainLossPercentage = ((gainLoss / (stock.buyPrice * stock.quantity)) * 100).toFixed(2);
-    const gainLossPercentage = (gainLoss / (stock.buyPrice * stock.quantity)) * 100;
+    const gainLossPercentage = (gainLoss / (item.buyPrice * item.quantity)) * 100;
 
 
     return (
@@ -24,11 +24,11 @@ const OverViewTab = ({ stock }: { stock: any }) => {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                         <div className="text-center p-3 bg-blue-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Quantity Held</p>
-                            <p className="text-lg font-bold text-blue-600">{stock.quantity}</p>
+                            <p className="text-lg font-bold text-blue-600">{item.quantity}</p>
                         </div>
                         <div className="text-center p-3 bg-green-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Total Invested Value</p>
-                            <p className="text-lg font-bold text-green-600">{stock.buyPrice * stock.quantity}</p>
+                            <p className="text-lg font-bold text-green-600">{item.buyPrice * item.quantity}</p>
                         </div>
                         <div className="text-center p-3 bg-purple-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Current Value</p>
@@ -57,46 +57,98 @@ const OverViewTab = ({ stock }: { stock: any }) => {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Portfolio Summary</CardTitle>
+            <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-indigo-600" />
+                        Stock Overview
+                    </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                    <div className="flex justify-between">
-                        <span>Quantity:</span>
-                        <span className="font-semibold">{stock.quantity}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Buy Price:</span>
-                        <span className="font-semibold">{formatCurrency(stock.buyPrice)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Current Price:</span>
-                        <span className="font-semibold">{formatCurrency(stock.currentPrice)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Total Value:</span>
-                        <span className="font-semibold">{formatCurrency(stock.currentPrice * stock.quantity)}</span>
-                    </div>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Performance</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    <div className="flex justify-between">
-                        <span>Gain/Loss:</span>
-                        <span className={`font-semibold ${gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {gainLoss >= 0 ? <TrendingUp className="inline h-4 w-4 mr-1" /> : <TrendingDown className="inline h-4 w-4 mr-1" />}
-                            {formatCurrency(gainLoss)}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Gain/Loss %:</span>
-                        <span className={`font-semibold ${Number(gainLossPercentage) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {formatPercentage(gainLossPercentage)}
-                        </span>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Basic Info</h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Company</span>
+                                    <span className="text-sm font-medium">{item.stock.name}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Ticker</span>
+                                    <span className="text-sm font-medium">{item.stock.symbol}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Sector</span>
+                                    <span className="text-sm font-medium">{item.stock.sector}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Industry</span>
+                                    <span className="text-sm font-medium">{item.stock.industry}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Market Data</h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Market Cap</span>
+                                    {/* <span className="text-sm font-medium">{stockOverview.marketCap}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">P/E Ratio</span>
+                                    {/* <span className="text-sm font-medium">{stockOverview.peRatio}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Dividend Yield</span>
+                                    {/* <span className="text-sm font-medium">{stockOverview.dividendYield}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Currency</span>
+                                    {/* <span className="text-sm font-medium">{stockOverview.currency}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Previous Close</span>
+                                    {/* <span className="text-sm font-medium">{stockOverview.previousClose}</span> */}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Price Range</h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">52-Week High</span>
+                                    {/* <span className="text-sm font-medium text-green-600">{stockOverview.high52Week}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">52-Week Low</span>
+                                    {/* <span className="text-sm font-medium text-red-600">{stockOverview.low52Week}</span> */}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Analyst Ratings</h4>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Buy</span>
+                                    {/* <span className="text-sm font-medium text-green-600">{analystRatings.buy}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Hold</span>
+                                    {/* <span className="text-sm font-medium text-yellow-600">{analystRatings.hold}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Sell</span>
+                                    {/* <span className="text-sm font-medium text-red-600">{analystRatings.sell}</span> */}
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-sm text-gray-600">Avg Rating</span>
+                                    {/* <span className="text-sm font-medium">{analystRatings.average}</span> */}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

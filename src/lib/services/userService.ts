@@ -4,6 +4,7 @@ import { users, userStocks, stocks } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { currentUser } from '@clerk/nextjs/server';
 import { stockRealTimePrice } from '@/lib/db/schema';
+import { stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
 
 
 export interface CreateUserParams {
@@ -169,6 +170,122 @@ export class UserService {
         .where(eq(userStocks.userId, userId));
     } catch (error) {
       console.error('Error getting user portfolio:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user's portfolio with complete stock details
+   */
+  static async getUserPortfolioWithDetails(userId: number) {
+    try {
+      return await db
+        .select({
+          // Portfolio data
+          id: userStocks.id,
+          quantity: userStocks.quantity,
+          buyPrice: userStocks.buyPrice,
+          addedAt: userStocks.addedAt,
+          updatedAt: userStocks.updatedAt,
+          
+          // Stock basic info
+          stock: {
+            id: stocks.id,
+            symbol: stocks.symbol,
+            name: stocks.name,
+            exchange: stocks.exchange,
+            sector: stocks.sector,
+            industry: stocks.industry,
+            currency: stocks.currency,
+            lastRefreshedAt: stocks.lastRefreshedAt,
+          },
+          
+          // Real-time price data
+          realTimePrice: {
+            price: stockRealTimePrice.price,
+            volume: stockRealTimePrice.volume,
+            updatedAt: stockRealTimePrice.updatedAt,
+          },
+          
+          // Intraday price data
+          intradayPrice: {
+            previousClose: stockIntraDayPrice.previousClose,
+            open: stockIntraDayPrice.open,
+            dayHigh: stockIntraDayPrice.dayHigh,
+            dayLow: stockIntraDayPrice.dayLow,
+            fiftyTwoWeekHigh: stockIntraDayPrice.fiftyTwoWeekHigh,
+            fiftyTwoWeekLow: stockIntraDayPrice.fiftyTwoWeekLow,
+            fiftyDayMovingAverage: stockIntraDayPrice.fiftyDayMovingAverage,
+            twoHundredDayMovingAverage: stockIntraDayPrice.twoHundredDayMovingAverage,
+            averageDailyVolume3Month: stockIntraDayPrice.averageDailyVolume3Month,
+            averageDailyVolume10Day: stockIntraDayPrice.averageDailyVolume10Day,
+            marketCap: stockIntraDayPrice.marketCap,
+            updatedAt: stockIntraDayPrice.updatedAt,
+          },
+          
+          // Fundamental data
+          fundamentalData: {
+            epsTTM: stockFundamentalData.epsTTM,
+            epsForward: stockFundamentalData.epsForward,
+            bookValue: stockFundamentalData.bookValue,
+            trailingPE: stockFundamentalData.trailingPE,
+            forwardPE: stockFundamentalData.forwardPE,
+            priceToBook: stockFundamentalData.priceToBook,
+            updatedAt: stockFundamentalData.updatedAt,
+          },
+          
+          // Financial data
+          financialData: {
+            totalRevenue: stockFinancialData.totalRevenue,
+            totalCash: stockFinancialData.totalCash,
+            totalDebt: stockFinancialData.totalDebt,
+            debtToEquity: stockFinancialData.debtToEquity,
+            currentRatio: stockFinancialData.currentRatio,
+            quickRatio: stockFinancialData.quickRatio,
+            profitMargin: stockFinancialData.profitMargin,
+            grossMargin: stockFinancialData.grossMargin,
+            operatingMargin: stockFinancialData.operatingMargin,
+            ebitdaMargin: stockFinancialData.ebitdaMargin,
+            returnOnAssets: stockFinancialData.returnOnAssets,
+            returnOnEquity: stockFinancialData.returnOnEquity,
+            revenueGrowth: stockFinancialData.revenueGrowth,
+            earningsGrowth: stockFinancialData.earningsGrowth,
+            updatedAt: stockFinancialData.updatedAt,
+          },
+          
+          // Statistics data
+          statistics: {
+            sharesHeldByInstitutions: stockStatistics.sharesHeldByInstitutions,
+            sharesHeldByAllInsider: stockStatistics.sharesHeldByAllInsider,
+            lastSplitFactor: stockStatistics.lastSplitFactor,
+            lastSplitDate: stockStatistics.lastSplitDate,
+            lastDividendValue: stockStatistics.lastDividendValue,
+            lastDividendDate: stockStatistics.lastDividendDate,
+            earningsDate: stockStatistics.earningsDate,
+            earningsCallDate: stockStatistics.earningsCallDate,
+            updatedAt: stockStatistics.updatedAt,
+          },
+          
+          // Analyst ratings
+          analystRating: {
+            recommendation: analystRating.recommendation,
+            numberOfAnalysts: analystRating.numberOfAnalysts,
+            targetPriceHigh: analystRating.targetPriceHigh,
+            targetLowPrice: analystRating.targetLowPrice,
+            updatedAt: analystRating.updatedAt,
+          },
+        })
+        .from(userStocks)
+        .leftJoin(stocks, eq(userStocks.stockId, stocks.id))
+        .leftJoin(stockRealTimePrice, eq(userStocks.stockId, stockRealTimePrice.stockId))
+        .leftJoin(stockIntraDayPrice, eq(userStocks.stockId, stockIntraDayPrice.stockId))
+        .leftJoin(stockFundamentalData, eq(userStocks.stockId, stockFundamentalData.stockId))
+        .leftJoin(stockFinancialData, eq(userStocks.stockId, stockFinancialData.stockId))
+        .leftJoin(stockStatistics, eq(userStocks.stockId, stockStatistics.stockId))
+        .leftJoin(analystRating, eq(userStocks.stockId, analystRating.stockId))
+        .where(eq(userStocks.userId, userId));
+    } catch (error) {
+      console.error('Error getting user portfolio with details:', error);
       return [];
     }
   }
