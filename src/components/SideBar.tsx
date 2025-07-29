@@ -86,10 +86,10 @@ export function SideBar() {
           </div>
           <div>
 
-            <div className="flex flex-col items-center space-y-2">
+            <div className="flex flex-col space-y-2">
               <SignedIn>
                 {open ? (
-                  <div className="hidden sm:flex items-center space-x-2 text-sm">
+                  <div className="hidden sm:flex items-center space-x-2 text-sm mx-1">
                     {updateManager.status.realTime.isActive ? (
                       <div className="flex items-center space-x-1 text-green-600">
                         <Activity className="h-4 w-4" />
@@ -103,7 +103,7 @@ export function SideBar() {
                     )}
                   </div>
                 ) : (
-                  <div className="hidden sm:flex items-center">
+                  <div className="hidden sm:flex items-center mx-1">
                     {updateManager.status.realTime.isActive ? (
                       <Activity className="h-4 w-4 text-green-600" />
                     ) : (
