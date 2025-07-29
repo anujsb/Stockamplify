@@ -152,12 +152,6 @@ const StocksPage = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Signal</p>
-                      <p className="font-semibold">
-                        {stockData.realTimePrice[0].signal || 'N/A'}
-                      </p>
-                    </div>
-                    <div>
                       <p className="text-gray-500">Last Updated</p>
                       <p className="font-semibold">
                         {formatDateTime(stockData.realTimePrice[0].updatedAt)}

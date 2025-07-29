@@ -35,7 +35,6 @@ export const stockRealTimePrice = pgTable('stock_realtime_price', {
   stockId: integer('stock_id').references(() => stocks.id).notNull(),
   price: decimal('price', { precision: 18, scale: 4 }),
   volume: bigint('volume', { mode: 'bigint' }),
-  signal: varchar('signal', { length: 20 }),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 

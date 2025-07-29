@@ -21,7 +21,6 @@ export interface StockRealTimePrice {
   stockId: number;
   price: string | null;
   volume: bigint | null;
-  signal: string | null;
   updatedAt: Date;
 }
 

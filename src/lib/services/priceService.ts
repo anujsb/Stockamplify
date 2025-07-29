@@ -17,7 +17,6 @@ export class PriceService {
         stockId,
         price: quote.regularMarketPrice !== undefined ? quote.regularMarketPrice.toString() : null,
         volume: quote.regularMarketVolume !== undefined ? BigInt(quote.regularMarketVolume) : null,
-        signal: null, // You can add logic to determine signals
         updatedAt: new Date(),
       };
 
