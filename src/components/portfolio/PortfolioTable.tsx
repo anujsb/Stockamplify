@@ -35,16 +35,16 @@ const PortfolioTable = () => {
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
-    const calculateCurrentValue = (currentPrice: number, quantity: number) => {
-        return Number((currentPrice * quantity).toFixed(2));
+    const calculateCurrentValue = (Price: number, quantity: number) => {
+        return Number((Price * quantity).toFixed(2));
     }
 
     const calculateBuyValue = (buyPrice: number, quantity: number) => {
         return Number((buyPrice * quantity).toFixed(2));
     }
 
-    const calculateGainLoss = (currentPrice: number, buyPrice: number, quantity: number) => {
-        const currentValue = calculateCurrentValue(currentPrice, quantity);
+    const calculateGainLoss = (Price: number, buyPrice: number, quantity: number) => {
+        const currentValue = calculateCurrentValue(Price, quantity);
         const buyValue = calculateBuyValue(buyPrice, quantity);
         const gainLoss = Number((currentValue - buyValue).toFixed(2));
         const gainLossPercentage = Number(((gainLoss / buyValue) * 100).toFixed(2));
@@ -131,20 +131,20 @@ const PortfolioTable = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {item.currentPrice !== undefined && item.currentPrice !== null ? `₹${Number(item.currentPrice).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice.price !== undefined && item.realTimePrice.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {calculateCurrentValue(item.currentPrice, item.quantity)}
+                                            {calculateCurrentValue(item.realTimePrice.price, item.quantity)}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {calculateGainLoss(item.currentPrice, item.buyPrice, item.quantity).gainLoss}
+                                            {calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}
                                         </div>
                                         <div className="text-gray-500">
-                                            {calculateGainLoss(item.currentPrice, item.buyPrice, item.quantity).gainLossPercentage}%
+                                            {calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
