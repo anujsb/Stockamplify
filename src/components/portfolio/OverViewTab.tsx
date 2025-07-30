@@ -57,18 +57,16 @@ const OverViewTab = ({ item }: { item: any }) => {
                     </div>
                 </CardContent>
             </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                        <AlertCircle className="h-5 w-5 text-indigo-600" />
-                        Stock Overview
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="">
+                        <CardTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-indigo-600" />
+                            Basic Info
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Basic Info</h4>
                             <div className="space-y-2">
                                 <div className="flex justify-between gap-4">
                                     <span className="text-sm text-gray-600">Company</span>
@@ -86,73 +84,99 @@ const OverViewTab = ({ item }: { item: any }) => {
                                     <span className="text-sm text-gray-600">Industry</span>
                                     <span className="text-sm font-medium">{item.stock.industry}</span>
                                 </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Volume</span>
+                                    <span className="text-sm font-medium">{item.realTimePrice.volume}</span>
+                                </div>
                             </div>
                         </div>
-
+                    </CardContent>
+                </Card>
+                <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="">
+                        <CardTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-indigo-600" />
+                            Market Data
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Market Data</h4>
                             <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Market Cap</span>
-                                    {/* <span className="text-sm font-medium">{stockOverview.marketCap}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">P/E Ratio</span>
-                                    {/* <span className="text-sm font-medium">{stockOverview.peRatio}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Dividend Yield</span>
-                                    {/* <span className="text-sm font-medium">{stockOverview.dividendYield}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Currency</span>
-                                    {/* <span className="text-sm font-medium">{stockOverview.currency}</span> */}
-                                </div>
-                                <div className="flex justify-between">
+                                <div className="flex justify-between gap-4">
                                     <span className="text-sm text-gray-600">Previous Close</span>
-                                    {/* <span className="text-sm font-medium">{stockOverview.previousClose}</span> */}
+                                    <span className="text-sm font-medium">{item.intradayPrice.previousClose}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Open</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.open}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Day High</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.dayHigh}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">52 Week High</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.fiftyTwoWeekHigh}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">52 Week Low</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.fiftyTwoWeekLow}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">50 Day Moving Average</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.fiftyDayMovingAverage}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">200 Day Moving Average</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.twoHundredDayMovingAverage}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Average Daily Volume (3 Month)</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.averageDailyVolume3Month}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Average Daily Volume (10 Day)</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.averageDailyVolume10Day}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Market Cap</span>
+                                    <span className="text-sm font-medium">{item.intradayPrice.marketCap}</span>
                                 </div>
                             </div>
                         </div>
-
+                    </CardContent>
+                </Card>
+                <Card className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="">
+                        <CardTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-indigo-600" />
+                            Analyst Rating
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Price Range</h4>
                             <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">52-Week High</span>
-                                    {/* <span className="text-sm font-medium text-green-600">{stockOverview.high52Week}</span> */}
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Recommendation</span>
+                                    <span className="text-sm font-medium">{item.analystRating.recommendation}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">52-Week Low</span>
-                                    {/* <span className="text-sm font-medium text-red-600">{stockOverview.low52Week}</span> */}
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Number Of Analysts</span>
+                                    <span className="text-sm font-medium">{item.analystRating.numberOfAnalysts}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Target Price High</span>
+                                    <span className="text-sm font-medium">{item.analystRating.targetPriceHigh}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Target Price Low</span>
+                                    <span className="text-sm font-medium">{item.analystRating.targetLowPrice}</span>
                                 </div>
                             </div>
                         </div>
-
-                        <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Analyst Ratings</h4>
-                            <div className="space-y-2">
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Buy</span>
-                                    {/* <span className="text-sm font-medium text-green-600">{analystRatings.buy}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Hold</span>
-                                    {/* <span className="text-sm font-medium text-yellow-600">{analystRatings.hold}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Sell</span>
-                                    {/* <span className="text-sm font-medium text-red-600">{analystRatings.sell}</span> */}
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Avg Rating</span>
-                                    {/* <span className="text-sm font-medium">{analystRatings.average}</span> */}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
         </div>
     )
