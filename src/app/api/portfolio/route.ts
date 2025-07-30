@@ -153,11 +153,3 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioRe
   }
 }
 
-// Optionally, handle unsupported methods (for edge runtime or custom routing)
-export function handler(req: NextRequest) {
-  if (req.method !== 'GET') {
-    return NextResponse.json({ success: false, error: 'Method Not Allowed' }, { status: 405 });
-  }
-  // @ts-ignore
-  return GET(req);
-}

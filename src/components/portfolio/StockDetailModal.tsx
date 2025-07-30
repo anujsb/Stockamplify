@@ -34,7 +34,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="w-full min-w-max ">
+            <DialogContent className="w-full min-w-full ">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between gap-4 mt-4">
                         <div className="flex-1">
