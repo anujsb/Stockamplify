@@ -2,19 +2,37 @@
 import { SideBar } from '@/components/SideBar'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useUser } from '@clerk/nextjs';
 import PortfolioTable from '@/components/portfolio/PortfolioTable'
 import AddStockModal from '@/components/portfolio/AddStockModal';
+import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
 
 const PortfolioPage = () => {
     const { user } = useUser();
     const [showAddModal, setShowAddModal] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
+    const [portfolio, setPortfolio] = useState<any[]>([]);
 
     const handleAddClick = () => setShowAddModal(true);
     const handleCloseModal = () => setShowAddModal(false);
     const handleSuccess = () => setRefreshKey(k => k + 1);
+
+    // Fetch portfolio data
+    useEffect(() => {
+        const fetchPortfolio = async () => {
+            try {
+                const res = await fetch('/api/portfolio');
+                const data = await res.json();
+                if (data.success) {
+                    setPortfolio(data.data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch portfolio:', err);
+            }
+        };
+        fetchPortfolio();
+    }, [refreshKey]);
 
     return (
         <div className="flex h-screen overflow-hidden">
@@ -35,9 +53,14 @@ const PortfolioPage = () => {
                     </div>
                 </header>
                 <AddStockModal open={showAddModal} onClose={handleCloseModal} onSuccess={handleSuccess} />
+                {/* Portfolio Summary */}
+                <PortfolioSummary portfolio={portfolio} />
                 {/* Body */}
                 <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <PortfolioTable key={refreshKey} />
+                    <PortfolioTable 
+                        portfolio={portfolio} 
+                        onRefresh={() => setRefreshKey(k => k + 1)} 
+                    />
                 </main>
             </div>
         </div>

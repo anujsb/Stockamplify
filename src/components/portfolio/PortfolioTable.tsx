@@ -1,39 +1,16 @@
 import { Trash2 } from 'lucide-react';
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import StockDetailModal from './StockDetailModal';
 
-const PortfolioTable = () => {
-    const [portfolio, setPortfolio] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+interface PortfolioTableProps {
+  portfolio: any[];
+  onRefresh: () => void;
+}
+
+const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedStock, setSelectedStock] = useState<any>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
-
-
-    useEffect(() => {
-        const fetchPortfolio = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const res = await fetch('/api/portfolio');
-                const data = await res.json();
-                if (data.success) {
-                    setPortfolio(data.data);
-                } else {
-                    setError(data.error || 'Failed to fetch portfolio');
-                }
-            } catch (err) {
-                setError('Failed to fetch portfolio');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPortfolio();
-    }, []);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
 
     const calculateCurrentValue = (Price: number, quantity: number) => {
         return Number((Price * quantity).toFixed(2));
@@ -61,7 +38,7 @@ const PortfolioTable = () => {
                 method: 'DELETE',
             });
             if (response.ok) {
-                setPortfolio(portfolio.filter(item => item.id !== id));
+                onRefresh(); // Refresh the portfolio data
             } else {
                 setErrorMessage('Failed to remove stock. Please try again.');
             }
@@ -80,6 +57,15 @@ const PortfolioTable = () => {
         setShowDetailModal(false);
         setSelectedStock(null);
     };
+
+    if (portfolio.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <div className="text-gray-500 text-lg">No stocks in your portfolio yet.</div>
+                <div className="text-gray-400 text-sm mt-2">Add your first stock to get started!</div>
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -131,20 +117,20 @@ const PortfolioTable = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {item.realTimePrice.price !== undefined && item.realTimePrice.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {calculateCurrentValue(item.realTimePrice.price, item.quantity)}
+                                            {item.realTimePrice?.price ? calculateCurrentValue(item.realTimePrice.price, item.quantity) : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">
-                                            {calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}
+                                            {item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss : <span className="text-gray-400">N/A</span>}
                                         </div>
                                         <div className="text-gray-500">
-                                            {calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%
+                                            {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
