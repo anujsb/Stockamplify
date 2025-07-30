@@ -3,11 +3,12 @@ import React, { useState } from 'react'
 import StockDetailModal from './StockDetailModal';
 
 interface PortfolioTableProps {
-  portfolio: any[];
-  onRefresh: () => void;
+    portfolio: any[];
+    onRefresh: () => void;
+    isLoading?: boolean; // Add this prop
 }
 
-const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh }) => {
+const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, isLoading = false }) => {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedStock, setSelectedStock] = useState<any>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
@@ -58,7 +59,25 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh })
         setSelectedStock(null);
     };
 
-    if (portfolio.length === 0) {
+    // Check loading state FIRST
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="animate-pulse space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-[250px]"></div>
+                    <div className="space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-[400px]"></div>
+                        <div className="h-4 bg-gray-200 rounded w-[350px]"></div>
+                        <div className="h-4 bg-gray-200 rounded w-[300px]"></div>
+                    </div>
+                    <div className="text-center text-gray-500">Loading portfolio data...</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Then check for empty portfolio AFTER loading is complete
+    if (!isLoading && portfolio.length === 0) {
         return (
             <div className="text-center py-12">
                 <div className="text-gray-500 text-lg">No stocks in your portfolio yet.</div>
@@ -106,30 +125,30 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh })
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="font-medium text-gray-900">{item.stock?.symbol}</div>
-                                        <div className="text-gray-500">{item.stock?.name}</div>
-                                        <div className="text-gray-500">{item.stock?.exchange}</div>
+                                        <div className="text-sm text-gray-500">{item.stock?.name}</div>
+                                        <div className="text-xs text-gray-400">{item.stock?.exchange}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">{item.quantity}</div>
+                                        <div className="px-6 py-4 whitespace-nowrap text-md text-gray-900">{item.quantity}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">₹{Number(item.buyPrice).toFixed(2)}</div>
+                                        <div className="px-6 py-4 whitespace-nowrap text-md text-gray-900">₹{Number(item.buyPrice).toFixed(2)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">
+                                        <div className="px-6 py-4 whitespace-nowrap text-md text-gray-900">
                                             {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">
+                                        <div className="px-6 py-4 whitespace-nowrap text-md text-gray-900">
                                             {item.realTimePrice?.price ? calculateCurrentValue(item.realTimePrice.price, item.quantity) : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">
+                                        <div className={`text-md font-medium flex items-center gap-1 ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss : <span className="text-gray-400">N/A</span>}
                                         </div>
-                                        <div className="text-gray-500">
+                                        <div className={`text-sm ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>

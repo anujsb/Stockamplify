@@ -13,6 +13,7 @@ const PortfolioPage = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
     const [portfolio, setPortfolio] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleAddClick = () => setShowAddModal(true);
     const handleCloseModal = () => setShowAddModal(false);
@@ -21,6 +22,7 @@ const PortfolioPage = () => {
     // Fetch portfolio data
     useEffect(() => {
         const fetchPortfolio = async () => {
+            setIsLoading(true);
             try {
                 const res = await fetch('/api/portfolio');
                 const data = await res.json();
@@ -29,6 +31,8 @@ const PortfolioPage = () => {
                 }
             } catch (err) {
                 console.error('Failed to fetch portfolio:', err);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchPortfolio();
@@ -60,6 +64,7 @@ const PortfolioPage = () => {
                     <PortfolioTable 
                         portfolio={portfolio} 
                         onRefresh={() => setRefreshKey(k => k + 1)} 
+                        isLoading={isLoading} // Add this prop
                     />
                 </main>
             </div>
