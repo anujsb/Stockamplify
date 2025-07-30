@@ -102,7 +102,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                     </TabsContent>
 
                     <TabsContent value="technicals" className="space-y-4 p-6">
-                        <TechnicalTab />
+                        <TechnicalTab item={stock} />
                     </TabsContent>
                 </Tabs>
             </DialogContent>
