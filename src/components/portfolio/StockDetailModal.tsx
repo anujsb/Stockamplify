@@ -34,7 +34,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="w-full min-w-full ">
+            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto sm:max-w-[85vw] md:max-w-[80vw] lg:max-w-[75vw]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between gap-4 mt-4">
                         <div className="flex-1">
@@ -54,7 +54,8 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                 </DialogHeader>
 
                 <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-6">
+                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 grid-rows-2 md:grid-rows-1 min-h-max">
+                    {/* <TabsList className="grid w-full grid-cols-6"> */}
                         <TabsTrigger value="overview" className="flex items-center gap-1">
                             <BarChart3 className="h-4 w-4" />
                             Overview
@@ -81,33 +82,35 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="overview" className="space-y-4 p-6">
-                        <OverViewTab item={stock} />
-                    </TabsContent>
+                    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 overflow-y-auto">
+                        <TabsContent value="overview">
+                            <OverViewTab item={stock} />
+                        </TabsContent>
 
-                    <TabsContent value="chart" className="space-y-4 p-6">
-                        <ChartTab />
-                    </TabsContent>
+                        <TabsContent value="chart" className="space-y-4 p-6">
+                            <ChartTab />
+                        </TabsContent>
 
-                    <TabsContent value="ai-analysis" className="space-y-4 p-6">
-                        <AiAnalysisTab />
-                    </TabsContent>
+                        <TabsContent value="ai-analysis" className="space-y-4 p-6">
+                            <AiAnalysisTab />
+                        </TabsContent>
 
-                    <TabsContent value="news" className="space-y-4 p-6">
-                        <NewsAndActionsTab />
-                    </TabsContent>
+                        <TabsContent value="news" className="space-y-4 p-6">
+                            <NewsAndActionsTab />
+                        </TabsContent>
 
-                    <TabsContent value="financials" className="space-y-4 p-6">
-                        <FinancialTab item={stock} />
-                    </TabsContent>
+                        <TabsContent value="financials" className="space-y-4 p-6">
+                            <FinancialTab item={stock} />
+                        </TabsContent>
 
-                    <TabsContent value="technicals" className="space-y-4 p-6">
-                        <TechnicalTab item={stock} />
-                    </TabsContent>
+                        <TabsContent value="technicals" className="space-y-4 p-6">
+                            <TechnicalTab item={stock} />
+                        </TabsContent>
+                    </div>
                 </Tabs>
             </DialogContent>
         </Dialog>
     );
 };
 
-export default StockDetailModal; 
+export default StockDetailModal;
