@@ -4,7 +4,7 @@
  * Format a stock price for display
  */
 export function formatPrice(price: string | number | null | undefined): string {
-    if (!price) return '₹0.00';
+    if (!price) return '0.00';
     
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     
@@ -25,16 +25,16 @@ export function formatPrice(price: string | number | null | undefined): string {
     const numValue = typeof num === 'string' ? parseFloat(num) : num;
     
     if (numValue >= 1e12) {
-      return `₹${(numValue / 1e12).toFixed(2)}T`;
+      return `${(numValue / 1e12).toFixed(2)}T`;
     } else if (numValue >= 1e9) {
-      return `₹${(numValue / 1e9).toFixed(2)}B`;
+      return `${(numValue / 1e9).toFixed(2)}B`;
     } else if (numValue >= 1e6) {
-      return `₹${(numValue / 1e6).toFixed(2)}M`;
+      return `${(numValue / 1e6).toFixed(2)}M`;
     } else if (numValue >= 1e3) {
-      return `₹${(numValue / 1e3).toFixed(2)}K`;
+      return `${(numValue / 1e3).toFixed(2)}K`;
     }
     
-    return `₹${numValue.toFixed(2)}`;
+    return `${numValue.toFixed(2)}`;
   }
   
   /**

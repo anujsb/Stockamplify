@@ -19,7 +19,7 @@ interface StockDetailModalProps {
 const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stock }) => {
     if (!stock) return null;
 
-    const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
+    // const formatCurrency = (value: number) => `${Number(value).toFixed(2)}`;
     const formatPercentage = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
 
     const calculateGainLoss = () => {
@@ -44,7 +44,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <div className="text-lg font-semibold">₹{Number(stock.realTimePrice.price).toFixed(2)}</div>
+                                <div className="text-lg font-semibold">{Number(stock.realTimePrice.price).toFixed(2)}</div>
                                 <Badge variant="outline" className="shrink-0">
                                     {stock.stock.exchange}
                                 </Badge>

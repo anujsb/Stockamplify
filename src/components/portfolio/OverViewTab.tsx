@@ -4,7 +4,7 @@ import { formatPercentage } from '@/lib/utils/stockUtils';
 import { AlertCircle, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
 const OverViewTab = ({ item }: { item: any }) => {
-    const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
+    // const formatCurrency = (value: number) => `${Number(value).toFixed(2)}`;
     const currentValue = item.realTimePrice.price * item.quantity;
     const gainLoss = item.realTimePrice.price * item.quantity - item.buyPrice * item.quantity;
     // const gainLossPercentage = ((gainLoss / (stock.buyPrice * stock.quantity)) * 100).toFixed(2);

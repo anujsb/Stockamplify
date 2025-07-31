@@ -133,21 +133,21 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                                         <div className="text-md text-gray-900">{item.quantity}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-md text-gray-900">₹{Number(item.buyPrice).toFixed(2)}</div>
+                                        <div className="text-md text-gray-900">{Number(item.buyPrice).toFixed(2)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-md text-gray-900">
-                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-md text-gray-900">
-                                            {item.realTimePrice?.price ? `₹${calculateCurrentValue(item.realTimePrice.price, item.quantity)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price ? `${calculateCurrentValue(item.realTimePrice.price, item.quantity)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className={`text-md font-medium flex items-center gap-1 ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
-                                            {item.realTimePrice?.price ? `₹${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                         <div className={`text-sm ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : <span className="text-gray-400">N/A</span>}
@@ -207,18 +207,18 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                             </div>
                             <div>
                                 <div className="text-gray-500 text-xs uppercase tracking-wide">Purchase Price</div>
-                                <div className="font-medium text-gray-900">₹{Number(item.buyPrice).toFixed(2)}</div>
+                                <div className="font-medium text-gray-900">{Number(item.buyPrice).toFixed(2)}</div>
                             </div>
                             <div>
                                 <div className="text-gray-500 text-xs uppercase tracking-wide">Current Price</div>
                                 <div className="font-medium text-gray-900">
-                                    {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `₹${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
+                                    {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
                                 </div>
                             </div>
                             <div>
                                 <div className="text-gray-500 text-xs uppercase tracking-wide">Current Value</div>
                                 <div className="font-medium text-gray-900">
-                                    {item.realTimePrice?.price ? `₹${calculateCurrentValue(item.realTimePrice.price, item.quantity)}` : <span className="text-gray-400">N/A</span>}
+                                    {item.realTimePrice?.price ? `${calculateCurrentValue(item.realTimePrice.price, item.quantity)}` : <span className="text-gray-400">N/A</span>}
                                 </div>
                             </div>
                         </div>
@@ -228,7 +228,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                             <div className="text-gray-500 text-xs uppercase tracking-wide mb-1">Gain/Loss</div>
                             <div className="flex justify-between items-center">
                                 <div className={`font-medium ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : 'text-gray-400'}`}>
-                                    {item.realTimePrice?.price ? `₹${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}` : 'N/A'}
+                                    {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}` : 'N/A'}
                                 </div>
                                 <div className={`text-sm font-medium ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600' : 'text-gray-400'}`}>
                                     {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : 'N/A'}

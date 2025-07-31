@@ -44,7 +44,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ portfolio }) => {
 
   const { totalInvested, totalCurrentValue, totalGainLoss, totalGainLossPercentage, lastUpdated } = calculatePortfolioSummary();
 
-  const formatCurrency = (value: number) => `₹${Number(value).toFixed(2)}`;
+  const formatCurrency = (value: number) => `${Number(value).toFixed(2)}`;
   const formatPercentage = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
   const formatDateTime = (date: Date) => {
     return date.toLocaleString('en-IN', {
