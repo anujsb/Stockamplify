@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Newspaper, TrendingUp, AlertCircle, Loader2 } from 'lucide-react';
 import { SideBar } from '@/components/SideBar';
+import { cn } from '@/lib/utils';
 
 const STOCK_MARKET_CATEGORIES = [
     { value: 'market', label: 'Market Overview', query: 'Indian stock market OR BSE OR NSE OR NIFTY OR SENSEX' },
@@ -76,9 +77,13 @@ export default function NewsPage() {
     };
 
     return (
-        <div className="flex h-screen overflow-hidden">
+        <div className={cn(
+            " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
+            "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+        )}>
             <SideBar />
-            <div className='flex-1 overflow-y-auto min-h-screen bg-gray-50 p-6'>
+            <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
+                {/* Header */}
                 <div className="container mx-auto px-4 py-8">
                     {/* Header */}
                     <div className="mb-8">

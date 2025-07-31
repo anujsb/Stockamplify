@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate, formatPrice, formatLargeNumber } from "@/lib/utils/stockUtils";
 import { SideBar } from "@/components/SideBar";
+import { cn } from "@/lib/utils";
 
 const formatDateTime = (date: string | Date | null | undefined) => {
   if (!date) return 'N/A';
@@ -83,10 +84,13 @@ const StocksPage = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className={cn(
+      " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
+      "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+    )}>
       <SideBar />
-      <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-6">
-        {/* <div className="container mx-auto p-6 space-y-6"> */}
+      <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
+        {/* Header */}
         <Card>
           <CardHeader>
             <CardTitle>Stock Search</CardTitle>
