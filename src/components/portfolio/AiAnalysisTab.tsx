@@ -72,7 +72,7 @@ function getBadgeColor(val: string) {
 function RiskBar({ score }: { score: number }) {
   const percent = Math.max(0, Math.min(1, score || 0));
   const percentValue = percent * 100;
-  
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-center">
@@ -120,36 +120,49 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
     setError(null);
     setAnalysis(null);
     setTimestamp(null);
+
+    // IMPROVED: Pass the complete item data structure
     const payload = {
-      symbol: item.stock.symbol,
-      name: item.stock?.name,
-      sector: item.stock.sector || '',
-      industry: item.stock.industry || '',
-      // description: item.stock.description || '',
-      currentPrice: item.realTimePrice.price || '',
-      peRatio: item.fundamentalData.trailingPE || '',
-      marketCap: item.intradayPrice.marketCap || '',
-      otherData: item.stock
+      // Pass the entire item structure that matches the API expectations
+      stock: item.stock,
+      realTimePrice: item.realTimePrice || {},
+      intradayPrice: item.intradayPrice || {},
+      fundamentalData: item.fundamentalData || {},
+      financialData: item.financialData || {},
+      statistics: item.statistics || {},
+      analystRating: item.analystRating || {},
+      quantity: item.quantity || 0,
+      buyPrice: item.buyPrice || 0,
+      addedAt: item.addedAt
     };
+
     fetch(`/api/stocks/${item.stock.symbol}/ai-analysis`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
       .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('API Error:', errorText);
+          throw new Error(errorText);
+        }
         return res.json();
       })
       .then((data) => {
+        console.log('Received analysis:', data); // Debug log
         setAnalysis(parseAIResponse(data.analysis));
         setTimestamp(data.generatedAt || null);
         setLoading(false);
       })
-      .catch(() => {
-        setError('Failed to fetch AI analysis');
+      .catch((error) => {
+        console.error('Fetch error:', error);
+        setError('Failed to fetch AI analysis: ' + error.message);
         setLoading(false);
       });
   };
+
+
 
   useEffect(() => {
     fetchAnalysis();
@@ -176,7 +189,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
 
   // Only show extra fields if there are any besides the standard ones
   const extraFields = analysis && typeof analysis === 'object'
-    ? Object.entries(analysis).filter(([k]) => !['sentiment','recommendation','riskScore','volatility','prediction','explanation'].includes(k))
+    ? Object.entries(analysis).filter(([k]) => !['sentiment', 'recommendation', 'riskScore', 'volatility', 'prediction', 'explanation'].includes(k))
     : [];
 
   // Loading skeletons
@@ -329,36 +342,57 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           </div>
 
           {/* Row 2: Trade Plan */}
+          {/* Row 2: Trade Plan */}
           {(priceRange || targetPrice || stoploss || timeFrame) && (
             <Card className="shadow-md border border-indigo-200">
-              <CardHeader className="pb-2 flex flex-row items-center gap-2">
+              <CardHeader className="pb-3 flex flex-row items-center gap-2">
                 <DollarSign className="h-5 w-5 text-indigo-600" />
                 <CardTitle className="text-lg font-bold">AI Trade Plan</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {priceRange && (
-                    <div className="flex items-center gap-2 text-indigo-800">
-                      <Flag className="w-4 h-4" />
-                      <span className="font-medium">Price Range:</span> {priceRange}
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Flag className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-semibold text-indigo-900 block mb-1">Price Range</span>
+                          <p className="text-sm text-indigo-800 leading-relaxed">{priceRange}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   {targetPrice && (
-                    <div className="flex items-center gap-2 text-green-800">
-                      <TrendingUp className="w-4 h-4" />
-                      <span className="font-medium">Target Price:</span> {targetPrice}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <TrendingUp className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-semibold text-green-900 block mb-1">Target Price</span>
+                          <p className="text-sm text-green-800 leading-relaxed">{targetPrice}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   {stoploss && (
-                    <div className="flex items-center gap-2 text-red-800">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span className="font-medium">Stoploss:</span> {stoploss}
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-semibold text-red-900 block mb-1">Stop Loss</span>
+                          <p className="text-sm text-red-800 leading-relaxed">{stoploss}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   {timeFrame && (
-                    <div className="flex items-center gap-2 text-purple-800">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-medium">Time Frame:</span> {timeFrame}
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Clock className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <span className="font-semibold text-purple-900 block mb-1">Time Frame</span>
+                          <p className="text-sm text-purple-800 leading-relaxed">{timeFrame}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -494,3 +528,37 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
     </div>
   );
 }
+
+
+
+export const validatePortfolioData = (item: any) => {
+  const issues = [];
+
+  if (!item.stock?.symbol) issues.push('Missing stock symbol');
+  if (!item.realTimePrice?.price) issues.push('Missing current price');
+  if (!item.fundamentalData?.trailingPE && !item.fundamentalData?.epsTTM) {
+    issues.push('Missing fundamental data');
+  }
+  if (!item.financialData?.profitMargin && !item.financialData?.totalRevenue) {
+    issues.push('Missing financial data');
+  }
+
+  return {
+    isValid: issues.length === 0,
+    issues,
+    dataCompleteness: calculateDataCompleteness(item)
+  };
+};
+
+const calculateDataCompleteness = (item: any) => {
+  const checks = [
+    !!item.stock?.symbol,
+    !!item.realTimePrice?.price,
+    !!item.intradayPrice?.previousClose,
+    !!item.fundamentalData?.trailingPE,
+    !!item.financialData?.profitMargin,
+    !!item.analystRating?.recommendation
+  ];
+
+  return (checks.filter(Boolean).length / checks.length) * 100;
+};
