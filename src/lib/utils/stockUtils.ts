@@ -9,8 +9,6 @@ export function formatPrice(price: string | number | null | undefined): string {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     
     return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(numPrice);

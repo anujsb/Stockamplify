@@ -82,18 +82,18 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ portfolio }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-blue-50 rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <DollarSign className="h-5 w-5 text-blue-600" />
+                <IconReceiptRupee className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium text-gray-600">Total Invested</span>
               </div>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(totalInvested)}</p>
+              <p className="text-xl font-bold text-black-600">{formatCurrency(totalInvested)}</p>
             </div>
 
             <div className="text-center p-4 bg-green-50 rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <IconWallet className="h-5 w-5 text-blue-600" />
                 <span className="text-sm font-medium text-gray-600">Current Value</span>
               </div>
-              <p className="text-xl font-bold text-green-600">{formatCurrency(totalCurrentValue)}</p>
+              <p className="text-xl font-bold text-black-600">{formatCurrency(totalCurrentValue)}</p>
             </div>
 
             <div className="text-center p-4 bg-purple-50 rounded-lg">
@@ -117,7 +117,7 @@ const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({ portfolio }) => {
                 ) : (
                   <TrendingDown className="h-5 w-5 text-red-600" />
                 )}
-                <span className="text-sm font-medium text-gray-600">Gain/Loss %</span>
+                <span className="text-sm font-medium text-gray-600">Gain/Loss</span>
               </div>
               <p className={`text-xl font-bold ${totalGainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatPercentage(totalGainLossPercentage)}
