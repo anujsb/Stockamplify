@@ -56,7 +56,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
                 <Tabs defaultValue="overview" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 grid-rows-2 md:grid-rows-1 min-h-max">
-                    {/* <TabsList className="grid w-full grid-cols-6"> */}
+                        {/* <TabsList className="grid w-full grid-cols-6"> */}
                         <TabsTrigger value="overview" className="flex items-center gap-1">
                             <BarChart3 className="h-4 w-4" />
                             Overview
@@ -89,7 +89,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                         </TabsContent>
 
                         <TabsContent value="chart" className="space-y-4 p-6">
-                            <ChartTab />
+                            <ChartTab item={stock} />
                         </TabsContent>
 
                         <TabsContent value="ai-analysis" className="space-y-4 p-6">
