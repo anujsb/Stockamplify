@@ -21,7 +21,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
     const sortPortfolio = (items: any[]) => {
         return [...items].sort((a, b) => {
             let aValue, bValue;
-            
+
             switch (sortField) {
                 case 'symbol':
                     aValue = a.stock?.symbol.toLowerCase();
@@ -51,7 +51,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                     aValue = 0;
                     bValue = 0;
             }
-            
+
             if (sortDirection === 'asc') {
                 return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
             } else {
@@ -152,38 +152,38 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th 
+                                <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('symbol')}
                                 >
                                     Stock {sortField === 'symbol' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                <th
+                                    className="px-6 py-3 text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('quantity')}
                                 >
                                     Quantity {sortField === 'quantity' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                <th
+                                    className="px-6 py-3 text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('buyPrice')}
                                 >
                                     Purchase Price {sortField === 'buyPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                <th
+                                    className="px-6 py-3 text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('currentPrice')}
                                 >
                                     Current Price {sortField === 'currentPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                <th
+                                    className="px-6 py-3 text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('currentValue')}
                                 >
                                     Current Value {sortField === 'currentValue' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                <th
+                                    className="px-6 py-3 text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('gainLoss')}
                                 >
                                     Gain/Loss {sortField === 'gainLoss' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -228,12 +228,15 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <div className={`text-md font-medium flex items-center gap-1 ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
+                                        <div className={`text-md font-medium gap-1 ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? `${formatPrice(calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                         <div className={`text-sm ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : <span className="text-gray-400">N/A</span>}
                                         </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span>--</span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <button
