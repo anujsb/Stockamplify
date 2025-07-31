@@ -28,7 +28,7 @@ export default function ClientLayout({
       </main>
 
       {/* Update Status Footer (only when signed in) */}
-      <SignedIn>
+      {/* <SignedIn>
         {updateManager.isLoading && (
           <div className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -44,7 +44,7 @@ export default function ClientLayout({
             </div>
           </div>
         )}
-      </SignedIn>
+      </SignedIn> */}
     </div>
   );
 }
