@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import React, { useState } from 'react'
 import StockDetailModal from './StockDetailModal';
+import { formatPercentage, formatPrice, formatLargeNumber, formatSymbol, getPriceChangeColor } from '@/lib/utils/stockUtils';
 
 type SortField = 'symbol' | 'quantity' | 'buyPrice' | 'currentPrice' | 'currentValue' | 'gainLoss';
 
@@ -69,17 +70,17 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
     };
 
     const calculateCurrentValue = (Price: number, quantity: number) => {
-        return Number((Price * quantity).toFixed(2));
+        return Number((Price * quantity));
     }
 
     const calculateBuyValue = (buyPrice: number, quantity: number) => {
-        return Number((buyPrice * quantity).toFixed(2));
+        return Number((buyPrice * quantity));
     }
 
     const calculateGainLoss = (Price: number, buyPrice: number, quantity: number) => {
         const currentValue = calculateCurrentValue(Price, quantity);
         const buyValue = calculateBuyValue(buyPrice, quantity);
-        const gainLoss = Number((currentValue - buyValue).toFixed(2));
+        const gainLoss = Number((currentValue - buyValue));
         const gainLossPercentage = Number(((gainLoss / buyValue) * 100).toFixed(2));
         return { gainLoss, gainLossPercentage };
     }
@@ -158,34 +159,37 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                                     Stock {sortField === 'symbol' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('quantity')}
                                 >
                                     Quantity {sortField === 'quantity' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('buyPrice')}
                                 >
                                     Purchase Price {sortField === 'buyPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('currentPrice')}
                                 >
                                     Current Price {sortField === 'currentPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('currentValue')}
                                 >
                                     Current Value {sortField === 'currentValue' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 text-right uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('gainLoss')}
                                 >
                                     Gain/Loss {sortField === 'gainLoss' && (sortDirection === 'asc' ? '↑' : '↓')}
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Signal
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
@@ -199,30 +203,33 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                                     className="hover:bg-gray-50 cursor-pointer transition-colors"
                                     onClick={() => handleRowClick(item)}
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="font-medium text-gray-900">{item.stock?.symbol}</div>
-                                        <div className="text-sm text-gray-500">{item.stock?.name}</div>
-                                        <div className="text-xs text-gray-400">{item.stock?.exchange}</div>
+                                    <td className="px-3 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div className="font-medium text-gray-900">{formatSymbol(item.stock?.symbol)} {' '}
+                                                <span className="text-[10px] text-gray-500">{item.stock?.exchange}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-xs text-gray-500">{item.stock?.name}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className="text-md text-gray-900">{item.quantity}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-md text-gray-900">{Number(item.buyPrice).toFixed(2)}</div>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                                        <div className="text-md text-gray-900">{formatPrice(item.buyPrice)}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className="text-md text-gray-900">
-                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${formatPrice(item.realTimePrice.price)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className="text-md text-gray-900">
-                                            {item.realTimePrice?.price ? `${calculateCurrentValue(item.realTimePrice.price, item.quantity)}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price ? `${formatPrice(calculateCurrentValue(item.realTimePrice.price, item.quantity))}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className={`text-md font-medium flex items-center gap-1 ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
-                                            {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss}` : <span className="text-gray-400">N/A</span>}
+                                            {item.realTimePrice?.price ? `${formatPrice(calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLoss)}` : <span className="text-gray-400">N/A</span>}
                                         </div>
                                         <div className={`text-sm ${item.realTimePrice?.price ? calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600' : ''}`}>
                                             {item.realTimePrice?.price ? `${calculateGainLoss(item.realTimePrice.price, item.buyPrice, item.quantity).gainLossPercentage}%` : <span className="text-gray-400">N/A</span>}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatPercentage } from '@/lib/utils/stockUtils';
+import { formatPercentage, formatPrice, formatLargeNumber, formatVolume, normalizeStockSymbol} from '@/lib/utils/stockUtils';
 import { AlertCircle, TrendingDown, TrendingUp, Users } from 'lucide-react';
 
 const OverViewTab = ({ item }: { item: any }) => {
@@ -28,29 +28,29 @@ const OverViewTab = ({ item }: { item: any }) => {
                         </div>
                         <div className="text-center p-3 bg-green-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Total Invested Value</p>
-                            <p className="text-lg font-bold text-green-600">{item.buyPrice * item.quantity}</p>
+                            <p className="text-lg font-bold text-green-600">{formatPrice(item.buyPrice * item.quantity)}</p>
                         </div>
                         <div className="text-center p-3 bg-purple-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Current Value</p>
-                            <p className="text-lg font-bold text-purple-600">{currentValue}</p>
+                            <p className="text-lg font-bold text-purple-600">{formatPrice(currentValue)}</p>
                         </div>
                         <div className="text-center p-3 bg-orange-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Gain/Loss</p>
                             <p className={`text-lg font-bold ${gainLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {Number(gainLoss).toFixed(2)}
+                                {formatPrice(gainLoss)}
                             </p>
                         </div>
                         <div className="text-center p-3 bg-indigo-50 rounded-lg">
                             <p className="text-xs text-gray-600 mb-1">Gain/Loss %</p>
                             <p className={`text-lg font-bold ${gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {Number(gainLossPercentage).toFixed(2)}
+                                {formatPrice(gainLossPercentage)}
 
                             </p>
                         </div>
                         <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                            <p className="text-xs text-gray-600 mb-1">Est. Yearly Return</p>
+                            <p className="text-xs text-gray-600 mb-1">Est. Yearly Return %</p>
                             <p className="text-lg font-bold text-yellow-600">
-                                {Number(gainLossPercentage * 1.2).toFixed(2)}
+                                {formatPrice(gainLossPercentage * 1.2)}
                             </p>
                             <p className="text-xs text-gray-500">Est. yearly</p>
                         </div>
@@ -86,7 +86,11 @@ const OverViewTab = ({ item }: { item: any }) => {
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-sm text-gray-600">Volume</span>
-                                <span className="text-sm font-medium">{item.realTimePrice.volume}</span>
+                                <span className="text-sm font-medium">{formatVolume(item.realTimePrice.volume)}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                                <span className="text-sm text-gray-600">Market Cap</span>
+                                <span className="text-sm font-medium">{formatLargeNumber(item.intradayPrice.marketCap)}</span>
                             </div>
                         </div>
                     </CardContent>
@@ -99,46 +103,44 @@ const OverViewTab = ({ item }: { item: any }) => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4">
-                        <div className="space-y-1 sm:space-y-2">
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Previous Close</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.previousClose}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Open</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.open}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Day High</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.dayHigh}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">52 Week High</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.fiftyTwoWeekHigh}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">52 Week Low</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.fiftyTwoWeekLow}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">50 Day Moving Average</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.fiftyDayMovingAverage}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">200 Day Moving Average</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.twoHundredDayMovingAverage}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Average Daily Volume (3 Month)</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.averageDailyVolume3Month}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Average Daily Volume (10 Day)</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.averageDailyVolume10Day}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
-                                <span className="text-sm text-gray-600">Market Cap</span>
-                                <span className="text-sm font-medium">{item.intradayPrice.marketCap}</span>
+                        <div>
+                            <div className="space-y-2">
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Previous Close</span>
+                                    <span className="text-sm font-medium">{formatPrice(item.intradayPrice.previousClose)}</span>
+                                </div>  
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Day's Range</span>
+                                    <span className="text-sm font-medium">
+                                        {formatPrice(item.intradayPrice.dayLow)}
+                                        {' - '}
+                                        {formatPrice(item.intradayPrice.dayHigh)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">52 Week Range</span>
+                                    <span className="text-sm font-medium">
+                                        {formatPrice(item.intradayPrice.fiftyTwoWeekHigh)}
+                                        {' - '}
+                                        {formatPrice(item.intradayPrice.fiftyTwoWeekLow)}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">50 Day Moving Average</span>
+                                    <span className="text-sm font-medium">{formatPrice(item.intradayPrice.fiftyDayMovingAverage)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">200 Day Moving Average</span>
+                                    <span className="text-sm font-medium">{formatPrice(item.intradayPrice.twoHundredDayMovingAverage)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Average Daily Volume (3 Month)</span>
+                                    <span className="text-sm font-medium">{formatVolume(item.intradayPrice.averageDailyVolume3Month)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-sm text-gray-600">Average Daily Volume (10 Day)</span>
+                                    <span className="text-sm font-medium">{formatVolume(item.intradayPrice.averageDailyVolume10Day)}</span>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
@@ -162,11 +164,11 @@ const OverViewTab = ({ item }: { item: any }) => {
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-sm text-gray-600">Target Price High</span>
-                                <span className="text-sm font-medium">{item.analystRating.targetPriceHigh}</span>
+                                <span className="text-sm font-medium">{formatPrice(item.analystRating.targetPriceHigh)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-sm text-gray-600">Target Price Low</span>
-                                <span className="text-sm font-medium">{item.analystRating.targetLowPrice}</span>
+                                <span className="text-sm font-medium">{formatPrice(item.analystRating.targetLowPrice)}</span>
                             </div>
                         </div>
                     </CardContent>

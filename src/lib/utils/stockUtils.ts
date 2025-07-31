@@ -120,6 +120,13 @@ export function formatPrice(price: string | number | null | undefined): string {
     // Default to NSE if not specified
     return s + '.NS';
   }
+
+  export function formatSymbol(symbol: string | null | undefined): string {
+  if (!symbol) return '';
+
+  // Remove `.NS`, `.BO`, `.BSE`, `.NSE`, case-insensitive
+  return symbol.replace(/\.(NS|BO|BSE|NSE)$/i, '');
+  }
   
   /**
    * Format date for display

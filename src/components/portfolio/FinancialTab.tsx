@@ -1,5 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatPercentage, formatPrice, formatLargeNumber, formatVolume, normalizeStockSymbol } from '@/lib/utils/stockUtils';
 
 const FinancialTab = ({ item }: { item: any }) => {
   return (
@@ -17,15 +18,15 @@ const FinancialTab = ({ item }: { item: any }) => {
               <div className="space-y-2">
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Total Revenue</span>
-                  <span className="text-sm font-medium">{item.financialData.totalRevenue}</span>
+                  <span className="text-sm font-medium">{formatLargeNumber(item.financialData.totalRevenue)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Total Cash</span>
-                  <span className="text-sm font-medium">{item.financialData.totalCash}</span>
+                  <span className="text-sm font-medium">{formatLargeNumber(item.financialData.totalCash)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Total Debt</span>
-                  <span className="text-sm font-medium">{item.financialData.totalDebt}</span>
+                  <span className="text-sm font-medium">{formatLargeNumber(item.financialData.totalDebt)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Debt To Equity</span>
@@ -57,35 +58,35 @@ const FinancialTab = ({ item }: { item: any }) => {
               <div className="space-y-2">
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Profit Margin</span>
-                  <span className="text-sm font-medium">{item.financialData.profitMargin}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.profitMargin)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Gross Margin</span>
-                  <span className="text-sm font-medium">{item.financialData.grossMargin}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.grossMargin)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Operating Margin</span>
-                  <span className="text-sm font-medium">{item.financialData.operatingMargin}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.operatingMargin)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Ebitda Margin</span>
-                  <span className="text-sm font-medium">{item.financialData.ebitdaMargin}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.ebitdaMargin)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Return on Assets</span>
-                  <span className="text-sm font-medium">{item.financialData.returnOnAssets}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.returnOnAssets)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Return on Equity</span>
-                  <span className="text-sm font-medium">{item.financialData.returnOnEquity}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.returnOnEquity)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Revenue Growth</span>
-                  <span className="text-sm font-medium">{item.financialData.revenueGrowth}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.revenueGrowth)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Earnings Growth</span>
-                  <span className="text-sm font-medium">{item.financialData.earningsGrowth}</span>
+                  <span className="text-sm font-medium">{formatPercentage(item.financialData.earningsGrowth)}</span>
                 </div>
               </div>
             </div>
@@ -103,27 +104,27 @@ const FinancialTab = ({ item }: { item: any }) => {
               <div className="space-y-2">
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">eps TTM</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.epsTTM}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.epsTTM)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">eps Forward</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.epsForward}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.epsForward)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Book Value</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.bookValue}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.bookValue)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Trailing PE</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.trailingPE}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.trailingPE)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Forward PE</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.forwardPE}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.forwardPE)}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Price to Book</span>
-                  <span className="text-sm font-medium">{item.fundamentalData.priceToBook}</span>
+                  <span className="text-sm font-medium">{formatPrice(item.fundamentalData.priceToBook)}</span>
                 </div>
               </div>
             </div>

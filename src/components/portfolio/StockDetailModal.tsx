@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, BarChart3, Brain, Newspaper, Calculator, Activity } from 'lucide-react';
+import { formatPrice, formatSymbol } from '@/lib/utils/stockUtils';
 import OverViewTab from '@/components/portfolio/OverViewTab';
 import ChartTab from '@/components/portfolio/ChartTab';
 import AiAnalysisTab from '@/components/portfolio/AiAnalysisTab';
@@ -38,13 +39,13 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between gap-4 mt-4">
                         <div className="flex-1">
-                            <div className="text-xl font-bold text-foreground">{stock.stock.symbol}</div>
+                            <div className="text-xl font-bold text-foreground">{formatSymbol(stock.stock.symbol)}</div>
                             <div className="text-sm text-muted-foreground">{stock.stock.name}</div>
                         </div>
 
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <div className="text-lg font-semibold">{Number(stock.realTimePrice.price).toFixed(2)}</div>
+                                <div className="text-lg font-semibold">{formatPrice(stock.realTimePrice.price)}</div>
                                 <Badge variant="outline" className="shrink-0">
                                     {stock.stock.exchange}
                                 </Badge>
