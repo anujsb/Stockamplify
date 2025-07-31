@@ -2,6 +2,8 @@ import { Trash2 } from 'lucide-react';
 import React, { useState } from 'react'
 import StockDetailModal from './StockDetailModal';
 
+type SortField = 'symbol' | 'quantity' | 'buyPrice' | 'currentPrice' | 'currentValue' | 'gainLoss';
+
 interface PortfolioTableProps {
     portfolio: any[];
     onRefresh: () => void;
@@ -12,6 +14,59 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedStock, setSelectedStock] = useState<any>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [sortField, setSortField] = useState<SortField>('symbol');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const sortPortfolio = (items: any[]) => {
+        return [...items].sort((a, b) => {
+            let aValue, bValue;
+            
+            switch (sortField) {
+                case 'symbol':
+                    aValue = a.stock?.symbol.toLowerCase();
+                    bValue = b.stock?.symbol.toLowerCase();
+                    break;
+                case 'quantity':
+                    aValue = a.quantity;
+                    bValue = b.quantity;
+                    break;
+                case 'buyPrice':
+                    aValue = Number(a.buyPrice);
+                    bValue = Number(b.buyPrice);
+                    break;
+                case 'currentPrice':
+                    aValue = Number(a.realTimePrice?.price || 0);
+                    bValue = Number(b.realTimePrice?.price || 0);
+                    break;
+                case 'currentValue':
+                    aValue = calculateCurrentValue(a.realTimePrice?.price || 0, a.quantity);
+                    bValue = calculateCurrentValue(b.realTimePrice?.price || 0, b.quantity);
+                    break;
+                case 'gainLoss':
+                    aValue = calculateGainLoss(a.realTimePrice?.price || 0, a.buyPrice, a.quantity).gainLoss;
+                    bValue = calculateGainLoss(b.realTimePrice?.price || 0, b.buyPrice, b.quantity).gainLoss;
+                    break;
+                default:
+                    aValue = 0;
+                    bValue = 0;
+            }
+            
+            if (sortDirection === 'asc') {
+                return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+            } else {
+                return bValue < aValue ? -1 : bValue > aValue ? 1 : 0;
+            }
+        });
+    };
+
+    const handleSort = (field: SortField) => {
+        if (field === sortField) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortField(field);
+            setSortDirection('asc');
+        }
+    };
 
     const calculateCurrentValue = (Price: number, quantity: number) => {
         return Number((Price * quantity).toFixed(2));
@@ -86,6 +141,8 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
         );
     }
 
+    const sortedPortfolio = sortPortfolio(portfolio);
+
     return (
         <div>
             {/* Desktop Table View */}
@@ -94,23 +151,41 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Stock
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('symbol')}
+                                >
+                                    Stock {sortField === 'symbol' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Quantity
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('quantity')}
+                                >
+                                    Quantity {sortField === 'quantity' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Purchase Price
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('buyPrice')}
+                                >
+                                    Purchase Price {sortField === 'buyPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Current Price
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('currentPrice')}
+                                >
+                                    Current Price {sortField === 'currentPrice' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Current Value
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('currentValue')}
+                                >
+                                    Current Value {sortField === 'currentValue' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Gain/Loss
+                                <th 
+                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                    onClick={() => handleSort('gainLoss')}
+                                >
+                                    Gain/Loss {sortField === 'gainLoss' && (sortDirection === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions
@@ -118,7 +193,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {portfolio.map((item) => (
+                            {sortedPortfolio.map((item) => (
                                 <tr
                                     key={item.id}
                                     className="hover:bg-gray-50 cursor-pointer transition-colors"
@@ -174,7 +249,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
 
             {/* Mobile Card View */}
             <div className="lg:hidden space-y-4">
-                {portfolio.map((item) => (
+                {sortedPortfolio.map((item) => (
                     <div
                         key={item.id}
                         className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer hover:shadow-md transition-shadow"
