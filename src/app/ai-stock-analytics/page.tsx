@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign } from 'lucide-react';
+import { SideBar } from '@/components/SideBar';
+import { cn } from '@/lib/utils';
 
 type AnalysisData = {
   recommendation: string;
@@ -76,7 +78,7 @@ const StockAnalytics = () => {
     confidence: 75,
     holdingPeriod: '1-5 Days',
     reasoning: 'GALLANTT.NS has shown strong bullish momentum on increasing volume over the last five 1-hour intervals, now trading near its 52-week high. A breakout above the ₹782.90 resistance could lead to further upside, making it a potential swing-short opportunity with a tight stop-loss due to its overbought condition.',
-    
+
     trendAnalysis: {
       overall: 'Bullish',
       shortTerm: 'Strong Bullish',
@@ -84,12 +86,12 @@ const StockAnalytics = () => {
       longTerm: 'Bullish',
       confidence: 88
     },
-    
+
     supportResistance: {
       support: ['₹760.00', '₹745.00'],
       resistance: ['₹782.90', '₹800.00']
     },
-    
+
     priceTargets: {
       entryPoint: '₹765.00',
       exitTarget: '₹790.00',
@@ -97,27 +99,27 @@ const StockAnalytics = () => {
       upside: '₹790.00',
       downside: '₹745.00'
     },
-    
+
     indicators: {
       rsi: 'Overbought (Likely >70)',
       macd: 'Strong Bullish momentum',
       sma: 'Above short-term SMAs'
     },
-    
+
     riskVolatility: {
       riskLevel: 'Medium',
       volatility: 'Increasing',
       volatilityScore: 75,
       suitableFor: 'Short-term Traders, Momentum Traders'
     },
-    
+
     weekRange: {
       currentPrice: '₹766.20',
       weekHigh: '₹782.90',
       weekLow: '₹288.05',
       position: 'Near High'
     },
-    
+
     sentiment: {
       marketSentiment: 'Bullish',
       sentimentSource: 'Strong upward price momentum and significant trading volume over the past 5 days.'
@@ -126,7 +128,7 @@ const StockAnalytics = () => {
 
   const handleAnalyze = async () => {
     if (!stockSymbol || !investmentHorizon) return;
-    
+
     setIsAnalyzing(true);
     // Simulate API call
     setTimeout(() => {
@@ -151,8 +153,12 @@ const StockAnalytics = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className={cn(
+      " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
+      "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+    )}>
+      <SideBar />
+      <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -196,7 +202,7 @@ const StockAnalytics = () => {
                 </Select>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={handleAnalyze}
               disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5"
@@ -234,7 +240,7 @@ const StockAnalytics = () => {
                     <div className="text-sm text-gray-600">Current Price</div>
                   </div>
                 </div>
-                
+
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium text-gray-900 mb-2">Reasoning:</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">{analysisData.reasoning}</p>
@@ -424,6 +430,7 @@ const StockAnalytics = () => {
             </Card>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

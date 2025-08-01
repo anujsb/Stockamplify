@@ -39,7 +39,7 @@ export function SideBar() {
     //   icon: <IconEye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     // },
     {
-      label: "Search Stocks",
+      label: "Ai Stock Analysis",
       href: "/ai-stock-analytics",
       icon: <BrainCircuit className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     },
