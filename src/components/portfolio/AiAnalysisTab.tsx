@@ -509,7 +509,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
                 {/* {disclaimer} */}
                 <div className='flex flex-col space-y-1'>
                   <ul className="list-disc pl-5">
-                    <li>This AI-generated analysis is based solely on the provided OHLCV data and does not include fundamental analysis, broader market conditions, news, or other technical indicators.</li>
+                    <li>This AI-generated analysis is based solely on the provided data and does not include fundamental analysis, broader market conditions, news, or other technical indicators.</li>
                     <li>Stock trading involves significant risk, and past performance is not indicative of future results.</li>
                     <li>All information is for educational purposes only. We strongly recommend conducting your own research and consulting a qualified financial advisor before making any investment decisions.</li>
                     <li>The platform does not guarantee the accuracy, completeness, or reliability of any data or analysis.</li>
@@ -521,7 +521,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           {/* )} */}
 
           {/* Extra fields if present */}
-          {extraFields.length > 0 && (
+          {/* {extraFields.length > 0 && (
             <Card className="shadow-md border border-gray-100">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold text-gray-700">Other AI Insights</CardTitle>
@@ -534,7 +534,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
                 </ul>
               </CardContent>
             </Card>
-          )}
+          )} */}
         </>
       )}
     </div>

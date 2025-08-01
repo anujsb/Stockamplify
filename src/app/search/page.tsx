@@ -22,7 +22,7 @@ const formatDateTime = (date: string | Date | null | undefined) => {
   }).format(dateObj);
 };
 
-const StocksPage = () => {
+const SearchPage = () => {
   const [symbol, setSymbol] = useState<string>("");
   const [stockData, setStockData] = useState<any>(null);
   const [error, setError] = useState<string>("");
@@ -502,4 +502,4 @@ const StocksPage = () => {
   );
 };
 
-export default StocksPage;
+export default SearchPage;

@@ -27,11 +27,7 @@ export function SideBar() {
     //   href: "/dashboard",
     //   icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     // },
-    {
-      label: "Search Stocks",
-      href: "/stocks",
-      icon: <IconSearch className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    },
+    
     {
       label: "Portfolio",
       href: "/portfolio",
@@ -46,6 +42,11 @@ export function SideBar() {
       label: "Market News",
       href: "/news",
       icon: <IconNews className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    },
+    {
+      label: "Search Stocks",
+      href: "/search",
+      icon: <IconSearch className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     },
     // {
     //   label: "Recommendations",

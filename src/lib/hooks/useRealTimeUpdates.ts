@@ -36,7 +36,7 @@ export const useRealTimeUpdates = () => {
   const updateRealTimePrices = useCallback(async () => {
     // Check if user has been inactive for more than 5 minutes
     const inactiveTime = Date.now() - lastActivityRef.current;
-    const maxInactiveTime = 5 * 60 * 1000; // 5 minutes
+    const maxInactiveTime = 5 * 60 * 1000; //  minutes
 
     if (inactiveTime > maxInactiveTime) {
       console.log('User inactive, skipping real-time update');
