@@ -16,7 +16,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { SignedIn, UserButton } from "@clerk/nextjs";
-import { Activity, Clock } from "lucide-react";
+import { Activity, BrainCircuit, Clock } from "lucide-react";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
 
 
@@ -38,6 +38,11 @@ export function SideBar() {
     //   href: "/watchlist",
     //   icon: <IconEye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     // },
+    {
+      label: "Search Stocks",
+      href: "/ai-stock-analytics",
+      icon: <BrainCircuit className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    },
     {
       label: "Market News",
       href: "/news",
