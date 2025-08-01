@@ -74,7 +74,7 @@ const StockAnalytics = () => {
   ];
 
   const mockAnalysisData = {
-    recommendation: 'Buy',
+    recommendation: 'hold',
     confidence: 75,
     holdingPeriod: '1-5 Days',
     reasoning: 'GALLANTT.NS has shown strong bullish momentum on increasing volume over the last five 1-hour intervals, now trading near its 52-week high. A breakout above the ₹782.90 resistance could lead to further upside, making it a potential swing-short opportunity with a tight stop-loss due to its overbought condition.',
@@ -220,13 +220,21 @@ const StockAnalytics = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">AI Analysis for {stockSymbol}</CardTitle>
-                  <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}>
+                  {/* <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}>
                     {analysisData.recommendation}
-                  </Badge>
+                  </Badge> */}
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className={`text-center p-4 rounded-lg ${getRecommendationColor(analysisData.recommendation)}`}>
+                    {/* <div className="text-2xl font-bold text-blue-600">{analysisData.confidence}%</div> */}
+                    {/* <div className="text-sm text-gray-600">Confidence</div> */}
+                    {/* <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}> */}
+                    <div className={`text-2xl font-bold text-blue-600 ${getRecommendationColor(analysisData.recommendation)}`}>{analysisData.recommendation}</div>
+                    {/* </Badge> */}
+                    <div className="text-sm text-gray-600">Recommendation</div>
+                  </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">{analysisData.confidence}%</div>
                     <div className="text-sm text-gray-600">Confidence</div>
