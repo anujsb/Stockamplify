@@ -55,7 +55,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                 </DialogHeader>
 
                 <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 grid-rows-2 md:grid-rows-1 min-h-max">
+                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-1 grid-rows-2 md:grid-rows-1 min-h-max">
                         {/* <TabsList className="grid w-full grid-cols-6"> */}
                         <TabsTrigger value="overview" className="flex items-center gap-1">
                             <BarChart3 className="h-4 w-4" />
@@ -77,10 +77,10 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                             <Calculator className="h-4 w-4" />
                             Financials
                         </TabsTrigger>
-                        <TabsTrigger value="technicals" className="flex items-center gap-1">
+                        {/* <TabsTrigger value="technicals" className="flex items-center gap-1">
                             <TrendingUp className="h-4 w-4" />
                             Technicals
-                        </TabsTrigger>
+                        </TabsTrigger> */}
                     </TabsList>
 
                     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 overflow-y-auto">
@@ -93,7 +93,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                         </TabsContent>
 
                         <TabsContent value="ai-analysis" className="space-y-4 p-6">
-                            <AiAnalysisTab item={stock}/>
+                            <AiAnalysisTab item={stock} />
                         </TabsContent>
 
                         <TabsContent value="news" className="space-y-4 p-6">
@@ -104,9 +104,9 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
                             <FinancialTab item={stock} />
                         </TabsContent>
 
-                        <TabsContent value="technicals" className="space-y-4 p-6">
+                        {/* <TabsContent value="technicals" className="space-y-4 p-6">
                             <TechnicalTab item={stock} />
-                        </TabsContent>
+                        </TabsContent> */}
                     </div>
                 </Tabs>
             </DialogContent>
