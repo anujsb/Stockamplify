@@ -297,8 +297,8 @@ export default function HomePage() {
               <span className="text-xl font-bold text-white">StockSense</span>
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <Link href="/privacy" className="hover:text-white transition-colors">
-                Privacy Policy
+              <Link href="/disclaimer" className="hover:text-white transition-colors">
+                Disclaimer
               </Link>
               <Link href="/terms" className="hover:text-white transition-colors">
                 Terms of Service
