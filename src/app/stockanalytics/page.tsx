@@ -1,0 +1,432 @@
+"use client";
+
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign } from 'lucide-react';
+
+type AnalysisData = {
+  recommendation: string;
+  confidence: number;
+  holdingPeriod: string;
+  reasoning: string;
+  trendAnalysis: {
+    overall: string;
+    shortTerm: string;
+    mediumTerm: string;
+    longTerm: string;
+    confidence: number;
+  };
+  supportResistance: {
+    support: string[];
+    resistance: string[];
+  };
+  priceTargets: {
+    entryPoint: string;
+    exitTarget: string;
+    stopLoss: string;
+    upside: string;
+    downside: string;
+  };
+  indicators: {
+    rsi: string;
+    macd: string;
+    sma: string;
+  };
+  riskVolatility: {
+    riskLevel: string;
+    volatility: string;
+    volatilityScore: number;
+    suitableFor: string;
+  };
+  weekRange: {
+    currentPrice: string;
+    weekHigh: string;
+    weekLow: string;
+    position: string;
+  };
+  sentiment: {
+    marketSentiment: string;
+    sentimentSource: string;
+  };
+};
+
+const StockAnalytics = () => {
+  const [stockSymbol, setStockSymbol] = useState('');
+  const [investmentHorizon, setInvestmentHorizon] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+
+  const investmentOptions = [
+    { value: 'scalping', label: 'Scalping (Minutes to Hours)' },
+    { value: 'intraday', label: 'Intraday (Same Day)' },
+    { value: 'swing-short', label: 'Swing Trading - Short (1 to 5 Days)' },
+    { value: 'swing-medium', label: 'Swing Trading - Medium (1 to 4 Weeks)' },
+    { value: 'positional', label: 'Positional Trading (1 to 6 Months)' },
+    { value: 'long-term', label: 'Long-term Investing (6 to 12 Months)' },
+    { value: 'custom', label: 'Custom Interval & Period' }
+  ];
+
+  const mockAnalysisData = {
+    recommendation: 'Buy',
+    confidence: 75,
+    holdingPeriod: '1-5 Days',
+    reasoning: 'GALLANTT.NS has shown strong bullish momentum on increasing volume over the last five 1-hour intervals, now trading near its 52-week high. A breakout above the ₹782.90 resistance could lead to further upside, making it a potential swing-short opportunity with a tight stop-loss due to its overbought condition.',
+    
+    trendAnalysis: {
+      overall: 'Bullish',
+      shortTerm: 'Strong Bullish',
+      mediumTerm: 'Bullish',
+      longTerm: 'Bullish',
+      confidence: 88
+    },
+    
+    supportResistance: {
+      support: ['₹760.00', '₹745.00'],
+      resistance: ['₹782.90', '₹800.00']
+    },
+    
+    priceTargets: {
+      entryPoint: '₹765.00',
+      exitTarget: '₹790.00',
+      stopLoss: '₹750.00',
+      upside: '₹790.00',
+      downside: '₹745.00'
+    },
+    
+    indicators: {
+      rsi: 'Overbought (Likely >70)',
+      macd: 'Strong Bullish momentum',
+      sma: 'Above short-term SMAs'
+    },
+    
+    riskVolatility: {
+      riskLevel: 'Medium',
+      volatility: 'Increasing',
+      volatilityScore: 75,
+      suitableFor: 'Short-term Traders, Momentum Traders'
+    },
+    
+    weekRange: {
+      currentPrice: '₹766.20',
+      weekHigh: '₹782.90',
+      weekLow: '₹288.05',
+      position: 'Near High'
+    },
+    
+    sentiment: {
+      marketSentiment: 'Bullish',
+      sentimentSource: 'Strong upward price momentum and significant trading volume over the past 5 days.'
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!stockSymbol || !investmentHorizon) return;
+    
+    setIsAnalyzing(true);
+    // Simulate API call
+    setTimeout(() => {
+      setAnalysisData(mockAnalysisData);
+      setIsAnalyzing(false);
+    }, 2000);
+  };
+
+  const getRecommendationColor = (recommendation: string) => {
+    switch (recommendation?.toLowerCase()) {
+      case 'buy': return 'bg-green-100 text-green-800 border-green-200';
+      case 'sell': return 'bg-red-100 text-red-800 border-red-200';
+      case 'hold': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getTrendIcon = (trend: string) => {
+    if (trend?.toLowerCase().includes('bullish')) return <TrendingUp className="h-4 w-4 text-green-600" />;
+    if (trend?.toLowerCase().includes('bearish')) return <TrendingDown className="h-4 w-4 text-red-600" />;
+    return <Activity className="h-4 w-4 text-gray-600" />;
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            AI Stock Analytics
+          </h1>
+          <p className="text-gray-600 text-lg">Advanced AI-powered analysis for Indian stock market</p>
+        </div>
+
+        {/* Input Section */}
+        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              Stock Analysis Configuration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Stock Symbol</label>
+                <Input
+                  placeholder="Enter stock symbol (e.g., RELIANCE.NS, TCS.NS)"
+                  value={stockSymbol}
+                  onChange={(e) => setStockSymbol(e.target.value.toUpperCase())}
+                  className="border-gray-200 focus:border-blue-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Investment Horizon</label>
+                <Select value={investmentHorizon} onValueChange={setInvestmentHorizon}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500">
+                    <SelectValue placeholder="Select investment horizon" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {investmentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button 
+              onClick={handleAnalyze}
+              disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5"
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Analyze Stock'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Analysis Results */}
+        {analysisData && (
+          <div className="space-y-6">
+            {/* Main Recommendation */}
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl">AI Analysis for {stockSymbol}</CardTitle>
+                  <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}>
+                    {analysisData.recommendation}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{analysisData.confidence}%</div>
+                    <div className="text-sm text-gray-600">Confidence</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-lg font-semibold text-purple-600">{analysisData.holdingPeriod}</div>
+                    <div className="text-sm text-gray-600">Holding Period</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-lg font-semibold text-green-600">{analysisData.weekRange.currentPrice}</div>
+                    <div className="text-sm text-gray-600">Current Price</div>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">Reasoning:</h4>
+                  <p className="text-sm text-gray-700 leading-relaxed">{analysisData.reasoning}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Detailed Analysis Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              {/* Trend Analysis */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-5 w-5 text-blue-600" />
+                    Trend Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {Object.entries(analysisData.trendAnalysis).map(([key, value]) => {
+                    if (key === 'confidence') return null;
+                    return (
+                      <div key={key} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                        <div className="flex items-center gap-2">
+                          {getTrendIcon(String(value))}
+                          <span className="text-sm font-medium">{value}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Trend Confidence</span>
+                    <span className="text-sm font-bold text-blue-600">{analysisData.trendAnalysis.confidence}%</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Support & Resistance */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    Support & Resistance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">Support Levels</div>
+                    <div className="space-y-1">
+                      {analysisData.supportResistance.support.map((level, index) => (
+                        <div key={index} className="bg-green-50 px-3 py-1 rounded text-sm text-green-700 font-medium">
+                          {level}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">Resistance Levels</div>
+                    <div className="space-y-1">
+                      {analysisData.supportResistance.resistance.map((level, index) => (
+                        <div key={index} className="bg-red-50 px-3 py-1 rounded text-sm text-red-700 font-medium">
+                          {level}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Price Targets */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="h-5 w-5 text-green-600" />
+                    Price Targets
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {Object.entries(analysisData.priceTargets).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                      <span className="text-sm font-medium">{value}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Technical Indicators */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="h-5 w-5 text-orange-600" />
+                    Technical Indicators
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {Object.entries(analysisData.indicators).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 uppercase">{key}</span>
+                      <span className="text-sm font-medium">{value}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Risk & Volatility */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    Risk & Volatility
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Risk Level</span>
+                    <Badge variant="outline" className="text-orange-600 border-orange-200">
+                      {analysisData.riskVolatility.riskLevel}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Volatility</span>
+                    <span className="text-sm font-medium">{analysisData.riskVolatility.volatility}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Volatility Score</span>
+                    <span className="text-sm font-bold text-red-600">{analysisData.riskVolatility.volatilityScore}</span>
+                  </div>
+                  <div className="pt-2 border-t">
+                    <div className="text-sm text-gray-600 mb-1">Suitable For:</div>
+                    <div className="text-sm font-medium text-blue-600">{analysisData.riskVolatility.suitableFor}</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* 52-Week Range */}
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Calendar className="h-5 w-5 text-indigo-600" />
+                    52-Week Range
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Current Price</span>
+                    <span className="text-sm font-bold text-blue-600">{analysisData.weekRange.currentPrice}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">52-Week High</span>
+                    <span className="text-sm font-medium text-green-600">{analysisData.weekRange.weekHigh}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">52-Week Low</span>
+                    <span className="text-sm font-medium text-red-600">{analysisData.weekRange.weekLow}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Position</span>
+                    <Badge variant="outline" className="text-green-600 border-green-200">
+                      {analysisData.weekRange.position}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Market Sentiment */}
+            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  Market Sentiment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-3">
+                  <span className="text-sm text-gray-600">Sentiment:</span>
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    {analysisData.sentiment.marketSentiment}
+                  </Badge>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">{analysisData.sentiment.sentimentSource}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default StockAnalytics;

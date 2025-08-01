@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, Clock, DollarSign, Activity } from 'lucide-react';
+import { IconReceiptRupee, IconWallet } from '@tabler/icons-react';
 
 interface PortfolioSummaryProps {
   portfolio: any[];
