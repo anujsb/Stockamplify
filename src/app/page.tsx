@@ -21,6 +21,9 @@ export default function HomePage() {
             <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
               How it Works
             </Link>
+            <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+              About Us
+            </Link>
             <Link href="/sign-in" className="text-gray-300 hover:text-white transition-colors">
               Sign In
             </Link>
