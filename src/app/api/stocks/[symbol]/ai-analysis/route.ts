@@ -161,7 +161,7 @@ Provide analysis in this exact JSON format:
   "marketPosition": "Competitive position analysis",
   "catalysts": "Potential stock moving events",
   "dataQuality": "Summary of data availability and reliability",
-  "disclaimer": "Investment disclaimer"
+
 }
 
 IMPORTANT: If data is limited, acknowledge this in your analysis but still provide useful insights based on sector, industry, and general market conditions. Adjust confidence scores accordingly.`;
@@ -211,7 +211,7 @@ IMPORTANT: If data is limited, acknowledge this in your analysis but still provi
         prediction: "Unable to generate prediction due to data parsing issues",
         explanation: `Analysis generated but failed to parse properly. Raw response: ${text.substring(0, 500)}...`,
         dataQuality: "Poor - parsing failed",
-        disclaimer: "This analysis failed to parse properly and should not be used for investment decisions."
+        // disclaimer: "This analysis failed to parse properly and should not be used for investment decisions."
       };
     }
 

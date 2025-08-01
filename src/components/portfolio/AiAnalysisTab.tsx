@@ -184,7 +184,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
   const targetPrice = analysis?.targetPrice || '';
   const stoploss = analysis?.stoploss || '';
   const timeFrame = analysis?.timeFrame || '';
-  const disclaimer = analysis?.disclaimer || '';
+  // const disclaimer = analysis?.disclaimer || '';
   const nextSteps = analysis?.nextSteps || '';
 
   // Only show extra fields if there are any besides the standard ones
@@ -194,7 +194,8 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
 
   // Loading skeletons
   const Skeleton = ({ className = '' }: { className?: string }) => (
-    <div className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg ${className}`} />
+    <div className={`animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg 
+    {className}`} />
   );
 
   // Update the LoadingSkeleton component with this enhanced version
@@ -497,16 +498,27 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           )}
 
           {/* Row 8: Disclaimer */}
-          {disclaimer && (
-            <Card className="shadow-none border border-gray-200 bg-gray-50 mt-4">
-              <CardContent>
-                <div className="flex items-center gap-2 text-xs text-gray-500 italic">
+          {/* {disclaimer && ( */}
+          <Card className="shadow-none border border-gray-200 bg-gray-50 mt-4">
+            <CardContent>
+              <div className="flex flex-col items-start gap-2 text-xs text-gray-500 italic">
+                <div className='flex items-center gap-1'>
                   <InfoIcon className="w-4 h-4" />
-                  {disclaimer}
+                  <span className="font-medium">Disclaimer:</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                {/* {disclaimer} */}
+                <div className='flex flex-col space-y-1'>
+                  <ul className="list-disc pl-5">
+                    <li>This AI-generated analysis is based solely on the provided OHLCV data and does not include fundamental analysis, broader market conditions, news, or other technical indicators.</li>
+                    <li>Stock trading involves significant risk, and past performance is not indicative of future results.</li>
+                    <li>All information is for educational purposes only. We strongly recommend conducting your own research and consulting a qualified financial advisor before making any investment decisions.</li>
+                    <li>The platform does not guarantee the accuracy, completeness, or reliability of any data or analysis.</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          {/* )} */}
 
           {/* Extra fields if present */}
           {extraFields.length > 0 && (
