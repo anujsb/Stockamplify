@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Cell, AreaChart, Area, Pie } from 'recharts';
 import { Button } from '@/components/ui/button';
+import { SideBar } from '@/components/SideBar';
+import { cn } from '@/lib/utils';
 
 const Dashboard = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState('1D');
@@ -74,8 +76,12 @@ const Dashboard = () => {
   const totalChangePercent = (totalChange / (totalValue - totalChange)) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
-      {/* Header */}
+    <div className={cn(
+        " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
+        "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+      )}>
+      <SideBar />
+      <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Portfolio Dashboard</h1>
@@ -344,6 +350,7 @@ const Dashboard = () => {
           ))}
         </div>
       </div>
+    </div>
     </div>
   );
 };
