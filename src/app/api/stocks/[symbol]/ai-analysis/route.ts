@@ -68,7 +68,7 @@ STOCK OVERVIEW:
       if (dataQuality.hasRealTimePrice) {
         prompt += `
 CURRENT PRICE DATA:
-- Current Price: $${currentPrice}
+- Current Price: ${currentPrice}
 - Volume: ${realTimePrice.volume || 'N/A'}
 `;
       }
@@ -76,13 +76,13 @@ CURRENT PRICE DATA:
       if (dataQuality.hasIntradayData) {
         prompt += `
 TECHNICAL ANALYSIS:
-- Previous Close: $${intradayPrice.previousClose || 'N/A'}
-- Day High: $${intradayPrice.dayHigh || 'N/A'}
-- Day Low: $${intradayPrice.dayLow || 'N/A'}
-- 52W High: $${intradayPrice.fiftyTwoWeekHigh || 'N/A'}
-- 52W Low: $${intradayPrice.fiftyTwoWeekLow || 'N/A'}
-- 50-day MA: $${intradayPrice.fiftyDayMovingAverage || 'N/A'}
-- 200-day MA: $${intradayPrice.twoHundredDayMovingAverage || 'N/A'}
+- Previous Close: ${intradayPrice.previousClose || 'N/A'}
+- Day High: ${intradayPrice.dayHigh || 'N/A'}
+- Day Low: ${intradayPrice.dayLow || 'N/A'}
+- 52W High: ${intradayPrice.fiftyTwoWeekHigh || 'N/A'}
+- 52W Low: ${intradayPrice.fiftyTwoWeekLow || 'N/A'}
+- 50-day MA: ${intradayPrice.fiftyDayMovingAverage || 'N/A'}
+- 200-day MA: ${intradayPrice.twoHundredDayMovingAverage || 'N/A'}
 - Market Cap: ${intradayPrice.marketCap || 'N/A'}
 `;
       }
@@ -115,16 +115,16 @@ FINANCIAL HEALTH:
 MARKET SENTIMENT:
 - Analyst Recommendation: ${analystRating.recommendation || 'N/A'}
 - Number of Analysts: ${analystRating.numberOfAnalysts || 'N/A'}
-- Target Price High: $${analystRating.targetPriceHigh || 'N/A'}
+- Target Price High: ${analystRating.targetPriceHigh || 'N/A'}
 `;
       }
 
       if (dataQuality.hasPortfolioData) {
         prompt += `
 PORTFOLIO CONTEXT:
-- Your Position: ${quantity} shares at $${buyPrice}
-- Current Value: $${currentValue.toFixed(2)}
-- Gain/Loss: $${gainLoss.toFixed(2)} (${gainLossPercent.toFixed(2)}%)
+- Your Position: ${quantity} shares at ${buyPrice}
+- Current Value: ${currentValue.toFixed(2)}
+- Gain/Loss: ${gainLoss.toFixed(2)} (${gainLossPercent.toFixed(2)}%)
 - Holding Period: ${holdingPeriodDays} days
 `;
       }

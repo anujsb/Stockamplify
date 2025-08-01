@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { BarChart2, ArrowUp, Activity, Shield, RefreshCw, Info, CheckCircle, AlertTriangle, TrendingUp, Target, DollarSign, Flag, Clock, Info as InfoIcon, Sparkles } from 'lucide-react';
+import { BarChart2, ArrowUp, Activity, Shield, RefreshCw, Info, CheckCircle, AlertTriangle, TrendingUp, Target, DollarSign, Flag, Clock, Info as InfoIcon, Sparkles, ChartBar } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -346,7 +346,7 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           {(priceRange || targetPrice || stoploss || timeFrame) && (
             <Card className="shadow-md border border-indigo-200">
               <CardHeader className="pb-3 flex flex-row items-center gap-2">
-                <DollarSign className="h-5 w-5 text-indigo-600" />
+                <ChartBar className="h-5 w-5 text-indigo-600" />
                 <CardTitle className="text-lg font-bold">AI Trade Plan</CardTitle>
               </CardHeader>
               <CardContent>
