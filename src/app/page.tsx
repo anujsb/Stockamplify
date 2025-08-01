@@ -1,5 +1,6 @@
 
 import React from 'react';
+import Image from "next/image";
 import { ArrowRight, BarChart3, Brain, Eye, FileText, TrendingUp, Upload, Users, Zap, Star, Shield, Globe } from 'lucide-react';
 import Link from 'next/link';
 
@@ -9,11 +10,9 @@ export default function HomePage() {
       {/* Header */}
       <header className="relative z-50 px-6 py-4">
         <nav className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-600">
-              <TrendingUp className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">StockSense</span>
+          <div className="flex items-center space-x-4">
+            <Image src="/logo.png" alt="Logo" width={60} height={60} className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-1" />
+            <span className="text-5xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent leading-tight pb-1">StockAmplify</span>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
@@ -25,12 +24,10 @@ export default function HomePage() {
             <Link href="/sign-in" className="text-gray-300 hover:text-white transition-colors">
               Sign In
             </Link>
-            <Link href="/sign-up" className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 text-white font-medium hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105">
-              Get Started
-            </Link>
           </div>
         </nav>
       </header>
+      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
 
       {/* Hero Section */}
       <section className="relative px-6 py-20">
@@ -40,13 +37,13 @@ export default function HomePage() {
             AI-Powered Stock Analysis
           </div>
           <h1 className="mb-6 text-5xl md:text-7xl font-bold text-white leading-tight">
-            Smart Stock Research
+            Stock Research
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-              Made Simple
+              Simplified. Amplified.
             </span>
           </h1>
           <p className="mb-10 text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Upload your portfolio, get AI-powered insights, track real-time news, and make informed investment decisions with our comprehensive stock research platform.
+            StockAmplify isn't just another stock research tool. It's your AI-powered amplifier Boosting clarity, confidence, and conviction in every investment you make.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/portfolio" className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
@@ -175,7 +172,7 @@ export default function HomePage() {
               <Zap className="h-12 w-12 text-indigo-400 mb-6" />
               <h3 className="text-2xl font-bold text-white mb-4">Real-time Data</h3>
               <p className="text-gray-300 mb-6">
-                Access live stock prices, market data, and financial metrics powered by Yahoo Finance API for the most up-to-date information.
+                Access real-time stock prices, market data, and financial metrics powered by Yahoo Finance API for the most up-to-date information.
               </p>
               <div className="flex items-center text-indigo-400">
                 <span className="text-sm font-medium">View Data</span>
@@ -291,10 +288,8 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600">
-                <TrendingUp className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-white">StockSense</span>
+              <Image src="/logo.png" alt="Logo" width={40} height={40} className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-1" />
+              <span className="text-xl font-bold text-white">StockAmplify</span>
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">
               <Link href="/disclaimer" className="hover:text-white transition-colors">
@@ -308,9 +303,17 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="mt-8 border-t border-white/10 pt-8 text-center text-sm text-gray-400">
-            © 2025 StockSense. All rights reserved. Built with Next.js, Tailwind CSS, and powered by AI.
-          </div>
+          <footer className="text-center text-sm text-gray-400 mt-12">
+            © 2025 StockAmplify. All rights reserved. Designed by
+            <a
+              href="https://www.21bubbles.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white underline hover:text-blue-400 ml-1"
+            >
+              21bubbles
+            </a>.
+          </footer>
         </div>
       </footer>
     </div>
