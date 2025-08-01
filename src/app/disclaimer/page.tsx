@@ -19,6 +19,11 @@ export default function TermsPage() {
             While StockAmplify takes reasonable efforts to ensure that the information available on the site is accurate, StockAmplify does not make any guarantee as to the accuracy of the information. Neither StockAmplify nor its affiliates or employees shall be responsible and/or liable for any loss or damage that may arise to any person from any inadvertent error in the information contained on the site.
         </p>
       </section>
+                  <section className="mb-4">
+        <p>
+            All data shown as 'real-time' on this platform refers to near real-time data, which may have a delay of a few seconds to minutes depending on the source and market conditions. Always verify critical decisions with official market sources.
+        </p>
+      </section>
             <section className="mb-4">
         <p>
             The information on our site is provided solely to provide information about StockAmplify and does not constitute a recommendation to buy, sell, or otherwise deal in investments.
