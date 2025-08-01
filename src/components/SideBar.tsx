@@ -22,11 +22,11 @@ import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
 
 export function SideBar() {
   const links = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    },
+    // {
+    //   label: "Dashboard",
+    //   href: "/dashboard",
+    //   icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    // },
     {
       label: "Search Stocks",
       href: "/stocks",
@@ -37,26 +37,26 @@ export function SideBar() {
       href: "/portfolio",
       icon: <IconChartBar className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     },
-    {
-      label: "Watchlist",
-      href: "/watchlist",
-      icon: <IconEye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    },
+    // {
+    //   label: "Watchlist",
+    //   href: "/watchlist",
+    //   icon: <IconEye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    // },
     {
       label: "Market News",
       href: "/news",
       icon: <IconNews className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
     },
-    {
-      label: "Recommendations",
-      href: "/recommendations",
-      icon: <IconBell className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-      icon: <IconSettings className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    },
+    // {
+    //   label: "Recommendations",
+    //   href: "/recommendations",
+    //   icon: <IconBell className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    // },
+    // {
+    //   label: "Settings",
+    //   href: "/settings",
+    //   icon: <IconSettings className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    // },
   ];
 
   const [open, setOpen] = useState(false);
