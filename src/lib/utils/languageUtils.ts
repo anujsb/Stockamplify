@@ -10,13 +10,86 @@ export interface LanguageOptions {
   label: string;
 }
 
+export interface TranslationKeys {
+  // UI Elements
+  pageTitle: string;
+  pageSubtitle: string;
+  stockSymbol: string;
+  investmentHorizon: string;
+  language: string;
+  analyzeStock: string;
+  analyzing: string;
+  selectStockAndHorizon: string;
+  selectValidStock: string;
+  analysisCompleted: string;
+  analysisError: string;
+  success: string;
+  unknownError: string;
+  
+  // Analysis Results
+  aiAnalysisFor: string;
+  recommendation: string;
+  confidence: string;
+  holdingPeriod: string;
+  currentPrice: string;
+  reasoning: string;
+  trendAnalysis: string;
+  trendConfidence: string;
+  supportResistance: string;
+  supportLevels: string;
+  resistanceLevels: string;
+  priceTargets: string;
+  technicalIndicators: string;
+  riskVolatility: string;
+  riskLevel: string;
+  volatility: string;
+  volatilityScore: string;
+  suitableFor: string;
+  weekRange: string;
+  weekHigh: string;
+  weekLow: string;
+  position: string;
+  sentimentSummary: string;
+  marketSentiment: string;
+  sentimentSource: string;
+  
+  // Investment Horizons
+  scalping: string;
+  intraday: string;
+  swingShort: string;
+  swingMedium: string;
+  positionTrading: string;
+  longTerm: string;
+  
+  // Trend Directions
+  bullish: string;
+  bearish: string;
+  sideways: string;
+  neutral: string;
+  
+  // Risk Levels
+  low: string;
+  medium: string;
+  high: string;
+  
+  // Positions
+  nearHigh: string;
+  nearLow: string;
+  midRange: string;
+  
+  // Recommendations
+  buy: string;
+  sell: string;
+  hold: string;
+}
+
 export const languageOptions: LanguageOptions[] = [
   { value: 'english', label: 'English' },
   { value: 'hindi', label: 'हिंदी' },
   { value: 'marathi', label: 'मराठी' }
 ];
 
-export const translations = {
+export const translations: Record<Language, TranslationKeys> = {
   english: {
     // UI Elements
     pageTitle: 'AI Stock Analytics',
@@ -238,7 +311,12 @@ export const translations = {
 };
 
 export function getTranslation(language: Language, key: string): string {
-  return translations[language]?.[key] || translations.english[key] || key;
+  const langTranslations = translations[language];
+  const englishTranslations = translations.english;
+  
+  return langTranslations?.[key as keyof TranslationKeys] || 
+         englishTranslations[key as keyof TranslationKeys] || 
+         key;
 }
 
 export function translateAnalysisData(data: any, language: Language): any {
@@ -248,27 +326,32 @@ export function translateAnalysisData(data: any, language: Language): any {
   
   // Translate recommendation
   if (translated.recommendation) {
-    translated.recommendation = getTranslation(language, translated.recommendation.toLowerCase());
+    const recKey = translated.recommendation.toLowerCase();
+    translated.recommendation = getTranslation(language, recKey);
   }
   
   // Translate trend direction
   if (translated.trendDirection) {
-    translated.trendDirection = getTranslation(language, translated.trendDirection.toLowerCase());
+    const trendKey = translated.trendDirection.toLowerCase();
+    translated.trendDirection = getTranslation(language, trendKey);
   }
   
   // Translate risk level
   if (translated.riskLevel) {
-    translated.riskLevel = getTranslation(language, translated.riskLevel.toLowerCase());
+    const riskKey = translated.riskLevel.toLowerCase();
+    translated.riskLevel = getTranslation(language, riskKey);
   }
   
   // Translate market sentiment
   if (translated.marketSentiment) {
-    translated.marketSentiment = getTranslation(language, translated.marketSentiment.toLowerCase());
+    const sentimentKey = translated.marketSentiment.toLowerCase();
+    translated.marketSentiment = getTranslation(language, sentimentKey);
   }
   
   // Translate week52 position
   if (translated.week52Comparison?.position) {
-    translated.week52Comparison.position = getTranslation(language, translated.week52Comparison.position.toLowerCase().replace(' ', ''));
+    const positionKey = translated.week52Comparison.position.toLowerCase().replace(' ', '');
+    translated.week52Comparison.position = getTranslation(language, positionKey);
   }
   
   return translated;

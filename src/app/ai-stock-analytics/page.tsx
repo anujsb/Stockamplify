@@ -182,7 +182,7 @@ const StockAnalytics = () => {
               )}
             </Button>
             
-            {/* {error && (
+            {error && (
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center gap-2 text-red-800">
                   <AlertTriangle className="h-5 w-5" />
@@ -190,9 +190,9 @@ const StockAnalytics = () => {
                 </div>
                 <p className="mt-2 text-sm text-red-700">{error}</p>
               </div>
-            )} */}
+            )}
             
-            {/* {success && (
+            {success && (
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center gap-2 text-green-800">
                   <TrendingUp className="h-5 w-5" />
@@ -200,7 +200,7 @@ const StockAnalytics = () => {
                 </div>
                 <p className="mt-2 text-sm text-green-700">{success}</p>
               </div>
-            )} */}
+            )}
           </CardContent>
         </Card>
 
