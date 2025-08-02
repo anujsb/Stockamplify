@@ -16,6 +16,7 @@ export interface AnalysisData {
   investmentHorizon: string;
   interval: string;
   period: string;
+  language?: string;
 }
 
 export interface TechnicalAnalysis {
@@ -72,7 +73,7 @@ export function calculateTechnicalAnalysis(data: AnalysisData): TechnicalAnalysi
  * @returns Formatted prompt string
  */
 export function buildAnalysisPrompt(data: AnalysisData): string {
-  const { symbol, quote, modules, historical, investmentHorizon, interval, period } = data;
+  const { symbol, quote, modules, historical, investmentHorizon, interval, period, language = 'english' } = data;
   const technical = calculateTechnicalAnalysis(data);
 
   // Convert historical data to JSON format for AI analysis
@@ -116,6 +117,8 @@ export function buildAnalysisPrompt(data: AnalysisData): string {
   const prompt = `You are a senior financial market analyst.
 
 Analyze the stock ${symbol} based on price and volume data of ${period} with interval ${interval} (in yfinance JSON format) and the investment horizon: ${investmentHorizon}.
+
+IMPORTANT: Provide your analysis response in ${language === 'hindi' ? 'Hindi' : language === 'marathi' ? 'Marathi' : 'English'} language. All text fields in the JSON response should be in ${language === 'hindi' ? 'Hindi' : language === 'marathi' ? 'Marathi' : 'English'}.
 
 Your analysis and recommendations must dynamically adapt based on BOTH the investment horizon and the data interval.
 
@@ -176,15 +179,15 @@ Return ONLY a structured JSON response in this exact format:
   "volatility": "string",               // High, Low, Increasing, Decreasing
   "volatilityScore": int,                 // 0–100 volatility level
   "riskLevel": "Low" / "Medium" / "High",
-  "supportLevels": ["₹value", "₹value"],
-  "resistanceLevels": ["₹value", "₹value"],
+  "supportLevels": ["value", "value"],
+  "resistanceLevels": ["value", "value"],
   "targetPrice": {
-    "upside": "₹value",
-    "downside": "₹value"
+    "upside": "value",
+    "downside": "value"
   },
-  "entryPoint": "₹value",               // If it's a good zone to enter
-  "stopLoss": "₹value",
-  "exitTarget": "₹value",
+  "entryPoint": "value",               // If it's a good zone to enter
+  "stopLoss": "value",
+  "exitTarget": "value",
   "indicators": {
     "RSI": "string",                    // e.g. 'Oversold (34)', 'Neutral (50)'
     "MACD": "string",                   // e.g. 'Bearish crossover'
@@ -197,9 +200,9 @@ Return ONLY a structured JSON response in this exact format:
   "marketSentiment": "Bullish" / "Bearish" / "Neutral",
   "sentimentSource": "string",          // Summarized from recent news if possible
   "week52Comparison": {
-    "currentPrice": "₹value",
-    "week52High": "₹value",
-    "week52Low": "₹value",
+    "currentPrice": "value",
+    "week52High": "value",
+    "week52Low": "value",
     "position": "Near High" / "Near Low" / "Mid Range"
   },
   "reasoning": "Short summary (1–3 sentences) justifying the recommendation"

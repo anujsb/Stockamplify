@@ -20,11 +20,13 @@ import {
   getTrendIcon,
   type AnalysisData 
 } from '@/lib/utils/dataTransformers';
+import { languageOptions, getTranslation, translateAnalysisData, type Language } from '@/lib/utils/languageUtils';
 
 const StockAnalytics = () => {
   const [stockSymbol, setStockSymbol] = useState('');
   const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
   const [investmentHorizon, setInvestmentHorizon] = useState('');
+  const [language, setLanguage] = useState<Language>('english');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,13 +41,13 @@ const StockAnalytics = () => {
 
   const handleAnalyze = async () => {
     if (!stockSymbol || !investmentHorizon) {
-      setError('Please select a stock and investment horizon');
+      setError(getTranslation(language, 'selectStockAndHorizon'));
       return;
     }
 
     // Validate Indian stock symbol format
     if (!validateIndianStockSymbol(stockSymbol)) {
-      setError('Please select a valid Indian stock from the search results');
+      setError(getTranslation(language, 'selectValidStock'));
       return;
     }
 
@@ -63,6 +65,7 @@ const StockAnalytics = () => {
         body: JSON.stringify({
           symbol: stockSymbol,
           investmentHorizon: investmentHorizon,
+          language: language,
         }),
       });
 
@@ -76,14 +79,16 @@ const StockAnalytics = () => {
       if (data.success && data.analysis) {
         // Transform the API response using the utility function
         const transformedData = transformAIResponseToFrontend(data.analysis);
-        setAnalysisData(transformedData);
-        setSuccess(`Analysis completed for ${stockSymbol}`);
+        // Translate the analysis data to the selected language
+        const translatedData = translateAnalysisData(transformedData, language);
+        setAnalysisData(translatedData);
+        setSuccess(`${getTranslation(language, 'analysisCompleted')} ${stockSymbol}`);
       } else {
         throw new Error('Invalid response from analysis service');
       }
     } catch (error) {
       console.error('Analysis error:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setError(error instanceof Error ? error.message : getTranslation(language, 'unknownError'));
     } finally {
       setIsAnalyzing(false);
     }
@@ -108,9 +113,9 @@ const StockAnalytics = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            AI Stock Analytics
+            {getTranslation(language, 'pageTitle')}
           </h1>
-          <p className="text-gray-600 text-lg">Advanced AI-powered analysis for Indian stock market</p>
+          <p className="text-gray-600 text-lg">{getTranslation(language, 'pageSubtitle')}</p>
         </div>
 
         {/* Input Section */}
@@ -122,9 +127,9 @@ const StockAnalytics = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Stock Symbol</label>
+                <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'stockSymbol')}</label>
                 <StockSearch
                   onStockSelect={handleStockSelect}
                   placeholder="Search for stocks..."
@@ -132,13 +137,28 @@ const StockAnalytics = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Investment Horizon</label>
+                <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'investmentHorizon')}</label>
                 <Select value={investmentHorizon} onValueChange={setInvestmentHorizon}>
                   <SelectTrigger className="border-gray-200 focus:border-blue-500">
                     <SelectValue placeholder="Select investment horizon" />
                   </SelectTrigger>
                   <SelectContent>
                     {investmentOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'language')}</label>
+                <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
+                  <SelectTrigger className="border-gray-200 focus:border-blue-500">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -155,10 +175,10 @@ const StockAnalytics = () => {
               {isAnalyzing ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Analyzing...
+                  {getTranslation(language, 'analyzing')}
                 </div>
               ) : (
-                'Analyze Stock'
+                getTranslation(language, 'analyzeStock')
               )}
             </Button>
             
@@ -166,7 +186,7 @@ const StockAnalytics = () => {
               <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-center gap-2 text-red-800">
                   <AlertTriangle className="h-5 w-5" />
-                  <span className="font-medium">Analysis Error</span>
+                  <span className="font-medium">{getTranslation(language, 'analysisError')}</span>
                 </div>
                 <p className="mt-2 text-sm text-red-700">{error}</p>
               </div>
@@ -176,7 +196,7 @@ const StockAnalytics = () => {
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center gap-2 text-green-800">
                   <TrendingUp className="h-5 w-5" />
-                  <span className="font-medium">Success</span>
+                  <span className="font-medium">{getTranslation(language, 'success')}</span>
                 </div>
                 <p className="mt-2 text-sm text-green-700">{success}</p>
               </div>
@@ -191,7 +211,7 @@ const StockAnalytics = () => {
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">AI Analysis for {stockSymbol}</CardTitle>
+                  <CardTitle className="text-xl">{getTranslation(language, 'aiAnalysisFor')} {stockSymbol}</CardTitle>
                   {/* <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}>
                     {analysisData.recommendation}
                   </Badge> */}
@@ -205,24 +225,24 @@ const StockAnalytics = () => {
                     {/* <Badge className={`px-3 py-1 text-sm font-medium ${getRecommendationColor(analysisData.recommendation)}`}> */}
                     <div className={`text-2xl font-bold text-blue-600 ${getRecommendationColor(analysisData.recommendation)}`}>{analysisData.recommendation}</div>
                     {/* </Badge> */}
-                    <div className="text-sm text-gray-600">Recommendation</div>
+                    <div className="text-sm text-gray-600">{getTranslation(language, 'recommendation')}</div>
                   </div>
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">{analysisData.confidence}%</div>
-                    <div className="text-sm text-gray-600">Confidence</div>
+                    <div className="text-sm text-gray-600">{getTranslation(language, 'confidence')}</div>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <div className="text-lg font-semibold text-purple-600">{analysisData.holdingPeriod}</div>
-                    <div className="text-sm text-gray-600">Holding Period</div>
+                    <div className="text-sm text-gray-600">{getTranslation(language, 'holdingPeriod')}</div>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
                     <div className="text-lg font-semibold text-green-600">{analysisData.weekRange.currentPrice}</div>
-                    <div className="text-sm text-gray-600">Current Price</div>
+                    <div className="text-sm text-gray-600">{getTranslation(language, 'currentPrice')}</div>
                   </div>
                 </div>
 
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Reasoning:</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{getTranslation(language, 'reasoning')}:</h4>
                   <p className="text-sm text-gray-700 leading-relaxed">{analysisData.reasoning}</p>
                 </div>
               </CardContent>
@@ -235,7 +255,7 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Activity className="h-5 w-5 text-blue-600" />
-                    Trend Analysis
+                    {getTranslation(language, 'trendAnalysis')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -253,7 +273,7 @@ const StockAnalytics = () => {
                   })}
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Trend Confidence</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'trendConfidence')}</span>
                     <span className="text-sm font-bold text-blue-600">{analysisData.trendAnalysis.confidence}%</span>
                   </div>
                 </CardContent>
@@ -264,12 +284,12 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <BarChart3 className="h-5 w-5 text-purple-600" />
-                    Support & Resistance
+                    {getTranslation(language, 'supportResistance')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">Support Levels</div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">{getTranslation(language, 'supportLevels')}</div>
                     <div className="space-y-1">
                       {analysisData.supportResistance.support.map((level, index) => (
                         <div key={index} className="bg-green-50 px-3 py-1 rounded text-sm text-green-700 font-medium">
@@ -279,7 +299,7 @@ const StockAnalytics = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">Resistance Levels</div>
+                    <div className="text-sm font-medium text-gray-700 mb-2">{getTranslation(language, 'resistanceLevels')}</div>
                     <div className="space-y-1">
                       {analysisData.supportResistance.resistance.map((level, index) => (
                         <div key={index} className="bg-red-50 px-3 py-1 rounded text-sm text-red-700 font-medium">
@@ -296,7 +316,7 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Target className="h-5 w-5 text-green-600" />
-                    Price Targets
+                    {getTranslation(language, 'priceTargets')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -314,7 +334,7 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Activity className="h-5 w-5 text-orange-600" />
-                    Technical Indicators
+                    {getTranslation(language, 'technicalIndicators')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -332,26 +352,26 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
-                    Risk & Volatility
+                    {getTranslation(language, 'riskVolatility')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Risk Level</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'riskLevel')}</span>
                     <Badge variant="outline" className="text-orange-600 border-orange-200">
                       {analysisData.riskVolatility.riskLevel}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Volatility</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'volatility')}</span>
                     <span className="text-sm font-medium">{analysisData.riskVolatility.volatility}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Volatility Score</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'volatilityScore')}</span>
                     <span className="text-sm font-bold text-red-600">{analysisData.riskVolatility.volatilityScore}</span>
                   </div>
                   <div className="pt-2 border-t">
-                    <div className="text-sm text-gray-600 mb-1">Suitable For:</div>
+                    <div className="text-sm text-gray-600 mb-1">{getTranslation(language, 'suitableFor')}:</div>
                     <div className="text-sm font-medium text-blue-600">{analysisData.riskVolatility.suitableFor}</div>
                   </div>
                 </CardContent>
@@ -362,24 +382,24 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Calendar className="h-5 w-5 text-indigo-600" />
-                    52-Week Range
+                    {getTranslation(language, 'weekRange')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Current Price</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'currentPrice')}</span>
                     <span className="text-sm font-bold text-blue-600">{analysisData.weekRange.currentPrice}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">52-Week High</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'weekHigh')}</span>
                     <span className="text-sm font-medium text-green-600">{analysisData.weekRange.weekHigh}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">52-Week Low</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'weekLow')}</span>
                     <span className="text-sm font-medium text-red-600">{analysisData.weekRange.weekLow}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Position</span>
+                    <span className="text-sm text-gray-600">{getTranslation(language, 'position')}</span>
                     <Badge variant="outline" className="text-green-600 border-green-200">
                       {analysisData.weekRange.position}
                     </Badge>
@@ -393,18 +413,18 @@ const StockAnalytics = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-600" />
-                  Sentiment Summary
+                  {getTranslation(language, 'sentimentSummary')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4 mb-3">
-                  <span className="text-sm text-gray-600">Market Sentiment:</span>
+                  <span className="text-sm text-gray-600">{getTranslation(language, 'marketSentiment')}:</span>
                   <Badge className="bg-green-100 text-green-800 border-green-200">
                     {analysisData.sentiment.marketSentiment}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-700">Sentiment Source: {analysisData.sentiment.sentimentSource}</p>
+                  <p className="text-sm text-gray-700">{getTranslation(language, 'sentimentSource')}: {analysisData.sentiment.sentimentSource}</p>
                 </div>
               </CardContent>
             </Card>
