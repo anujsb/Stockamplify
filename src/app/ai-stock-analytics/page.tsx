@@ -128,19 +128,26 @@ const StockAnalytics = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'stockSymbol')}</label>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* Stock Symbol */}
+                <div className="space-y-2 md:col-span-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {getTranslation(language, 'stockSymbol')}
+                  </label>
                   <StockSearch
                     onStockSelect={handleStockSelect}
                     placeholder="Search for stocks..."
                     className="w-full"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'investmentHorizon')}</label>
+
+                {/* Investment Horizon */}
+                <div className="space-y-2 md:col-span-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {getTranslation(language, 'investmentHorizon')}
+                  </label>
                   <Select value={investmentHorizon} onValueChange={setInvestmentHorizon}>
-                    <SelectTrigger className="border-gray-200 focus:border-blue-500">
+                    <SelectTrigger className="border-gray-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Select investment horizon" />
                     </SelectTrigger>
                     <SelectContent>
@@ -152,10 +159,14 @@ const StockAnalytics = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">{getTranslation(language, 'language')}</label>
+
+                {/* Language */}
+                <div className="space-y-2 md:col-span-1">
+                  <label className="text-sm font-medium text-gray-700">
+                    {getTranslation(language, 'language')}
+                  </label>
                   <Select value={language} onValueChange={(value) => setLanguage(value as Language)}>
-                    <SelectTrigger className="border-gray-200 focus:border-blue-500">
+                    <SelectTrigger className="border-gray-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
                     <SelectContent>
@@ -167,41 +178,39 @@ const StockAnalytics = () => {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <Button
-                onClick={handleAnalyze}
-                disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5"
-              >
-                {isAnalyzing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {getTranslation(language, 'analyzing')}
-                  </div>
-                ) : (
-                  getTranslation(language, 'analyzeStock')
-                )}
-              </Button>
 
-              {/* {error && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2 text-red-800">
-                  <AlertTriangle className="h-5 w-5" />
-                  <span className="font-medium">{getTranslation(language, 'analysisError')}</span>
+                {/* Analyze Button */}
+                <div className="space-y-2 md:col-span-1">
+                  <label className="text-sm font-medium text-gray-700 opacity-0">
+                    Action
+                  </label>
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 h-10"
+                  >
+                    {isAnalyzing ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        {getTranslation(language, 'analyzing')}
+                      </div>
+                    ) : (
+                      getTranslation(language, 'analyzeStock')
+                    )}
+                  </Button>
                 </div>
-                <p className="mt-2 text-sm text-red-700">{error}</p>
               </div>
-            )}
-            
-            {success && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-2 text-green-800">
-                  <TrendingUp className="h-5 w-5" />
-                  <span className="font-medium">{getTranslation(language, 'success')}</span>
+
+              {/* Error and Success Messages */}
+              {error && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-800">
+                    <AlertTriangle className="h-5 w-5" />
+                    <span className="font-medium">{getTranslation(language, 'analysisError')}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-red-700">{error}</p>
                 </div>
-                <p className="mt-2 text-sm text-green-700">{success}</p>
-              </div>
-            )} */}
+              )}
             </CardContent>
           </Card>
 
