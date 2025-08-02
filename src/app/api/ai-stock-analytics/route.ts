@@ -9,6 +9,7 @@ export interface AIStockAnalysisRequest {
   investmentHorizon: string;
   interval?: TimeInterval;
   period?: TimeRange;
+  language?: string;
 }
 
 export interface AIStockAnalysisResponse {
@@ -55,7 +56,7 @@ export interface AIStockAnalysisResponse {
 export async function POST(request: NextRequest) {
   try {
     const body: AIStockAnalysisRequest = await request.json();
-    const { symbol, investmentHorizon, interval, period } = body;
+    const { symbol, investmentHorizon, interval, period, language = 'english' } = body;
 
     if (!symbol || !investmentHorizon) {
       return NextResponse.json({ 
@@ -88,7 +89,8 @@ export async function POST(request: NextRequest) {
       chart: stockData.chart,
       investmentHorizon,
       interval: finalInterval,
-      period: finalPeriod
+      period: finalPeriod,
+      language
     };
 
     // Build AI prompt using the utility function
