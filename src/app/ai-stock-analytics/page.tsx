@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign } from 'lucide-react';
 import { SideBar } from '@/components/SideBar';
+import StockSearch, { StockSearchResult } from '@/components/StockSearch';
 import { cn } from '@/lib/utils';
 import { getHorizonOptions } from '@/lib/utils/investmentHorizons';
 import { 
@@ -22,6 +23,7 @@ import {
 
 const StockAnalytics = () => {
   const [stockSymbol, setStockSymbol] = useState('');
+  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
   const [investmentHorizon, setInvestmentHorizon] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -30,17 +32,20 @@ const StockAnalytics = () => {
 
   const investmentOptions = getHorizonOptions();
 
-
+  const handleStockSelect = (stock: StockSearchResult) => {
+    setSelectedStock(stock);
+    setStockSymbol(stock.symbol);
+  };
 
   const handleAnalyze = async () => {
     if (!stockSymbol || !investmentHorizon) {
-      setError('Please enter a stock symbol and select an investment horizon');
+      setError('Please select a stock and investment horizon');
       return;
     }
 
     // Validate Indian stock symbol format
     if (!validateIndianStockSymbol(stockSymbol)) {
-      setError('Please enter a valid Indian stock symbol (e.g., RELIANCE.NS, TCS.NS, SBIN.BO)');
+      setError('Please select a valid Indian stock from the search results');
       return;
     }
 
@@ -120,11 +125,10 @@ const StockAnalytics = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Stock Symbol</label>
-                <Input
-                  placeholder="Enter stock symbol (e.g., RELIANCE.NS, TCS.NS)"
-                  value={stockSymbol}
-                  onChange={(e) => setStockSymbol(formatStockSymbol(e.target.value))}
-                  className="border-gray-200 focus:border-blue-500"
+                <StockSearch
+                  onStockSelect={handleStockSelect}
+                  placeholder="Search for stocks..."
+                  className="w-full"
                 />
               </div>
               <div className="space-y-2">
@@ -399,7 +403,7 @@ const StockAnalytics = () => {
                     {analysisData.sentiment.marketSentiment}
                   </Badge>
                 </div>
-                <div className="text-green-800">
+                <div>
                   <p className="text-sm text-gray-700">Sentiment Source: {analysisData.sentiment.sentimentSource}</p>
                 </div>
               </CardContent>
