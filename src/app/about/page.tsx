@@ -1,7 +1,10 @@
 import React from "react";
+import Header from "../../components/header";
 
 export default function AboutPage() {
   return (
+    <>
+      <Header />
   <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-6 py-12">
       <div className="max-w-3xl text-center">
   <h1 className="text-4xl font-bold mb-6 text-white">About Stock Amplify</h1>
@@ -11,11 +14,10 @@ export default function AboutPage() {
   </p>
 
 <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-
     <div className="bg-white/5 rounded-xl p-8 shadow-md border border-white/10">
       <h2 className="text-2xl font-semibold mb-4 text-white">Why We Built This</h2>
       <p className="text-lg leading-relaxed text-gray-400">
-        Most platforms either overwhelm you with raw data or limit you to surface-level stats. We bridge that gap by offering in-depth financial data, momentum signals, institutional trends, and sentiment analysis — all in one unified, beautiful dashboard. Whether you're a beginner or an experienced trader, Stock Amplify gives you the edge.
+        Most platforms either overwhelm you with raw data or limit you to surface-level stats. We bridge that gap by offering in-depth financial analysis, momentum signals, institutional trends, and sentiment analysis — all in one unified, beautiful dashboard. Whether you're a beginner or an experienced trader, Stock Amplify gives you the edge.
       </p>
     </div>
 
@@ -25,7 +27,6 @@ export default function AboutPage() {
         We believe that smart investing shouldn’t be a luxury. We envision a future where every Indian investor — from small-town beginners to seasoned professionals — can make smarter financial decisions with confidence and clarity. Stock Amplify is more than just a platform. It's a movement toward smarter, data-driven investing.
       </p>
     </div>
-
   </div>
 
 <div className="max-w-5xl mx-auto text-center mt-20 mb-12">
@@ -55,5 +56,6 @@ export default function AboutPage() {
   </div>
   </div>
 </main> 
+</>
  );
 }

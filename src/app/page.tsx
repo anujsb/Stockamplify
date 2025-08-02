@@ -1,36 +1,14 @@
-
 import React from 'react';
 import Image from "next/image";
-import { ArrowRight, BarChart3, Brain, Eye, FileText, TrendingUp, Upload, Users, Zap, Star, Shield, Globe } from 'lucide-react';
+import {ArrowRight, BarChart3, Brain, Eye, FileText, TrendingUp, Upload, Users, Zap, Star, Shield, Globe } from 'lucide-react';
 import Link from 'next/link';
+import Header from "../components/header";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="relative z-50 px-6 py-4">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Image src="/logo.png" alt="Logo" width={60} height={60} className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-1" />
-            <span className="text-5xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent leading-tight pb-1">StockAmplify</span>
-          </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
-              Features
-            </Link>
-            <Link href="#how-it-works" className="text-gray-300 hover:text-white transition-colors">
-              How it Works
-            </Link>
-            <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
-              About Us
-            </Link>
-            <Link href="/sign-in" className="text-gray-300 hover:text-white transition-colors">
-              Sign In
-            </Link>
-          </div>
-        </nav>
-      </header>
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+      <Header />
 
       {/* Hero Section */}
       <section className="relative px-6 py-20">
@@ -49,7 +27,7 @@ export default function HomePage() {
             StockAmplify isn't just another stock research tool. It's your AI-powered amplifier, boosting clarity, confidence, and conviction in every investment you make.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/portfolio" className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+            <Link href="/sign-in" className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -275,7 +253,7 @@ export default function HomePage() {
             Join a growing community of investors transforming their strategies with StockAmplify’s AI-powered insights — right at their fingertips.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/portfolio" className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+            <Link href="/sign-in" className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
               Get Started Free
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>

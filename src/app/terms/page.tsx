@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Header from "../../components/header";
 
 export const metadata: Metadata = {
   title: 'Terms and Conditions | StockAmplify',
@@ -7,6 +8,8 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
+        <>
+          <Header />
     <main className="max-w-3xl mx-auto p-6 text-gray-800">
       <h1 className="text-3xl font-bold mb-6">Terms and Conditions</h1>
       <p className="text-xl mb-6">
@@ -236,5 +239,6 @@ export default function TermsPage() {
         </p>
       </section>
     </main>
+    </>
   );
 }

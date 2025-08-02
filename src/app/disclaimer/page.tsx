@@ -1,7 +1,10 @@
 import React from "react";
+import Header from "../../components/header";
 
 export default function TermsPage() {
   return (
+        <>
+          <Header />
     <main className="max-w-3xl mx-auto p-6 text-gray-800">
       <h1 className="text-3xl font-bold mb-6">DISCLAIMER</h1>
       <section className="mb-4">
@@ -46,5 +49,6 @@ export default function TermsPage() {
         </p>
       </section>
     </main>
+    </>
   );
 }
