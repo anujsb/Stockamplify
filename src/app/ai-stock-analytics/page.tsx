@@ -384,23 +384,23 @@ const StockAnalytics = () => {
               </Card>
             </div>
 
-            {/* Market Sentiment */}
+            {/* Sentiment Summary */}
             <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-600" />
-                  Market Sentiment
+                  Sentiment Summary
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4 mb-3">
-                  <span className="text-sm text-gray-600">Sentiment:</span>
+                  <span className="text-sm text-gray-600">Market Sentiment:</span>
                   <Badge className="bg-green-100 text-green-800 border-green-200">
                     {analysisData.sentiment.marketSentiment}
                   </Badge>
                 </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-700">{analysisData.sentiment.sentimentSource}</p>
+                <div className="text-green-800">
+                  <p className="text-sm text-gray-700">Sentiment Source: {analysisData.sentiment.sentimentSource}</p>
                 </div>
               </CardContent>
             </Card>
