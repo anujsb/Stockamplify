@@ -5,7 +5,7 @@ import StockSearch, { StockSearchResult } from "@/components/StockSearch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDate, formatPrice, formatLargeNumber } from "@/lib/utils/stockUtils";
+import { formatDate, formatPrice, formatLargeNumber,formatSymbol, formatPercentage } from "@/lib/utils/stockUtils";
 import { SideBar } from "@/components/SideBar";
 import { cn } from "@/lib/utils";
 
@@ -108,7 +108,7 @@ const SearchPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {stockData.stock.name} ({stockData.stock.symbol})
+                  {stockData.stock.name} ({formatSymbol(stockData.stock.symbol)})
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -152,7 +152,7 @@ const SearchPage = () => {
                     <div>
                       <p className="text-gray-500">Volume</p>
                       <p className="font-semibold">
-                        {stockData.realTimePrice[0].volume?.toLocaleString() || 'N/A'}
+                        {formatLargeNumber(stockData.realTimePrice[0].volume)}
                       </p>
                     </div>
                     <div>
@@ -261,27 +261,27 @@ const SearchPage = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <p className="text-gray-500">EPS (TTM)</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].epsTTM}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].epsTTM)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">EPS (Forward)</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].epsForward}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].epsForward)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Book Value</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].bookValue}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].bookValue)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Trailing PE</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].trailingPE}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].trailingPE)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Forward PE</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].forwardPE}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].forwardPE)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Price to Book</p>
-                      <p className="font-semibold">{stockData.fundamentalData[0].priceToBook}</p>
+                      <p className="font-semibold">{formatPrice(stockData.fundamentalData[0].priceToBook)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Last Updated</p>
@@ -328,35 +328,35 @@ const SearchPage = () => {
                     </div>
                     <div>
                       <p className="text-gray-500">Profit Margin</p>
-                      <p className="font-semibold">{stockData.financialData[0].profitMargin}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].profitMargin)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Gross Margin</p>
-                      <p className="font-semibold">{stockData.financialData[0].grossMargin}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].grossMargin)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Operating Margin</p>
-                      <p className="font-semibold">{stockData.financialData[0].operatingMargin}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].operatingMargin)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">EBITDA Margin</p>
-                      <p className="font-semibold">{stockData.financialData[0].ebitdaMargin}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].ebitdaMargin)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Return on Assets</p>
-                      <p className="font-semibold">{stockData.financialData[0].returnOnAssets}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].returnOnAssets)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Return on Equity</p>
-                      <p className="font-semibold">{stockData.financialData[0].returnOnEquity}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].returnOnEquity)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Revenue Growth</p>
-                      <p className="font-semibold">{stockData.financialData[0].revenueGrowth}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].revenueGrowth)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Earnings Growth</p>
-                      <p className="font-semibold">{stockData.financialData[0].earningsGrowth}</p>
+                      <p className="font-semibold">{formatPercentage(stockData.financialData[0].earningsGrowth)}</p>
                     </div>
                     <div>
                       <p className="text-gray-500">Last Updated</p>
