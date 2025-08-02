@@ -10,146 +10,87 @@ import { Separator } from '@/components/ui/separator';
 import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign } from 'lucide-react';
 import { SideBar } from '@/components/SideBar';
 import { cn } from '@/lib/utils';
-
-type AnalysisData = {
-  recommendation: string;
-  confidence: number;
-  holdingPeriod: string;
-  reasoning: string;
-  trendAnalysis: {
-    overall: string;
-    shortTerm: string;
-    mediumTerm: string;
-    longTerm: string;
-    confidence: number;
-  };
-  supportResistance: {
-    support: string[];
-    resistance: string[];
-  };
-  priceTargets: {
-    entryPoint: string;
-    exitTarget: string;
-    stopLoss: string;
-    upside: string;
-    downside: string;
-  };
-  indicators: {
-    rsi: string;
-    macd: string;
-    sma: string;
-  };
-  riskVolatility: {
-    riskLevel: string;
-    volatility: string;
-    volatilityScore: number;
-    suitableFor: string;
-  };
-  weekRange: {
-    currentPrice: string;
-    weekHigh: string;
-    weekLow: string;
-    position: string;
-  };
-  sentiment: {
-    marketSentiment: string;
-    sentimentSource: string;
-  };
-};
+import { getHorizonOptions } from '@/lib/utils/investmentHorizons';
+import { 
+  transformAIResponseToFrontend, 
+  validateIndianStockSymbol, 
+  formatStockSymbol,
+  getRecommendationColor,
+  getTrendIcon,
+  type AnalysisData 
+} from '@/lib/utils/dataTransformers';
 
 const StockAnalytics = () => {
   const [stockSymbol, setStockSymbol] = useState('');
   const [investmentHorizon, setInvestmentHorizon] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const investmentOptions = [
-    { value: 'scalping', label: 'Scalping (Minutes to Hours)' },
-    { value: 'intraday', label: 'Intraday (Same Day)' },
-    { value: 'swing-short', label: 'Swing Trading - Short (1 to 5 Days)' },
-    { value: 'swing-medium', label: 'Swing Trading - Medium (1 to 4 Weeks)' },
-    { value: 'positional', label: 'Positional Trading (1 to 6 Months)' },
-    { value: 'long-term', label: 'Long-term Investing (6 to 12 Months)' },
-    { value: 'custom', label: 'Custom Interval & Period' }
-  ];
+  const investmentOptions = getHorizonOptions();
 
-  const mockAnalysisData = {
-    recommendation: 'hold',
-    confidence: 75,
-    holdingPeriod: '1-5 Days',
-    reasoning: 'GALLANTT.NS has shown strong bullish momentum on increasing volume over the last five 1-hour intervals, now trading near its 52-week high. A breakout above the ₹782.90 resistance could lead to further upside, making it a potential swing-short opportunity with a tight stop-loss due to its overbought condition.',
 
-    trendAnalysis: {
-      overall: 'Bullish',
-      shortTerm: 'Strong Bullish',
-      mediumTerm: 'Bullish',
-      longTerm: 'Bullish',
-      confidence: 88
-    },
-
-    supportResistance: {
-      support: ['₹760.00', '₹745.00'],
-      resistance: ['₹782.90', '₹800.00']
-    },
-
-    priceTargets: {
-      entryPoint: '₹765.00',
-      exitTarget: '₹790.00',
-      stopLoss: '₹750.00',
-      upside: '₹790.00',
-      downside: '₹745.00'
-    },
-
-    indicators: {
-      rsi: 'Overbought (Likely >70)',
-      macd: 'Strong Bullish momentum',
-      sma: 'Above short-term SMAs'
-    },
-
-    riskVolatility: {
-      riskLevel: 'Medium',
-      volatility: 'Increasing',
-      volatilityScore: 75,
-      suitableFor: 'Short-term Traders, Momentum Traders'
-    },
-
-    weekRange: {
-      currentPrice: '₹766.20',
-      weekHigh: '₹782.90',
-      weekLow: '₹288.05',
-      position: 'Near High'
-    },
-
-    sentiment: {
-      marketSentiment: 'Bullish',
-      sentimentSource: 'Strong upward price momentum and significant trading volume over the past 5 days.'
-    }
-  };
 
   const handleAnalyze = async () => {
-    if (!stockSymbol || !investmentHorizon) return;
+    if (!stockSymbol || !investmentHorizon) {
+      setError('Please enter a stock symbol and select an investment horizon');
+      return;
+    }
+
+    // Validate Indian stock symbol format
+    if (!validateIndianStockSymbol(stockSymbol)) {
+      setError('Please enter a valid Indian stock symbol (e.g., RELIANCE.NS, TCS.NS, SBIN.BO)');
+      return;
+    }
 
     setIsAnalyzing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setAnalysisData(mockAnalysisData);
-      setIsAnalyzing(false);
-    }, 2000);
-  };
+    setError(null);
+    setSuccess(null);
+    setAnalysisData(null);
+    
+    try {
+      const response = await fetch('/api/ai-stock-analytics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          symbol: stockSymbol,
+          investmentHorizon: investmentHorizon,
+        }),
+      });
 
-  const getRecommendationColor = (recommendation: string) => {
-    switch (recommendation?.toLowerCase()) {
-      case 'buy': return 'bg-green-100 text-green-800 border-green-200';
-      case 'sell': return 'bg-red-100 text-red-800 border-red-200';
-      case 'hold': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze stock');
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.analysis) {
+        // Transform the API response using the utility function
+        const transformedData = transformAIResponseToFrontend(data.analysis);
+        setAnalysisData(transformedData);
+        setSuccess(`Analysis completed for ${stockSymbol}`);
+      } else {
+        throw new Error('Invalid response from analysis service');
+      }
+    } catch (error) {
+      console.error('Analysis error:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  const getTrendIcon = (trend: string) => {
-    if (trend?.toLowerCase().includes('bullish')) return <TrendingUp className="h-4 w-4 text-green-600" />;
-    if (trend?.toLowerCase().includes('bearish')) return <TrendingDown className="h-4 w-4 text-red-600" />;
-    return <Activity className="h-4 w-4 text-gray-600" />;
+  const getTrendIconComponent = (trend: string) => {
+    const trendType = getTrendIcon(trend);
+    switch (trendType) {
+      case 'bullish': return <TrendingUp className="h-4 w-4 text-green-600" />;
+      case 'bearish': return <TrendingDown className="h-4 w-4 text-red-600" />;
+      default: return <Activity className="h-4 w-4 text-gray-600" />;
+    }
   };
 
   return (
@@ -182,7 +123,7 @@ const StockAnalytics = () => {
                 <Input
                   placeholder="Enter stock symbol (e.g., RELIANCE.NS, TCS.NS)"
                   value={stockSymbol}
-                  onChange={(e) => setStockSymbol(e.target.value.toUpperCase())}
+                  onChange={(e) => setStockSymbol(formatStockSymbol(e.target.value))}
                   className="border-gray-200 focus:border-blue-500"
                 />
               </div>
@@ -207,8 +148,35 @@ const StockAnalytics = () => {
               disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5"
             >
-              {isAnalyzing ? 'Analyzing...' : 'Analyze Stock'}
+              {isAnalyzing ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Analyzing...
+                </div>
+              ) : (
+                'Analyze Stock'
+              )}
             </Button>
+            
+            {error && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span className="font-medium">Analysis Error</span>
+                </div>
+                <p className="mt-2 text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            
+            {success && (
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2 text-green-800">
+                  <TrendingUp className="h-5 w-5" />
+                  <span className="font-medium">Success</span>
+                </div>
+                <p className="mt-2 text-sm text-green-700">{success}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -273,7 +241,7 @@ const StockAnalytics = () => {
                       <div key={key} className="flex items-center justify-between">
                         <span className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
                         <div className="flex items-center gap-2">
-                          {getTrendIcon(String(value))}
+                          {getTrendIconComponent(String(value))}
                           <span className="text-sm font-medium">{value}</span>
                         </div>
                       </div>
