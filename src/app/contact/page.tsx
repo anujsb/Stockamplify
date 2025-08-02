@@ -3,20 +3,52 @@ import React from "react";
 
 export default function ContactPage() {
   return (
-    <main className="max-w-2xl mx-auto px-4 py-12 text-gray-300">
-      <h1 className="text-3xl font-bold mb-4 text-white">Contact Us</h1>
-      <p className="mb-4 text-base">
-        Have questions, suggestions, or need support? We are here to help.
-      </p>
-      <p className="text-base">
-        📧 Email us at:{" "}
-        <a
-          href="mailto:stockamplifyfeedback@gmail.com"
-          className="text-blue-400 hover:underline"
-        >
-          stockamplifyfeedback@gmail.com
-        </a>
-      </p>
-    </main>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <main className="max-w-4xl mx-auto px-6 py-20">
+        <div className="bg-gradient-to-b from-white/10 to-white/5 rounded-2xl p-10 backdrop-blur-sm shadow-2xl border border-white/20">
+          <h1 className="text-5xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 text-center">
+            Get in Touch
+          </h1>
+
+          <div className="space-y-10">
+            <p className="text-xl text-gray-300 text-center leading-relaxed">
+              Have questions, suggestions, or need support? We're here to help you
+              succeed with your investment journey.
+            </p>
+
+            <div className="flex flex-col items-center space-y-8">
+              <div className="group flex items-center space-x-6 bg-white/10 rounded-xl p-6 w-full max-w-lg hover:bg-white/[0.15] transition-all duration-300 hover:transform hover:scale-105 border border-white/10 hover:border-blue-500/50">
+                <div className="text-4xl bg-gradient-to-br from-blue-400 to-purple-400 rounded-full p-3">
+                  📧
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-2">Email Us</h2>
+                  <a
+                    href="mailto:stockamplifyfeedback@gmail.com"
+                    className="text-blue-400 hover:text-blue-300 transition duration-300 hover:underline"
+                  >
+                    stockamplifyfeedback@gmail.com
+                  </a>
+                </div>
+              </div>
+
+              <div className="group flex items-center space-x-6 bg-white/10 rounded-xl p-6 w-full max-w-lg hover:bg-white/[0.15] transition-all duration-300 hover:transform hover:scale-105 border border-white/10 hover:border-purple-500/50">
+                <div className="text-4xl bg-gradient-to-br from-purple-400 to-pink-400 rounded-full p-3">
+                  ⏱️
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-2">
+                    Response Time
+                  </h2>
+                  <p className="text-gray-300">
+                    We typically respond within 24 hours
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }
