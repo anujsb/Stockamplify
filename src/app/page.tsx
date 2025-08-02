@@ -46,7 +46,7 @@ export default function HomePage() {
             </span>
           </h1>
           <p className="mb-10 text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            StockAmplify isn't just another stock research tool. It's your AI-powered amplifier Boosting clarity, confidence, and conviction in every investment you make.
+            StockAmplify isn't just another stock research tool. It's your AI-powered amplifier, boosting clarity, confidence, and conviction in every investment you make.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/portfolio" className="group relative inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
@@ -89,7 +89,7 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
               Everything You Need for
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 leading-tight pb-1">
                 Smart Investing
               </span>
             </h2>
@@ -175,7 +175,7 @@ export default function HomePage() {
               <Zap className="h-12 w-12 text-indigo-400 mb-6" />
               <h3 className="text-2xl font-bold text-white mb-4">Real-time Data</h3>
               <p className="text-gray-300 mb-6">
-                Access real-time stock prices, market data, and financial metrics powered by Yahoo Finance API for the most up-to-date information.
+                Access real-time stock prices, market data, and financial metrics for the most up-to-date information.
               </p>
               <div className="flex items-center text-indigo-400">
                 <span className="text-sm font-medium">View Data</span>
@@ -223,7 +223,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-4">Make Decisions</h3>
               <p className="text-gray-300">
-                Receive actionable recommendations and make informed investment decisions based on comprehensive analysis.
+                Receive actionable insights and make informed investment decisions based on comprehensive analysis.
               </p>
             </div>
           </div>
@@ -235,28 +235,28 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-white mb-6">
-              Trusted by Smart Investors
+              Built for the Next Generation of Investors
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 mb-2">
-                10,000+
+                AI-Powered
               </div>
-              <p className="text-gray-300">Active Users</p>
+              <p className="text-gray-300">Insights that amplify your decisions</p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-2">
-                $50M+
+                Built for You
               </div>
-              <p className="text-gray-300">Assets Tracked</p>
+              <p className="text-gray-300">Designed with real investors in mind</p>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400 mb-2">
-                98%
+                100+
               </div>
-              <p className="text-gray-300">User Satisfaction</p>
+              <p className="text-gray-300">Active Users and growing</p>
             </div>
           </div>
         </div>
@@ -267,12 +267,12 @@ export default function HomePage() {
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Transform Your
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 leading-tight pb-1">
               Investment Strategy?
             </span>
           </h2>
           <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
-            Join thousands of smart investors who use StockAmplify to make better investment decisions with AI-powered insights.
+            Join a growing community of investors transforming their strategies with StockAmplify’s AI-powered insights — right at their fingertips.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/portfolio" className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-4 text-lg font-medium text-white hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
