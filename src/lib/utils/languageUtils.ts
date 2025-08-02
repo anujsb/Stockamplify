@@ -13,7 +13,6 @@ export interface LanguageOptions {
 export interface TranslationKeys {
   // UI Elements
   pageTitle: string;
-  pageSubtitle: string;
   stockSymbol: string;
   investmentHorizon: string;
   language: string;
@@ -93,7 +92,6 @@ export const translations: Record<Language, TranslationKeys> = {
   english: {
     // UI Elements
     pageTitle: 'AI Stock Analytics',
-    pageSubtitle: 'Advanced AI-powered analysis for Indian stock market',
     stockSymbol: 'Stock Symbol',
     investmentHorizon: 'Investment Horizon',
     language: 'Language',
@@ -166,7 +164,6 @@ export const translations: Record<Language, TranslationKeys> = {
   hindi: {
     // UI Elements
     pageTitle: 'एआई स्टॉक एनालिटिक्स',
-    pageSubtitle: 'भारतीय शेयर बाजार के लिए उन्नत एआई-संचालित विश्लेषण',
     stockSymbol: 'स्टॉक प्रतीक',
     investmentHorizon: 'निवेश क्षितिज',
     language: 'भाषा',
@@ -239,7 +236,6 @@ export const translations: Record<Language, TranslationKeys> = {
   marathi: {
     // UI Elements
     pageTitle: 'एआई स्टॉक अॅनालिटिक्स',
-    pageSubtitle: 'भारतीय स्टॉक मार्केटसाठी प्रगत एआई-चालित विश्लेषण',
     stockSymbol: 'स्टॉक चिन्ह',
     investmentHorizon: 'गुंतवणूक क्षितिज',
     language: 'भाषा',

@@ -122,6 +122,8 @@ IMPORTANT: Provide your analysis response in ${language === 'hindi' ? 'Hindi' : 
 
 Your analysis and recommendations must dynamically adapt based on BOTH the investment horizon and the data interval.
 
+Translate result in ${language === 'hindi' ? 'Hindi' : language === 'marathi' ? 'Marathi' : 'English'} language.
+
 -------------------------
 DATA INTERVAL → HOW TO INTERPRET
 -------------------------
