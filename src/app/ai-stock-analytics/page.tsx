@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign, ChartNoAxesGantt } from 'lucide-react';
 import { SideBar } from '@/components/SideBar';
 import StockSearch, { StockSearchResult } from '@/components/StockSearch';
 import { cn } from '@/lib/utils';
@@ -369,11 +369,11 @@ const StockAnalytics = () => {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">{getTranslation(language, 'volatilityScore')}</span>
-                      <span className="text-sm font-bold text-red-600">{analysisData.riskVolatility.volatilityScore}</span>
+                      <span className="text-sm font-medium">{analysisData.riskVolatility.volatilityScore}</span>
                     </div>
-                    <div className="pt-2 border-t">
-                      <div className="text-sm text-gray-600 mb-1">{getTranslation(language, 'suitableFor')}:</div>
-                      <div className="text-sm font-medium text-blue-600">{analysisData.riskVolatility.suitableFor}</div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">{getTranslation(language, 'suitableFor')}</div>
+                      <div className="text-sm font-medium">{analysisData.riskVolatility.suitableFor}</div>
                     </div>
                   </CardContent>
                 </Card>
@@ -413,7 +413,7 @@ const StockAnalytics = () => {
               <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-green-600" />
+                    <ChartNoAxesGantt className="h-5 w-5 text-green-600" />
                     {getTranslation(language, 'sentimentSummary')}
                   </CardTitle>
                 </CardHeader>
