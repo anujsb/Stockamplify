@@ -10,7 +10,7 @@ export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
   return (
 
-    <header className="sticky top-0 z-50 bg-white shadow-md">
+    <header className="sticky top-0 z-50 bg-transparent backdrop-blur-xl backdrop-brightness-95 text-white shadow-lg">
       <nav className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
         {/* Logo + Name */}
         <div className="flex items-center space-x-4">
@@ -28,10 +28,10 @@ export default function Header() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-8">
-          <Link href="#features" className="text-gray-700 hover:text-blue-600 font-medium">Features</Link>
-          <Link href="#how-it-works" className="text-gray-700 hover:text-blue-600 font-medium">How it Works</Link>
-          <Link href="/about" className="text-gray-700 hover:text-blue-600 font-medium">About Us</Link>
-          <Link href="/sign-in" className="text-gray-700 hover:text-blue-600 font-medium">Sign In</Link>
+          <Link href="#features" className="text-gray-100 hover:text-blue-600 font-medium">Features</Link>
+          <Link href="#how-it-works" className="text-gray-100 hover:text-blue-600 font-medium">How it Works</Link>
+          <Link href="/about" className="text-gray-100 hover:text-blue-600 font-medium">About Us</Link>
+          <Link href="/sign-in" className="text-gray-100 hover:text-blue-600 font-medium">Sign In</Link>
         </div>
 
         {/* Mobile Hamburger */}
