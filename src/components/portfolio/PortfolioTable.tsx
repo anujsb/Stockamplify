@@ -268,9 +268,11 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                         {/* Stock Header */}
                         <div className="flex justify-between items-start mb-3">
                             <div className="flex-1">
-                                <div className="font-medium text-gray-900 text-lg">{item.stock?.symbol}</div>
+                                <div className="flex items-center space-x-2">
+                                    <div className="font-medium text-gray-900 text-lg">{formatSymbol(item.stock?.symbol)}</div>
+                                    <div className="text-xs text-gray-400">{item.stock?.exchange}</div>
+                                </div>
                                 <div className="text-sm text-gray-500 truncate">{item.stock?.name}</div>
-                                <div className="text-xs text-gray-400">{item.stock?.exchange}</div>
                             </div>
                             <button
                                 onClick={(e) => {
