@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { stocks, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { YahooFinanceService } from '@/lib/services/yahooFinanceService';
+import { QuoteService } from '@/lib/services/quoteService';
+import { ModulesService } from '@/lib/services/modulesService';
 
 // Shared function to update monthly data
 async function updateMonthlyData() {
@@ -40,7 +41,10 @@ async function updateMonthlyData() {
     const batchPromises = batch.map(async (stock) => {
       try {
         // Fetch comprehensive data from Yahoo Finance
-        const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(stock.symbol);
+const [quote, modules] = await Promise.all([
+          QuoteService.getQuote(stock.symbol),
+          ModulesService.getModulesData(stock.symbol)
+        ]);
         
         if (!quote) {
           throw new Error(`Unable to fetch valid data for ${stock.symbol}`);

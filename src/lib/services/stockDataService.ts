@@ -9,7 +9,8 @@ import {
   stockStatistics, 
   analystRating 
 } from '../db/schema';
-import { YahooFinanceService, YahooQuoteData, YahooModulesData } from './yahooFinanceService';
+import { QuoteService, YahooQuoteData } from './quoteService';
+import { ModulesService, YahooModulesData } from './modulesService';
 import { eq, and } from 'drizzle-orm';
 import { normalizeStockSymbol } from '@/lib/utils/stockUtils';
 
@@ -36,7 +37,10 @@ export class StockDataService {
     try {
       symbol = normalizeStockSymbol(symbol);
       // Fetch data from Yahoo Finance
-      const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(symbol);
+const [quote, modules] = await Promise.all([
+        QuoteService.getQuote(symbol),
+        ModulesService.getModulesData(symbol)
+      ]);
       
       if (!quote || !quote.regularMarketPrice) {
         return {
@@ -445,7 +449,7 @@ export class StockDataService {
       symbol = normalizeStockSymbol(symbol);
       
       // Only fetch quote data (no modules) for faster response
-      const quote = await YahooFinanceService.getQuote(symbol);
+const quote = await QuoteService.getQuote(symbol);
       
       if (!quote || !quote.regularMarketPrice) {
         return {
@@ -506,7 +510,7 @@ export class StockDataService {
       symbol = normalizeStockSymbol(symbol);
       
       // Only fetch quote data (no modules) for faster response
-      const quote = await YahooFinanceService.getQuote(symbol);
+const quote = await QuoteService.getQuote(symbol);
       
       if (!quote || !quote.regularMarketPrice) {
         return {
@@ -686,7 +690,10 @@ export class StockDataService {
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including fundamental data
-            const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(stock.symbol);
+const [quote, modules] = await Promise.all([
+              QuoteService.getQuote(stock.symbol),
+              ModulesService.getModulesData(stock.symbol)
+            ]);
             
             if (!quote) {
               throw new Error('No quote data received');
@@ -779,7 +786,10 @@ export class StockDataService {
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including financial data
-            const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(stock.symbol);
+const [quote, modules] = await Promise.all([
+              QuoteService.getQuote(stock.symbol),
+              ModulesService.getModulesData(stock.symbol)
+            ]);
             
             if (!modules?.financialData) {
               throw new Error('No financial data received');
@@ -872,7 +882,10 @@ export class StockDataService {
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including statistics
-            const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(stock.symbol);
+const [quote, modules] = await Promise.all([
+              QuoteService.getQuote(stock.symbol),
+              ModulesService.getModulesData(stock.symbol)
+            ]);
             
             if (!modules || (!modules.defaultKeyStatistics && !modules.calendarEvents)) {
               throw new Error('No statistics data received');
@@ -965,7 +978,10 @@ export class StockDataService {
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including analyst ratings
-            const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(stock.symbol);
+const [quote, modules] = await Promise.all([
+              QuoteService.getQuote(stock.symbol),
+              ModulesService.getModulesData(stock.symbol)
+            ]);
             
             if (!modules?.financialData?.recommendationKey) {
               throw new Error('No analyst rating data received');

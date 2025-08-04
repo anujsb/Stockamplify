@@ -3,7 +3,7 @@
  * Defines different investment strategies and their corresponding data parameters
  */
 
-import { TimeInterval, TimeRange } from '@/lib/services/yahooFinanceService';
+import { TimeInterval, TimeRange } from '@/lib/services/chartService';
 
 export interface HorizonConfig {
   name: string;

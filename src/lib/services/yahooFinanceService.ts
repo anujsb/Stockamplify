@@ -101,6 +101,8 @@ export interface YahooChartData {
     previousClose: number;
     scale: number;
     priceHint: number;
+    // fiftyTwoWeekHigh?: number;s
+    // fiftyTwoWeekLow?: number;
     currentTradingPeriod: {
       pre: {
         timezone: string;
@@ -249,6 +251,8 @@ export class YahooFinanceService {
           previousClose: chart.meta.previousClose || 0,
           scale: chart.meta.scale || 1,
           priceHint: chart.meta.priceHint || 0,
+          // fiftyTwoWeekHigh: chart.meta.fiftyTwoWeekHigh,
+          // fiftyTwoWeekLow: chart.meta.fiftyTwoWeekLow,
           currentTradingPeriod: {
             pre: { 
               timezone: chart.meta.currentTradingPeriod?.pre?.timezone || '', 

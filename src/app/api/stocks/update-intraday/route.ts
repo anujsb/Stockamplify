@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { stocks, stockIntraDayPrice } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { YahooFinanceService } from '@/lib/services/yahooFinanceService';
+import { QuoteService } from '@/lib/services/quoteService';
 
 // Shared function to update intraday data
 async function updateIntradayData() {
@@ -34,7 +34,7 @@ async function updateIntradayData() {
     const batchPromises = batch.map(async (stock) => {
       try {
         // Fetch quote data from Yahoo Finance
-        const quote = await YahooFinanceService.getQuote(stock.symbol);
+const quote = await QuoteService.getQuote(stock.symbol);
         
         if (!quote || !quote.regularMarketPrice) {
           throw new Error(`Unable to fetch valid data for ${stock.symbol}`);

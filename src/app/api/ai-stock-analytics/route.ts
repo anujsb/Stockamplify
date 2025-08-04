@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { YahooFinanceService, TimeInterval, TimeRange } from '@/lib/services/yahooFinanceService';
+import { ChartService, TimeInterval, TimeRange } from '@/lib/services/chartService';
 import { getHorizonConfig } from '@/lib/utils/investmentHorizons';
 import { buildAnalysisPrompt } from '@/lib/utils/aiPromptBuilder';
 import { callGeminiAI, validateAnalysisResponse, transformAnalysisResponse } from '@/lib/services/aiAnalysisService';
@@ -72,21 +72,18 @@ export async function POST(request: NextRequest) {
     console.log(`Analyzing ${symbol} with horizon: ${investmentHorizon}, interval: ${finalInterval}, period: ${finalPeriod}`);
 
     // Fetch comprehensive stock data
-    const stockData = await YahooFinanceService.getStockDataForAnalysis(symbol, finalPeriod, finalInterval);
+const chart = await ChartService.getChartData(symbol, finalPeriod, finalInterval);
 
-    if (!stockData.quote) {
+if (!chart) {
       return NextResponse.json({ 
-        error: 'Failed to fetch stock data. Please check the symbol and try again.' 
+        error: 'Failed to fetch chart data. Please check the symbol and try again.' 
       }, { status: 400 });
     }
 
     // Prepare data for AI analysis
-    const analysisData = {
+const analysisData = {
       symbol,
-      quote: stockData.quote,
-      modules: stockData.modules,
-      historical: stockData.historical,
-      chart: stockData.chart,
+      chart,
       investmentHorizon,
       interval: finalInterval,
       period: finalPeriod,
@@ -124,11 +121,9 @@ export async function POST(request: NextRequest) {
         interval: finalInterval,
         period: finalPeriod,
         generatedAt: new Date().toISOString(),
-        dataPoints: {
-          hasQuote: !!stockData.quote,
-          hasModules: !!stockData.modules,
-          historicalDataPoints: stockData.historical.length,
-          hasChart: !!stockData.chart
+dataPoints: {
+          hasChart: !!chart,
+          dataPoints: chart?.timestamp.length || 0
         }
       }
     });

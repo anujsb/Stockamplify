@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { YahooFinanceService } from '@/lib/services/yahooFinanceService';
+import { SearchService } from '@/lib/services/searchService';
 import { db } from '@/lib/db';
 import { stocks } from '@/lib/db/schema';
 import { like, or } from 'drizzle-orm';
@@ -78,11 +78,11 @@ export async function GET(request: NextRequest) {
 
     // If not found in DB, search Yahoo Finance
     try {
-      let yahooResults = await YahooFinanceService.searchStocks(searchTerm);
+let yahooResults = await SearchService.searchStocks(searchTerm);
       
       // If the search term looks like a bank name (ends with I, C, etc.), try adding BANK suffix
       if (searchTerm.toUpperCase().endsWith('I') || searchTerm.toUpperCase().endsWith('C')) {
-        const bankResults = await YahooFinanceService.searchStocks(searchTerm + 'BANK');
+const bankResults = await SearchService.searchStocks(searchTerm + 'BANK');
         yahooResults = [...yahooResults, ...bankResults];
       }
       // Filter for Indian stocks only (NSI/BSE or region IN) and prioritize actual stocks over mutual funds

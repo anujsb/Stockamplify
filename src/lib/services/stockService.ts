@@ -2,7 +2,8 @@
 import { db } from '@/lib/db';
 import { stocks } from '@/lib/db/schema';
 import { Stock, StockCreationResult } from '@/types/stock.types';
-import { YahooFinanceService } from './yahooFinanceService';
+import { QuoteService } from './quoteService';
+import { ModulesService } from './modulesService';
 import { eq } from 'drizzle-orm';
 import { normalizeStockSymbol } from '@/lib/utils/stockUtils';
 
@@ -17,7 +18,10 @@ export class StockService {
     try {
       symbol = normalizeStockSymbol(symbol);
       // Fetch data from Yahoo Finance
-      const { quote, modules } = await YahooFinanceService.getComprehensiveStockData(symbol);
+const [quote, modules] = await Promise.all([
+        QuoteService.getQuote(symbol),
+        ModulesService.getModulesData(symbol)
+      ]);
       
       if (!quote || !quote.regularMarketPrice) {
         throw new Error(`Unable to fetch valid data for symbol: ${symbol}`);
