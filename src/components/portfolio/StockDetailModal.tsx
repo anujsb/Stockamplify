@@ -36,7 +36,7 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
     return (
         <Dialog open={open} onOpenChange={onClose}>
             {/* <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] lg:max-w-[80vw] xl:max-w-[75vw] p-0 overflow-hidden"> */}
-            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[80vw] lg:max-w-[75vw] p-0 overflow-hidden">
+            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[80vw] lg:max-w-[75vw] p-0">
                 <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
                     <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mt-0 md:mt-4">
                         <div className="flex-1 min-w-0">
