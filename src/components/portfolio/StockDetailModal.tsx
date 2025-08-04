@@ -35,78 +35,108 @@ const StockDetailModal: React.FC<StockDetailModalProps> = ({ open, onClose, stoc
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto sm:max-w-[85vw] md:max-w-[80vw] lg:max-w-[75vw]">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center justify-between gap-4 mt-4">
-                        <div className="flex-1">
-                            <div className="text-xl font-bold text-foreground">{formatSymbol(stock.stock.symbol)}</div>
-                            <div className="text-sm text-muted-foreground">{stock.stock.name}</div>
+            {/* <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[85vw] lg:max-w-[80vw] xl:max-w-[75vw] p-0 overflow-hidden"> */}
+            <DialogContent className="max-w-[90vw] max-h-[90vh] overflow-y-auto sm:max-w-[90vw] sm:max-h-[90vh] md:max-w-[80vw] lg:max-w-[75vw] p-0 overflow-hidden">
+                <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+                    <DialogTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mt-0 md:mt-4">
+                        <div className="flex-1 min-w-0">
+                            <div className="text-lg sm:text-xl font-bold text-foreground truncate">
+                                {formatSymbol(stock.stock.symbol)}
+                            </div>
+                            <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                                {stock.stock.name}
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex md:flex-col items-center md:items-end justify-between sm:justify-end gap-3 md:gap-0 shrink-0">
                             <div className="text-right">
-                                <div className="text-lg font-semibold">{formatPrice(stock.realTimePrice.price)}</div>
-                                <Badge variant="outline" className="shrink-0">
-                                    {stock.stock.exchange}
-                                </Badge>
+                                <div className="text-lg sm:text-xl font-semibold">
+                                    {formatPrice(stock.realTimePrice.price)}
+                                </div>
                             </div>
+                            <Badge variant="outline" className="shrink-0 text-xs">
+                                {stock.stock.exchange}
+                            </Badge>
                         </div>
                     </DialogTitle>
                 </DialogHeader>
 
-                <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 gap-1 grid-rows-2 md:grid-rows-1 min-h-max">
-                        {/* <TabsList className="grid w-full grid-cols-6"> */}
-                        <TabsTrigger value="overview" className="flex items-center gap-1">
-                            <BarChart3 className="h-4 w-4" />
-                            Overview
+                <Tabs defaultValue="overview" className="w-full px-0 md:px-2">
+                    {/* Mobile: Scrollable horizontal tabs */}
+                    {/* <div className="px-4 sm:px-0 py-2 border-b sm:border-none overflow-x-auto sm:overflow-visible"> */}
+                    <TabsList className="w-full">
+                        <TabsTrigger
+                            value="overview"
+                            className="flex items-center gap-1"
+                        >
+                            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Overview</span>
+                            <span className="sm:hidden">Info</span>
                         </TabsTrigger>
-                        <TabsTrigger value="chart" className="flex items-center gap-1">
-                            <Activity className="h-4 w-4" />
+                        <TabsTrigger
+                            value="chart"
+                            className="flex items-center gap-1"
+                        >
+                            <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
                             Chart
                         </TabsTrigger>
-                        <TabsTrigger value="ai-analysis" className="flex items-center gap-1">
-                            <Brain className="h-4 w-4" />
-                            AI Analysis
+                        <TabsTrigger
+                            value="ai-analysis"
+                            className="flex items-center gap-1"
+                        >
+                            <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">AI Analysis</span>
+                            <span className="sm:hidden">AI</span>
                         </TabsTrigger>
-                        <TabsTrigger value="news" className="flex items-center gap-1">
-                            <Newspaper className="h-4 w-4" />
+                        <TabsTrigger
+                            value="news"
+                            className="flex items-center gap-1"
+                        >
+                            <Newspaper className="h-3 w-3 sm:h-4 sm:w-4" />
                             News
                         </TabsTrigger>
-                        <TabsTrigger value="financials" className="flex items-center gap-1">
-                            <Calculator className="h-4 w-4" />
-                            Financials
+                        <TabsTrigger
+                            value="financials"
+                            className="flex items-center gap-1"
+                        >
+                            <Calculator className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="hidden sm:inline">Financials</span>
+                            <span className="sm:hidden">Finance</span>
                         </TabsTrigger>
-                        {/* <TabsTrigger value="technicals" className="flex items-center gap-1">
-                            <TrendingUp className="h-4 w-4" />
-                            Technicals
-                        </TabsTrigger> */}
                     </TabsList>
+                    {/* </div> */}
 
-                    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 overflow-y-auto">
-                        <TabsContent value="overview">
-                            <OverViewTab item={stock} />
+                    {/* Content area with proper scrolling */}
+                    <div className="flex-1 overflow-y-auto">
+                        <TabsContent value="overview" className="mt-0 h-full">
+                            <div className="p-4 sm:p-6">
+                                <OverViewTab item={stock} />
+                            </div>
                         </TabsContent>
 
-                        <TabsContent value="chart" className="space-y-4 p-6">
-                            <ChartTab item={stock} />
+                        <TabsContent value="chart" className="mt-0 h-full">
+                            <div className="p-4 sm:p-6">
+                                <ChartTab item={stock} />
+                            </div>
                         </TabsContent>
 
-                        <TabsContent value="ai-analysis" className="space-y-4 p-6">
-                            <AiAnalysisTab item={stock} />
+                        <TabsContent value="ai-analysis" className="mt-0 h-full">
+                            <div className="p-4 sm:p-6">
+                                <AiAnalysisTab item={stock} />
+                            </div>
                         </TabsContent>
 
-                        <TabsContent value="news" className="space-y-4 p-6">
-                            <NewsAndActionsTab item={stock} />
+                        <TabsContent value="news" className="mt-0 h-full">
+                            <div className="p-4 sm:p-6">
+                                <NewsAndActionsTab item={stock} />
+                            </div>
                         </TabsContent>
 
-                        <TabsContent value="financials" className="space-y-4 p-6">
-                            <FinancialTab item={stock} />
+                        <TabsContent value="financials" className="mt-0 h-full">
+                            <div className="p-4 sm:p-6">
+                                <FinancialTab item={stock} />
+                            </div>
                         </TabsContent>
-
-                        {/* <TabsContent value="technicals" className="space-y-4 p-6">
-                            <TechnicalTab item={stock} />
-                        </TabsContent> */}
                     </div>
                 </Tabs>
             </DialogContent>
