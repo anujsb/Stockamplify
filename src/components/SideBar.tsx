@@ -139,7 +139,7 @@ export const Logo = () => {
     <Link
       href="/dashboard"
       className="font-normal flex space-x-2 items-center py-1 relative z-20"
-      aria-label="StockApp Dashboard home"
+      aria-label="StockAmplify Dashboard home"
     >
       <div
         className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center"
@@ -152,7 +152,7 @@ export const Logo = () => {
         animate={{ opacity: 1 }}
         className="font-semibold whitespace-pre text-lg text-blue-700"
       >
-        StockApp
+        StockAmplify
       </motion.span>
     </Link>
   );
@@ -162,7 +162,7 @@ export const LogoIcon = () => {
   return (
     <div
       className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center"
-      aria-label="StockApp logo"
+      aria-label="StockAmplify logo"
     >
       <IconChartBar className="text-white w-5 h-5" />
     </div>
