@@ -13,7 +13,7 @@ export interface AnalysisData {
   investmentHorizon: string;
   interval: string;
   period: string;
-  language?: string;
+  // language?: string;
 }
 
 // export interface TechnicalAnalysis {
@@ -124,7 +124,8 @@ function validateChartData(chart: YahooChartData | null): { isValid: boolean; er
  * @returns Formatted prompt string
  */
 export function buildAnalysisPrompt(data: AnalysisData): string {
-const { symbol, chart, investmentHorizon, interval, period, language = 'english' } = data;
+// const { symbol, chart, investmentHorizon, interval, period, language = 'english' } = data;
+const { symbol, chart, investmentHorizon, interval, period } = data;
   
   // Validate chart data first
   const validation = validateChartData(chart);
@@ -321,9 +322,6 @@ Analyze the stock ${symbol} using the provided historical price and volume data.
 - Data Interval: ${getIntervalDesc(interval)} candles (${interval})
 - Investment Horizon: ${investmentHorizon}
 - Data Format: Yahoo Finance OHLCV format
-
-**IMPORTANT LANGUAGE REQUIREMENT:**
-Provide your analysis response in ${language === 'hindi' ? 'Hindi' : language === 'marathi' ? 'Marathi' : 'English'} language. All text fields in the JSON response should be in ${language === 'hindi' ? 'Hindi' : language === 'marathi' ? 'Marathi' : 'English'}.
 
 **ANALYSIS APPROACH:**
 Your analysis and recommendations must dynamically adapt based on BOTH the investment horizon and the data interval (candle timeframe).
