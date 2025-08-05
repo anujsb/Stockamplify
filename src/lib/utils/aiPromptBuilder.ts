@@ -3,7 +3,7 @@
  * Constructs prompts for Gemini AI based on stock data and analysis requirements
  */
 
-import { YahooChartData } from '@/lib/services/yahooFinanceService';
+import { YahooChartData } from '@/lib/services/chartService';
 import { getHorizonConfig } from './investmentHorizons';
 
 export interface AnalysisData {
