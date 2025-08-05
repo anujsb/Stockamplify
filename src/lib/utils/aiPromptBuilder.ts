@@ -62,9 +62,9 @@ function validateChartData(chart: YahooChartData | null): { isValid: boolean; er
     return { isValid: false, error: 'Missing meta data' };
   }
 
-  if (chart.meta.regularMarketPrice === undefined || chart.meta.previousClose === undefined) {
-    return { isValid: false, error: 'Missing current price or previous close in meta data' };
-  }
+  // if (chart.meta.regularMarketPrice === undefined || chart.meta.previousClose === undefined) {
+  //   return { isValid: false, error: 'Missing current price or previous close in meta data' };
+  // }
 
   return { isValid: true };
 }
@@ -138,10 +138,10 @@ const { symbol, chart, investmentHorizon, interval, period, language = 'english'
   const highestHigh = Math.max(...chart!.indicators.quote[0].high);
   const lowestLow = Math.min(...chart!.indicators.quote[0].low);
   const priceRange = highestHigh - lowestLow;
-  const currentPrice = chart!.meta.regularMarketPrice;
-  const previousClose = chart!.meta.previousClose;
-  const currentFromHigh = ((highestHigh - currentPrice) / highestHigh) * 100;
-  const currentFromLow = ((currentPrice - lowestLow) / lowestLow) * 100;
+  // const currentPrice = chart!.meta.regularMarketPrice;
+  // const previousClose = chart!.meta.previousClose;
+  // const currentFromHigh = ((highestHigh - currentPrice) / highestHigh) * 100;
+  // const currentFromLow = ((currentPrice - lowestLow) / lowestLow) * 100;
   
   // Helper function to get human-readable interval description
   const getIntervalDescription = (interval: string): string => {
@@ -197,10 +197,10 @@ const { symbol, chart, investmentHorizon, interval, period, language = 'english'
     // Basic stock info
     stockInfo: {
       symbol,
-      currentPrice: currentPrice,
-      previousClose: previousClose,
-      priceChange: currentPrice - previousClose,
-      priceChangePercent: previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0,
+      // currentPrice: currentPrice,
+      // previousClose: previousClose,
+      // priceChange: currentPrice - previousClose,
+      // priceChangePercent: previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0,
       currency: 'INR' // Assuming Indian market based on .BO suffix
     },
     
@@ -216,8 +216,8 @@ const { symbol, chart, investmentHorizon, interval, period, language = 'english'
     marketData: {
       fiftyTwoWeekHigh: chart!.meta.fiftyTwoWeekHigh,
       fiftyTwoWeekLow: chart!.meta.fiftyTwoWeekLow,
-      exchangeName: chart!.meta.exchangeName,
-      timezone: chart!.meta.timezone
+      // exchangeName: chart!.meta.exchangeName,
+      // timezone: chart!.meta.timezone
     },
 
     // Price position analysis
@@ -225,8 +225,8 @@ const { symbol, chart, investmentHorizon, interval, period, language = 'english'
       highestInPeriod: highestHigh,
       lowestInPeriod: lowestLow,
       priceRangeInPeriod: priceRange,
-      currentDistanceFromHigh: `${currentFromHigh.toFixed(2)}%`,
-      currentDistanceFromLow: `${currentFromLow.toFixed(2)}%`,
+      // currentDistanceFromHigh: `${currentFromHigh.toFixed(2)}%`,
+      // currentDistanceFromLow: `${currentFromLow.toFixed(2)}%`,
       totalDataPoints: chart!.timestamp.length,
       explanation: 'Distance percentages show how far current price is from period highs/lows'
     },

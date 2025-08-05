@@ -18,38 +18,38 @@ export interface YahooChartData {
   meta: {
     symbol: string;
     regularMarketTime: number;
-    gmtoffset: number;
-    timezone: string;
-    exchangeName: string;
-    regularMarketPrice: number;
-    chartPreviousClose: number;
-    previousClose: number;
-    scale: number;
-    priceHint: number;
+    // gmtoffset: number;
+    // timezone: string;
+    // exchangeName: string;
+    // regularMarketPrice: number;
+    // chartPreviousClose: number;
+    // previousClose: number;
+    // scale: number;
+    // priceHint: number;
     fiftyTwoWeekHigh?: number;
     fiftyTwoWeekLow?: number;
-    currentTradingPeriod: {
-      pre: {
-        timezone: string;
-        start: number;
-        end: number;
-        gmtoffset: number;
-      };
-      regular: {
-        timezone: string;
-        start: number;
-        end: number;
-        gmtoffset: number;
-      };
-      post: {
-        timezone: string;
-        start: number;
-        end: number;
-        gmtoffset: number;
-      };
-    };
-    dataGranularity: string;
-    validRanges: string[];
+    // currentTradingPeriod: {
+    //   pre: {
+    //     timezone: string;
+    //     start: number;
+    //     end: number;
+    //     gmtoffset: number;
+    //   };
+    //   regular: {
+    //     timezone: string;
+    //     start: number;
+    //     end: number;
+    //     gmtoffset: number;
+    //   };
+    //   post: {
+    //     timezone: string;
+    //     start: number;
+    //     end: number;
+    //     gmtoffset: number;
+    //   };
+    // };
+    // dataGranularity: string;
+    // validRanges: string[];
   };
 }
 
@@ -108,38 +108,38 @@ export class ChartService {
         meta: {
           symbol: chart.meta.symbol || '',
           regularMarketTime: chart.meta.regularMarketTime?.getTime() || Date.now(),
-          gmtoffset: chart.meta.gmtoffset || 0,
-          timezone: chart.meta.timezone || '',
-          exchangeName: chart.meta.exchangeName || '',
-          regularMarketPrice: chart.meta.regularMarketPrice || 0,
-          chartPreviousClose: chart.meta.chartPreviousClose || 0,
-          previousClose: chart.meta.previousClose || 0,
-          scale: chart.meta.scale || 1,
-          priceHint: chart.meta.priceHint || 0,
+          // gmtoffset: chart.meta.gmtoffset || 0,
+          // timezone: chart.meta.timezone || '',
+          // exchangeName: chart.meta.exchangeName || '',
+          // regularMarketPrice: chart.meta.regularMarketPrice || 0,
+          // chartPreviousClose: chart.meta.chartPreviousClose || 0,
+          // previousClose: chart.meta.previousClose || 0,
+          // scale: chart.meta.scale || 1,
+          // priceHint: chart.meta.priceHint || 0,
           fiftyTwoWeekHigh: (chart.meta as any).fiftyTwoWeekHigh,
-          fiftyTwoWeekLow: (chart.meta as any).fiftyTwoWeekLow,
-          currentTradingPeriod: {
-            pre: { 
-              timezone: chart.meta.currentTradingPeriod?.pre?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.pre?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.pre?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.pre?.gmtoffset || 0 
-            },
-            regular: { 
-              timezone: chart.meta.currentTradingPeriod?.regular?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.regular?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.regular?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.regular?.gmtoffset || 0 
-            },
-            post: { 
-              timezone: chart.meta.currentTradingPeriod?.post?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.post?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.post?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.post?.gmtoffset || 0 
-            }
-          },
-          dataGranularity: chart.meta.dataGranularity || '',
-          validRanges: chart.meta.validRanges || []
+          fiftyTwoWeekLow: (chart.meta as any).fiftyTwoWeekLow
+          // currentTradingPeriod: {
+          //   pre: { 
+          //     timezone: chart.meta.currentTradingPeriod?.pre?.timezone || '', 
+          //     start: chart.meta.currentTradingPeriod?.pre?.start?.getTime() || 0, 
+          //     end: chart.meta.currentTradingPeriod?.pre?.end?.getTime() || 0, 
+          //     gmtoffset: chart.meta.currentTradingPeriod?.pre?.gmtoffset || 0 
+          //   },
+          //   regular: { 
+          //     timezone: chart.meta.currentTradingPeriod?.regular?.timezone || '', 
+          //     start: chart.meta.currentTradingPeriod?.regular?.start?.getTime() || 0, 
+          //     end: chart.meta.currentTradingPeriod?.regular?.end?.getTime() || 0, 
+          //     gmtoffset: chart.meta.currentTradingPeriod?.regular?.gmtoffset || 0 
+          //   },
+          //   post: { 
+          //     timezone: chart.meta.currentTradingPeriod?.post?.timezone || '', 
+          //     start: chart.meta.currentTradingPeriod?.post?.start?.getTime() || 0, 
+          //     end: chart.meta.currentTradingPeriod?.post?.end?.getTime() || 0, 
+          //     gmtoffset: chart.meta.currentTradingPeriod?.post?.gmtoffset || 0 
+          //   }
+          // },
+          // dataGranularity: chart.meta.dataGranularity || '',
+          // validRanges: chart.meta.validRanges || []
         }
       };
       return transformedChart;
