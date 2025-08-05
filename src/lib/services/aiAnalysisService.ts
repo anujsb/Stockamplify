@@ -4,7 +4,7 @@
  */
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
 
 export interface AIAnalysisRequest {
   symbol: string;
@@ -94,7 +94,7 @@ export async function callGeminiAI(prompt: string): Promise<AIAnalysisResponse> 
     console.error('AI Analysis Service error:', error);
     return {
       success: false,
-      error: 'Internal server error',
+      error: 'Internal server error 1',
       details: String(error)
     };
   }
@@ -123,12 +123,21 @@ export function transformAnalysisResponse(analysis: any): any {
   return {
     ...analysis,
     // Ensure arrays are properly formatted
-    supportLevels: Array.isArray(analysis.supportLevels) ? analysis.supportLevels : [],
-    resistanceLevels: Array.isArray(analysis.resistanceLevels) ? analysis.resistanceLevels : [],
-    suitableFor: Array.isArray(analysis.suitableFor) ? analysis.suitableFor : [],
+    supportLevels: getEdgeValuesOnly(analysis.supportLevels),
+    resistanceLevels: getEdgeValuesOnly(analysis.resistanceLevels),
+    suitableFor: analysis.suitableFor,
     // Ensure numbers are properly formatted
     confidenceScore: Number(analysis.confidenceScore) || 0,
     trendConfidenceScore: Number(analysis.trendConfidenceScore) || 0,
     volatilityScore: Number(analysis.volatilityScore) || 0
   };
 } 
+  
+/**
+ * Return only first and last element if array has more than 2 values
+ */
+function getEdgeValuesOnly<T>(arr: T[]): T[] {
+  if (!Array.isArray(arr)) return [];
+  if (arr.length <= 2) return arr;
+  return [arr[0], arr[arr.length - 1]];
+}

@@ -71,17 +71,17 @@ export async function POST(request: NextRequest) {
 
     console.log(`Analyzing ${symbol} with horizon: ${investmentHorizon}, interval: ${finalInterval}, period: ${finalPeriod}`);
 
-    // Fetch comprehensive stock data
-const chart = await ChartService.getChartData(symbol, finalPeriod, finalInterval);
+    // Fetch chart data
+    const chart = await ChartService.getChartData(symbol, finalPeriod, finalInterval);
 
-if (!chart) {
+    if (!chart) {
       return NextResponse.json({ 
         error: 'Failed to fetch chart data. Please check the symbol and try again.' 
       }, { status: 400 });
     }
 
     // Prepare data for AI analysis
-const analysisData = {
+    const analysisData = {
       symbol,
       chart,
       investmentHorizon,
@@ -95,6 +95,8 @@ const analysisData = {
 
     // Call Gemini AI using the service
     const aiResponse = await callGeminiAI(prompt);
+
+    console.log('AI response:', aiResponse);
     
     if (!aiResponse.success) {
       return NextResponse.json({ 
@@ -121,9 +123,9 @@ const analysisData = {
         interval: finalInterval,
         period: finalPeriod,
         generatedAt: new Date().toISOString(),
-dataPoints: {
-          hasChart: !!chart,
-          dataPoints: chart?.timestamp.length || 0
+        dataPoints: {
+                  hasChart: !!chart,
+                  dataPoints: chart?.quotes?.length  || 0
         }
       }
     });
