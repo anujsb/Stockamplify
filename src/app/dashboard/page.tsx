@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Metadata } from 'next';
+
+// Note: Since this is a client component, metadata should be handled in layout.tsx or a parent component
+// For now, we'll add it via document head manipulation or move to server component
 import { 
   TrendingUp, 
   TrendingDown, 

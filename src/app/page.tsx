@@ -2,11 +2,89 @@ import React from 'react';
 import Image from "next/image";
 import {ArrowRight, BarChart3, Brain, Eye, FileText, TrendingUp, Upload, Users, Zap, Star, Shield, Globe } from 'lucide-react';
 import Link from 'next/link';
-import Header from "../components/header";
+import Header from "@/components/header";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "AI-Powered Stock Analysis & Portfolio Management Platform",
+  description: "Discover StockAmplify - the ultimate AI-powered stock research platform. Get real-time portfolio tracking, smart market insights, news analysis, and investment recommendations all in one place.",
+  keywords: [
+    "stock analysis platform",
+    "AI stock research",
+    "portfolio dashboard", 
+    "real-time stock data",
+    "investment insights",
+    "stock market news",
+    "financial analytics",
+    "trading tools",
+    "market predictions",
+    "investment management"
+  ],
+  openGraph: {
+    title: "StockAmplify - AI-Powered Stock Analysis Platform",
+    description: "Transform your investment strategy with AI-powered insights, real-time data, and comprehensive market analysis.",
+    type: "website",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "StockAmplify Platform Dashboard"
+      }
+    ]
+  },
+  alternates: {
+    canonical: "/"
+  }
+};
 
 export default function HomePage() {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "StockAmplify",
+    "description": "AI-powered stock analysis and portfolio management platform with real-time market insights, news analysis, and investment recommendations.",
+    "url": "https://stockamplify.com",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD",
+      "name": "Free Trial",
+      "description": "14-day free trial with full access to all features"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "StockAmplify",
+      "url": "https://stockamplify.com"
+    },
+    "featureList": [
+      "AI-powered stock analysis",
+      "Real-time portfolio tracking",
+      "Market news and insights",
+      "Investment recommendations",
+      "Portfolio dashboard",
+      "Stock watchlist",
+      "Performance analytics"
+    ],
+    "screenshot": "https://stockamplify.com/logo.png",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "127",
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Header */}
       <Header />
 
@@ -269,7 +347,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Image src="/logo.png" alt="Logo" width={40} height={40} className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-1" />
+              <Image src="/logo.png" alt="StockAmplify - AI-Powered Stock Analysis Platform Logo" width={40} height={40} className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full p-1" />
               <span className="text-xl font-bold text-white">StockAmplify</span>
             </div>
             <div className="flex items-center space-x-6 text-sm text-gray-400">

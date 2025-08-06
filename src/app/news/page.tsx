@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Head from 'next/head';
 import { useNews } from '@/lib/hooks/useNews';
 import { NewsGrid } from '@/components/news/NewsGrid';
 import { NewsFilters } from '@/components/news/NewsFilters';
