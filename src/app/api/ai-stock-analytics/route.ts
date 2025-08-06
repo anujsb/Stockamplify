@@ -124,8 +124,8 @@ export async function POST(request: NextRequest) {
         period: finalPeriod,
         generatedAt: new Date().toISOString(),
         dataPoints: {
-                  hasChart: !!chart,
-                  dataPoints: chart?.quotes?.length  || 0
+          hasChart: !!chart,
+          dataPoints: chart?.quotes?.length || 0
         }
       }
     });

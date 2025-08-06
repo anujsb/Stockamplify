@@ -5,17 +5,16 @@ import yahooFinance from 'yahoo-finance2';
 yahooFinance.suppressNotices(['yahooSurvey']);
 
 export interface YahooChartData {
-  quotes: {
-    quote: Array<{
-      date: number[];
-      open: number[];
-      high: number[];
-      low: number[];
-      close: number[];
-      volume: number[];
-    }>;
-  };
-  meta: any; // Keep this raw;
+  quotes: Array<{
+    date: string | number;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+    adjclose?: number;
+  }>;
+  meta: any; // Keep this raw
 }
 
 export type TimeInterval = '1m' | '2m' | '5m' | '15m' | '30m' | '60m' | '90m' | '1h' | '1d' | '5d' | '1wk' | '1mo' | '3mo';
@@ -61,9 +60,13 @@ export class ChartService {
       } as any);
 
       // Debug log
-    console.log(`Chart data for ${symbol} (${range}/${interval}):`, JSON.stringify(chart, null, 2));
+      console.log(`Chart data for ${symbol} (${range}/${interval}):`, JSON.stringify(chart, null, 2));
 
-      return chart as YahooChartData;
+      const chartData = chart as any;
+      if (!chartData.quotes) {
+        throw new Error('Invalid chart data: missing quotes');
+      }
+      return chartData as YahooChartData;
     } catch (error) {
       console.error(`Error fetching chart data for ${symbol}:`, error);
       return null;
