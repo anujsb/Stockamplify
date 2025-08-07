@@ -110,11 +110,10 @@ const StockAnalytics = () => {
       <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="text-center space-y-2">
+          <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {getTranslation(language, 'pageTitle')}
             </h1>
-            {/* <p className="text-gray-600 text-lg">{getTranslation(language, 'pageSubtitle')}</p> */}
           </div>
 
           {/* Input Section */}
@@ -224,28 +223,28 @@ const StockAnalytics = () => {
                     </CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-2">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className={`text-center p-4 rounded-lg ${getRecommendationColor(analysisData.recommendation)}`}>
+                    <div className={`text-center p-2 rounded-lg ${getRecommendationColor(analysisData.recommendation)}`}>
                       <div className={`text-2xl font-bold text-blue-600 ${getRecommendationColor(analysisData.recommendation)}`}>
                         {analysisData.recommendation}
                       </div>
                       <div className="text-sm text-gray-600">{getTranslation(language, 'recommendation')}</div>
                     </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-center p-2 bg-blue-50 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">{analysisData.confidence}%</div>
                       <div className="text-sm text-gray-600">{getTranslation(language, 'confidence')}</div>
                     </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-center p-2 bg-purple-50 rounded-lg">
                       <div className="text-lg font-semibold text-purple-600">{analysisData.holdingPeriod}</div>
                       <div className="text-sm text-gray-600">{getTranslation(language, 'holdingPeriod')}</div>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-center p-2 bg-green-50 rounded-lg">
                       <div className="text-lg font-semibold text-green-600">{analysisData.weekRange.currentPrice}</div>
                       <div className="text-sm text-gray-600">{getTranslation(language, 'currentPrice')}</div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-gray-50 p-2 rounded-lg">
                     <h4 className="font-medium text-gray-900 mb-2">{getTranslation(language, 'reasoning')}:</h4>
                     <p className="text-sm text-gray-700 leading-relaxed">{analysisData.reasoning}</p>
                   </div>
@@ -265,7 +264,7 @@ const StockAnalytics = () => {
                     {Object.entries(analysisData.priceTargets).map(([key, value]) => {
                       let bgColor = 'bg-gray-50';
                       let textColor = 'text-gray-600';
-                      
+
                       // Color coding based on price target type
                       if (key.toLowerCase().includes('entry')) {
                         bgColor = 'bg-blue-50';
