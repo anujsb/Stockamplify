@@ -1,6 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import React, { useState } from 'react'
 import StockDetailModal from './StockDetailModal';
+import PriceChangeIndicator from './PriceChangeIndicator';
 import { formatPercentage, formatPrice, formatLargeNumber, formatSymbol, getPriceChangeColor } from '@/lib/utils/stockUtils';
 
 type SortField = 'symbol' | 'quantity' | 'buyPrice' | 'currentPrice' | 'currentValue' | 'gainLoss';
@@ -218,9 +219,12 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                                         <div className="text-md text-gray-900">{formatPrice(item.buyPrice)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                                        <div className="text-md text-gray-900">
-                                            {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${formatPrice(item.realTimePrice.price)}` : <span className="text-gray-400">N/A</span>}
-                                        </div>
+                                        <PriceChangeIndicator
+                                            currentPrice={item.realTimePrice?.price ? Number(item.realTimePrice.price) : null}
+                                            previousPrice={item.intradayPrice?.previousClose ? Number(item.intradayPrice.previousClose) : null}
+                                            updatedAt={item.realTimePrice?.updatedAt}
+                                            className="justify-end"
+                                        />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                                         <div className="text-md text-gray-900">
@@ -298,9 +302,11 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolio, onRefresh, i
                             </div>
                             <div>
                                 <div className="text-gray-500 text-xs uppercase tracking-wide">Current Price</div>
-                                <div className="font-medium text-gray-900">
-                                    {item.realTimePrice?.price !== undefined && item.realTimePrice?.price !== null ? `${Number(item.realTimePrice.price).toFixed(2)}` : <span className="text-gray-400">N/A</span>}
-                                </div>
+                                <PriceChangeIndicator
+                                    currentPrice={item.realTimePrice?.price ? Number(item.realTimePrice.price) : null}
+                                    previousPrice={item.intradayPrice?.previousClose ? Number(item.intradayPrice.previousClose) : null}
+                                    updatedAt={item.realTimePrice?.updatedAt}
+                                />
                             </div>
                             <div>
                                 <div className="text-gray-500 text-xs uppercase tracking-wide">Current Value</div>

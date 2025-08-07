@@ -13,13 +13,24 @@ interface PortfolioResponse {
   error?: string;
 }
 
-// Helper to convert BigInt to string recursively
+// Helper to convert BigInt and Date to string recursively
 function convertBigIntToString(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(convertBigIntToString);
   } else if (obj && typeof obj === 'object') {
+    if (obj instanceof Date) {
+      return obj.toISOString();
+    }
     return Object.fromEntries(
-      Object.entries(obj).map(([k, v]) => [k, typeof v === 'bigint' ? v.toString() : convertBigIntToString(v)])
+      Object.entries(obj).map(([k, v]) => {
+        if (typeof v === 'bigint') {
+          return [k, v.toString()];
+        } else if (v instanceof Date) {
+          return [k, v.toISOString()];
+        } else {
+          return [k, convertBigIntToString(v)];
+        }
+      })
     );
   }
   return obj;

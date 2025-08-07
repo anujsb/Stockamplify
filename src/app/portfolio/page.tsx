@@ -7,37 +7,48 @@ import { useUser } from '@clerk/nextjs';
 import PortfolioTable from '@/components/portfolio/PortfolioTable'
 import AddStockModal from '@/components/portfolio/AddStockModal';
 import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
+import RealTimeStatus from '@/components/portfolio/RealTimeStatus';
+import { useRealTimePortfolio } from '@/lib/hooks/useRealTimePortfolio';
 import { cn } from '@/lib/utils'
 
 const PortfolioPage = () => {
   const { user } = useUser();
   const [showAddModal, setShowAddModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [portfolio, setPortfolio] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const handleAddClick = () => setShowAddModal(true);
   const handleCloseModal = () => setShowAddModal(false);
   const handleSuccess = () => setRefreshKey(k => k + 1);
 
-  // Fetch portfolio data
+  // Initial portfolio fetch (only on mount and after adding stocks)
   useEffect(() => {
-    const fetchPortfolio = async () => {
-      setIsLoading(true);
+    const fetchInitialPortfolio = async () => {
+      setInitialLoading(true);
       try {
         const res = await fetch('/api/portfolio');
         const data = await res.json();
         if (data.success) {
-          setPortfolio(data.data);
+          setInitialPortfolio(data.data);
         }
       } catch (err) {
-        console.error('Failed to fetch portfolio:', err);
+        console.error('Failed to fetch initial portfolio:', err);
       } finally {
-        setIsLoading(false);
+        setInitialLoading(false);
       }
     };
-    fetchPortfolio();
+    fetchInitialPortfolio();
   }, [refreshKey]);
+
+  // Use real-time portfolio hook
+  const {
+    portfolio,
+    status,
+    isLoading,
+    error,
+    refreshPortfolio
+  } = useRealTimePortfolio(initialPortfolio);
 
   return (
     <div className={cn(
@@ -65,11 +76,17 @@ const PortfolioPage = () => {
         
         {/* Body */}
         <main className="max-w-7xl mx-auto px-0 sm:px-2 lg:px-6 py-2 sm:py-6">
+          <RealTimeStatus 
+            status={status}
+            isLoading={isLoading}
+            error={error}
+            onRefresh={refreshPortfolio}
+          />
           <PortfolioSummary portfolio={portfolio} />
           <PortfolioTable
             portfolio={portfolio}
-            onRefresh={() => setRefreshKey(k => k + 1)}
-            isLoading={isLoading}
+            onRefresh={refreshPortfolio}
+            isLoading={isLoading && initialLoading}
           />
         </main>
       </div>
