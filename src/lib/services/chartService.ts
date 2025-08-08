@@ -60,7 +60,7 @@ export class ChartService {
       } as any);
 
       // Debug log
-      console.log(`Chart data for ${symbol} (${range}/${interval}):`, JSON.stringify(chart, null, 2));
+      //console.log(`Chart data for ${symbol} (${range}/${interval}):`, JSON.stringify(chart, null, 2));
 
       const chartData = chart as any;
       if (!chartData.quotes) {

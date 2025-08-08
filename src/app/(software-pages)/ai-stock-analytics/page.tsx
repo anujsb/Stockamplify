@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,15 +11,9 @@ import { SideBar } from '@/components/SideBar';
 import StockSearch, { StockSearchResult } from '@/components/StockSearch';
 import { cn } from '@/lib/utils';
 import { getHorizonOptions } from '@/lib/utils/investmentHorizons';
-import {
-  transformAIResponseToFrontend,
-  validateIndianStockSymbol,
-  formatStockSymbol,
-  getRecommendationColor,
-  getTrendIcon,
-  type AnalysisData
-} from '@/lib/utils/dataTransformers';
+import { transformAIResponseToFrontend, validateIndianStockSymbol, formatStockSymbol, getRecommendationColor, getTrendIcon,  type AnalysisData } from '@/lib/utils/dataTransformers';
 import { languageOptions, getTranslation, translateAnalysisData, type Language } from '@/lib/utils/languageUtils';
+import { formatDate, formatPrice, formatLargeNumber, formatSymbol, formatPercentage } from "@/lib/utils/stockUtils";
 
 const StockAnalytics = () => {
   const [stockSymbol, setStockSymbol] = useState('');
@@ -33,6 +27,28 @@ const StockAnalytics = () => {
 
   const investmentOptions = getHorizonOptions();
 
+  const waitMessages = [
+      "Scanning market signals...",
+      "Analyzing trends and patterns...",
+      "Weighing the odds...",
+      "Extracting key insights...",
+      "Cross-checking with historical data...",
+      "Optimizing your strategy...",
+      "Almost ready with your analysis..."
+  ];
+
+  const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isAnalyzing) return;
+
+    const interval = setInterval(() => {
+      setMessageIndex((i) => (i + 1) % waitMessages.length);
+    }, 4500); // change every 4.5 seconds
+
+    return () => clearInterval(interval);
+  }, [isAnalyzing]);
+
   const handleStockSelect = (stock: StockSearchResult) => {
     setSelectedStock(stock);
     setStockSymbol(stock.symbol);
@@ -44,7 +60,6 @@ const StockAnalytics = () => {
       return;
     }
 
-    // Validate Indian stock symbol format
     if (!validateIndianStockSymbol(stockSymbol)) {
       setError(getTranslation(language, 'selectValidStock'));
       return;
@@ -103,8 +118,8 @@ const StockAnalytics = () => {
 
   return (
     <div className={cn(
-      " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
-      "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+      " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ", 
+      "min-h-screen",
     )}>
       <SideBar />
       <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
@@ -219,7 +234,7 @@ const StockAnalytics = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">
-                      {getTranslation(language, 'aiAnalysisFor')} {stockSymbol}
+                      {getTranslation(language, 'aiAnalysisFor')} {formatSymbol(stockSymbol)}
                     </CardTitle>
                   </div>
                 </CardHeader>
@@ -472,11 +487,8 @@ const StockAnalytics = () => {
           )}
 
           {isAnalyzing && (
-            <div className="flex items-center gap-2">
-              {/* <Activity className="w-4 h-4 animate-spin text-gray-500" /> */}
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-              {/* <span className="text-sm text-gray-500">Ai Analysis can take 30 to 40 seconds...</span> */}
-              <span className="text-sm text-gray-500">Hang tight! AI is working its magic (about 30–40 seconds)...</span>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-sm text-gray-700 animate-pulse">{waitMessages[messageIndex]}</span>
             </div>
           )}
 

@@ -10,22 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate, formatPrice, formatLargeNumber, formatSymbol, formatPercentage } from "@/lib/utils/stockUtils";
 import { SideBar } from "@/components/SideBar";
 import { cn } from "@/lib/utils";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  BarChart3, 
-  Calendar, 
-  Users, 
-  Building, 
-  AlertCircle,
-  Plus,
-  RefreshCw,
-  Target,
-  PieChart,
-  Activity,
-  Calculator
-} from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, BarChart3, Calendar, Users, Building, AlertCircle, Plus, RefreshCw,
+  Target, PieChart, Activity, Calculator} from "lucide-react";
 
 const formatDateTime = (date: string | Date | null | undefined) => {
   if (!date) return 'N/A';

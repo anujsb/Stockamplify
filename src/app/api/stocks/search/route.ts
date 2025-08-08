@@ -131,12 +131,12 @@ const bankResults = await SearchService.searchStocks(searchTerm + 'BANK');
       }));
       return NextResponse.json(formattedYahooResults);
     } catch (yahooError) {
-      console.error('Yahoo Finance search failed:', yahooError);
+      //console.error('Yahoo Finance search failed:', yahooError);
       // Return empty array if both database and Yahoo searches fail
       return NextResponse.json([]);
     }
   } catch (error) {
-    console.error('Error during stock search:', error);
+    //console.error('Error during stock search:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

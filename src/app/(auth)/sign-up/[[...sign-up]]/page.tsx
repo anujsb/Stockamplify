@@ -28,7 +28,7 @@ export default function SignUpPage() {
                     formButtonReset: 'text-blue-400 hover:text-blue-300'
                   }
                 }}
-                redirectUrl="/portfolio"
+                redirectUrl="/dashboard"
                 signInUrl="/sign-in"
               />
 

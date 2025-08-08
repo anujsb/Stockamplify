@@ -148,7 +148,7 @@ export function buildAnalysisPrompt(data: AnalysisData): string {
 
   Here is the yfinance data for analysis:
   ${jsonData}`;
-    console.log(prompt);
+    //console.log(prompt);
     return prompt;
 } 
 

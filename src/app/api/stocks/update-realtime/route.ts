@@ -57,11 +57,6 @@ async function processStockBatch(stockBatch: any[], batchSize: number = 5) {
 
 export async function POST() {
   try {
-    // Optional: Check if user is authenticated (comment out if you want public access)
-    // const { userId } = await auth();
-    // if (!userId) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
 
     console.log('Starting real-time stock price update...');
     

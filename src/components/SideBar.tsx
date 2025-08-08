@@ -10,7 +10,8 @@ import {
   IconPlus,
   IconSearch,
   IconSettings,
-  IconBell
+  IconBell,
+  IconHome
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -141,10 +142,14 @@ export const Logo = () => {
       aria-label="StockAmplify Dashboard home"
     >
       <div
-        className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center"
+        className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
         aria-hidden="true"
       >
-        <IconChartBar className="text-white w-5 h-5" />
+         <img 
+          src="/logo.png" 
+          alt="StockAmplify Logo" 
+          className="w-5 h-5 object-contain"
+        />
       </div>
       <motion.span
         initial={{ opacity: 0 }}
@@ -160,10 +165,14 @@ export const Logo = () => {
 export const LogoIcon = () => {
   return (
     <div
-      className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center"
+      className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
       aria-label="StockAmplify logo"
     >
-      <IconChartBar className="text-white w-5 h-5" />
+               <img 
+          src="/logo.png" 
+          alt="StockAmplify Logo" 
+          className="w-5 h-5 object-contain"
+        />
     </div>
   );
 };

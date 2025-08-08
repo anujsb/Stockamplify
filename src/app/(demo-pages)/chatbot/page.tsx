@@ -8,35 +8,9 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Send, 
-  Bot, 
-  User, 
-  Settings, 
-  TrendingUp, 
-  TrendingDown, 
-  Activity, 
-  Target, 
-  AlertTriangle, 
-  BarChart3, 
-  Calendar, 
-  DollarSign,
-  Zap,
-  Brain,
-  LineChart,
-  PieChart,
-  Bell,
-  Filter,
-  Download,
-  RefreshCw,
-  Maximize2,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  ThumbsUp,
-  ThumbsDown,
-  Bookmark
-} from 'lucide-react';
+import { Send, Bot, User, Settings, TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, 
+  Calendar, DollarSign, Zap, Brain, LineChart, PieChart, Bell, Filter, Download, RefreshCw, Maximize2,
+  ChevronDown, ChevronUp, Copy, ThumbsUp, ThumbsDown, Bookmark} from 'lucide-react';
 
 const StockMarketChatbot = () => {
   const [messages, setMessages] = useState([

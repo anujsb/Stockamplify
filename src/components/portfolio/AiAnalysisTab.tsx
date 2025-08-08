@@ -5,7 +5,7 @@ import { BarChart2, ArrowUp, Activity, Shield, RefreshCw, Info, CheckCircle, Ale
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-// import { Separator } from '@/components/ui/separator';
+
 import { Progress } from '@/components/ui/progress';
 
 interface AIAnalysisProps {
@@ -150,7 +150,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
         return res.json();
       })
       .then((data) => {
-        console.log('Received analysis:', data); // Debug log
         setAnalysis(parseAIResponse(data.analysis));
         setTimestamp(data.generatedAt || null);
         setLoading(false);
@@ -166,7 +165,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
 
   useEffect(() => {
     fetchAnalysis();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, regenKey]);
 
   const sentiment = analysis?.sentiment || 'N/A';
@@ -343,7 +341,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           </div>
 
           {/* Row 2: Trade Plan */}
-          {/* Row 2: Trade Plan */}
           {(priceRange || targetPrice || stoploss || timeFrame) && (
             <Card className="shadow-md border border-indigo-200">
               <CardHeader className="pb-3 flex flex-row items-center gap-2">
@@ -498,7 +495,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
           )}
 
           {/* Row 8: Disclaimer */}
-          {/* {disclaimer && ( */}
           <Card className="shadow-none border border-gray-200 bg-gray-50 mt-4">
             <CardContent>
               <div className="flex flex-col items-start gap-2 text-xs text-gray-500 italic">
@@ -506,7 +502,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
                   <InfoIcon className="w-4 h-4" />
                   <span className="font-medium">Disclaimer:</span>
                 </div>
-                {/* {disclaimer} */}
                 <div className='flex flex-col space-y-1'>
                   <ul className="list-disc pl-5">
                     <li>This AI-generated analysis is based solely on the provided data and does not include fundamental analysis, broader market conditions, news, or other technical indicators.</li>
@@ -518,23 +513,6 @@ export default function AIAnalysis({ item }: AIAnalysisProps) {
               </div>
             </CardContent>
           </Card>
-          {/* )} */}
-
-          {/* Extra fields if present */}
-          {/* {extraFields.length > 0 && (
-            <Card className="shadow-md border border-gray-100">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-semibold text-gray-700">Other AI Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="text-sm text-gray-700 space-y-1">
-                  {extraFields.map(([k, v]) => (
-                    <li key={k}><span className="font-medium">{k}:</span> {String(v)}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )} */}
         </>
       )}
     </div>

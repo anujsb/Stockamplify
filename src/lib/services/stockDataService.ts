@@ -1,14 +1,7 @@
 // src/lib/services/stockDataService.ts
 import { db } from '@/lib/db';
-import { 
-  stocks, 
-  stockRealTimePrice, 
-  stockIntraDayPrice, 
-  stockFundamentalData, 
-  stockFinancialData, 
-  stockStatistics, 
-  analystRating 
-} from '../db/schema';
+import { stocks, stockRealTimePrice, stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, 
+  analystRating } from '../db/schema';
 import { QuoteService, YahooQuoteData } from './quoteService';
 import { ModulesService, YahooModulesData } from './modulesService';
 import { eq, and } from 'drizzle-orm';

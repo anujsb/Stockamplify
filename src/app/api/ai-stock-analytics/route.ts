@@ -69,8 +69,6 @@ export async function POST(request: NextRequest) {
     const finalInterval = interval || horizonConfig.interval;
     const finalPeriod = period || horizonConfig.period;
 
-    console.log(`Analyzing ${symbol} with horizon: ${investmentHorizon}, interval: ${finalInterval}, period: ${finalPeriod}`);
-
     // Fetch chart data
     const chart = await ChartService.getChartData(symbol, finalPeriod, finalInterval);
 
@@ -95,8 +93,6 @@ export async function POST(request: NextRequest) {
 
     // Call Gemini AI using the service
     const aiResponse = await callGeminiAI(prompt);
-
-    console.log('AI response:', aiResponse);
     
     if (!aiResponse.success) {
       return NextResponse.json({ 

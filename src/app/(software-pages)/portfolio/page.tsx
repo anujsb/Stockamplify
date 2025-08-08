@@ -53,7 +53,7 @@ const PortfolioPage = () => {
   return (
     <div className={cn(
         " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
-        "min-h-screen", // for your use case, use `h-screen` instead of `h-[60vh]`
+        "min-h-screen",
       )}>
       <SideBar />
       <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">

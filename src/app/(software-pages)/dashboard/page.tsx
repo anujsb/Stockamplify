@@ -201,9 +201,6 @@ const Dashboard = () => {
                     <Zap className="w-3 h-3 inline mr-1" />
                     Active
                   </div>
-                  {/* <Button variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
-                    Learn More
-                  </Button> */}
                 </div>
               </div>
             </CardContent>
@@ -232,7 +229,7 @@ const Dashboard = () => {
                   <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
                     <TrendingUp className="h-6 w-6 text-purple-600" />
                   </div>
-                  <h3 className="font-semibold text-slate-800">Ai Stock Analytics</h3>
+                  <h3 className="font-semibold text-slate-800">AI Stock Analytics</h3>
                   <p className="text-sm text-slate-600 mt-1">Research & analyze stocks</p>
                 </CardContent>
               </Card>
@@ -267,7 +264,6 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content Grid */}
-        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> */}
         <div>
           {/* Portfolio Allocation */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -317,44 +313,6 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-
-          {/* Top Performers */}
-          {/* <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-semibold text-slate-800 mb-6">Top Performers</h2>
-
-            {portfolio.length > 0 ? (
-              <div className="space-y-4">
-                {topPerformers.slice(0, 5).map((stock, index) => (
-                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="font-medium text-gray-900">{stock.symbol}</div>
-                      <div className="text-sm text-gray-500 truncate">{stock.name}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium text-gray-900">{formatPrice(stock.currentPrice)}</div>
-                      <div className={`text-sm font-medium flex items-center gap-1 ${stock.gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                        {stock.gainLossPercentage >= 0 ? (
-                          <TrendingUp className="w-3 h-3" />
-                        ) : (
-                          <TrendingUp className="w-3 h-3 rotate-180" />
-                        )}
-                        {formatPercentage(stock.gainLossPercentage)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg mb-2">No performance data</p>
-                  <p className="text-sm">Add stocks to see top performers</p>
-                </div>
-              </div>
-            )}
-          </div> */}
         </div>
 
         {/* Empty State */}

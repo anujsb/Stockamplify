@@ -12,7 +12,7 @@ export default function SignInPage() {
               <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
               <p className="text-gray-300">Sign in to access your stock dashboard</p>
             </div>
-            {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 border border-white/20"> */}
+
             <SignIn
               appearance={{
                 elements: {
@@ -28,7 +28,7 @@ export default function SignInPage() {
                   formButtonReset: 'text-blue-400 hover:text-blue-300'
                 }
               }}
-              redirectUrl="/portfolio"
+              redirectUrl="/dashboard"
               signUpUrl="/sign-up"
             />
             {/* Terms & Conditions Text */}
@@ -38,7 +38,7 @@ export default function SignInPage() {
                 Terms and Conditions
               </a>.
             </p>
-            {/* </div> */}
+
           </div>
         </section>
       </div>

@@ -4,17 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import { useUpdateManager } from '@/lib/hooks/useUpdateManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Activity, 
-  Clock, 
-  RefreshCw, 
-  TrendingUp, 
-  AlertCircle, 
-  CheckCircle,
-  BarChart3,
-  Users,
-  Zap
-} from 'lucide-react';
+import { Activity, Clock, RefreshCw, TrendingUp, AlertCircle, CheckCircle, BarChart3, Users, Zap} from 'lucide-react';
 import Link from 'next/link';
 import { SideBar } from '@/components/SideBar';
 

@@ -204,11 +204,6 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
               {status.portfolioLastUpdated ? (
                 <>
                   {formatTime(status.portfolioLastUpdated)}
-                  {/* {getTimeAgo(status.portfolioLastUpdated) && (
-                    <span className="text-gray-400 ml-1">
-                      ({getTimeAgo(status.portfolioLastUpdated)})
-                    </span>
-                  )} */}
                 </>
               ) : (
                 <span className="text-yellow-600">No recent updates</span>

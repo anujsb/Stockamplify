@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const portfolioData = await request.json();
-    console.log('Received portfolio data:', JSON.stringify(portfolioData, null, 2)); // Debug log
+    //console.log('Received portfolio data:', JSON.stringify(portfolioData, null, 2)); // Debug log
     
     // IMPROVED: More defensive data extraction with fallbacks
     const stock = portfolioData.stock || {};

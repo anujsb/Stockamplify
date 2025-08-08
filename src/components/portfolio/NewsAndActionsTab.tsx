@@ -146,18 +146,18 @@ export default function NewsAndActions({ item }: NewsAndActionsProps) {
     const keywords = `${companyName} OR ${item.stock.symbol} OR ${baseKeywords}`;
     const newsQuery = `${keywords} earnings OR dividend OR split OR bonus OR results OR profit OR loss OR revenue OR quarter OR financial OR AGM OR board meeting OR management OR CEO OR chairman OR acquisition OR merger OR expansion OR new product OR launch`;
 
-    console.log(`🔍 Fetching news for: ${companyName} (${item.stock.symbol})`);
-    console.log(`📝 Query: ${newsQuery}`);
+    //console.log(`🔍 Fetching news for: ${companyName} (${item.stock.symbol})`);
+   //console.log(`📝 Query: ${newsQuery}`);
 
     fetch(`/api/news?q=${encodeURIComponent(newsQuery)}`)
       .then(res => res.json())
       .then(data => {
-        console.log(`📰 Raw news results for ${companyName}:`, data.articles?.length || 0, 'articles');
-        console.log(`📋 Sample titles:`, data.articles?.slice(0, 3).map((a: any) => a.title));
+        //console.log(`📰 Raw news results for ${companyName}:`, data.articles?.length || 0, 'articles');
+        //console.log(`📋 Sample titles:`, data.articles?.slice(0, 3).map((a: any) => a.title));
 
         const relevantNews = filterRelevantNews(data.articles || [], companyName, item.stock.symbol);
-        console.log(`✅ Filtered relevant news for ${companyName}:`, relevantNews.length, 'articles');
-        console.log(`📊 Relevance scores:`, relevantNews.map(n => ({ title: n.title, score: n.relevanceScore })));
+        //console.log(`✅ Filtered relevant news for ${companyName}:`, relevantNews.length, 'articles');
+        //console.log(`📊 Relevance scores:`, relevantNews.map(n => ({ title: n.title, score: n.relevanceScore })));
 
         setStockNews(relevantNews);
         setLoading(false);
