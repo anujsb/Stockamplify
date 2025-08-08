@@ -226,6 +226,18 @@ const Dashboard = () => {
               </Card>
             </Link>
 
+            <Link href="/ai-stock-analytics">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
+                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-slate-800">Ai Stock Analytics</h3>
+                  <p className="text-sm text-slate-600 mt-1">Research & analyze stocks</p>
+                </CardContent>
+              </Card>
+            </Link>
+
             <Link href="/news">
               <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
                 <CardContent className="p-6 text-center">
@@ -238,17 +250,7 @@ const Dashboard = () => {
               </Card>
             </Link>
 
-            <Link href="/stock-analysis">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">Stock Analysis</h3>
-                  <p className="text-sm text-slate-600 mt-1">Research & analyze stocks</p>
-                </CardContent>
-              </Card>
-            </Link>
+
 
             <Link href="/search">
               <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign, GanttChartIcon as ChartNoAxesGantt } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Target, AlertTriangle, BarChart3, Calendar, DollarSign, GanttChartIcon as ChartNoAxesGantt, InfoIcon } from 'lucide-react';
 import { SideBar } from '@/components/SideBar';
 import StockSearch, { StockSearchResult } from '@/components/StockSearch';
 import { cn } from '@/lib/utils';
@@ -470,6 +470,35 @@ const StockAnalytics = () => {
               </div>
             </div>
           )}
+
+          {isAnalyzing && (
+            <div className="flex items-center gap-2">
+              {/* <Activity className="w-4 h-4 animate-spin text-gray-500" /> */}
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
+              {/* <span className="text-sm text-gray-500">Ai Analysis can take 30 to 40 seconds...</span> */}
+              <span className="text-sm text-gray-500">Hang tight! AI is working its magic (about 30–40 seconds)...</span>
+            </div>
+          )}
+
+          <Card className="shadow-none border border-gray-200 bg-gray-50 mt-4">
+            <CardContent>
+              <div className="flex flex-col items-start gap-2 text-xs text-gray-500 italic">
+                <div className='flex items-center gap-1'>
+                  <InfoIcon className="w-4 h-4" />
+                  <span className="font-medium">Disclaimer:</span>
+                </div>
+                {/* {disclaimer} */}
+                <div className='flex flex-col space-y-1'>
+                  <ul className="list-disc pl-5">
+                    <li>This AI-generated analysis is based solely on the provided data and does not include fundamental analysis, broader market conditions, news, or other technical indicators.</li>
+                    <li>Stock trading involves significant risk, and past performance is not indicative of future results.</li>
+                    <li>All information is for educational purposes only. We strongly recommend conducting your own research and consulting a qualified financial advisor before making any investment decisions.</li>
+                    <li>The platform does not guarantee the accuracy, completeness, or reliability of any data or analysis.</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
