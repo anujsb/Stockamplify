@@ -22,12 +22,11 @@ import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
 
 export function SideBar() {
   const links = [
-    // {
-    //   label: "Dashboard",
-    //   href: "/dashboard",
-    //   icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    // },
-    
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+    },
     {
       label: "Portfolio",
       href: "/portfolio",
