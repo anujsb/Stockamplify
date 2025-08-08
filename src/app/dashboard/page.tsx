@@ -8,15 +8,14 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
 import { useRealTimePortfolio } from '@/lib/hooks/useRealTimePortfolio';
-import { Plus, RefreshCw, TrendingUp, TrendingDown, Activity, PieChart as PieChartIcon, BarChart3, ArrowRight } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { Plus, RefreshCw, TrendingUp, Activity, PieChart as PieChartIcon, ArrowRight, Crown, Newspaper, BarChart3, Search, Zap } from 'lucide-react';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Link from 'next/link';
 
 const Dashboard = () => {
   const { user } = useUser();
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [selectedTimeframe, setSelectedTimeframe] = useState('1M');
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Initial portfolio fetch
@@ -81,35 +80,6 @@ const Dashboard = () => {
     };
   };
 
-  // Generate mock chart data based on timeframe
-  const generateChartData = (timeframe: string) => {
-    const metrics = calculatePortfolioMetrics();
-    if (!metrics) return [];
-
-    const dataPoints = timeframe === '1D' ? 24 : timeframe === '1W' ? 7 : timeframe === '1M' ? 30 : timeframe === '3M' ? 90 : 365;
-    const data = [];
-
-    for (let i = dataPoints; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-
-      // Generate mock portfolio value with some volatility
-      const baseValue = metrics.totalCurrentValue;
-      const volatility = baseValue * 0.02; // 2% volatility
-      const randomChange = (Math.random() - 0.5) * volatility;
-      const value = baseValue + randomChange;
-
-      data.push({
-        time: timeframe === '1D' ? date.getHours() + ':00' :
-          timeframe === '1W' ? date.toLocaleDateString('en-US', { weekday: 'short' }) :
-            date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        value: Math.max(value, 0)
-      });
-    }
-
-    return data;
-  };
-
   // Prepare pie chart data
   const preparePieData = () => {
     const metrics = calculatePortfolioMetrics();
@@ -149,13 +119,36 @@ const Dashboard = () => {
       .slice(0, 5);
   };
 
-  const chartData = generateChartData(selectedTimeframe);
   const pieData = preparePieData();
   const topPerformers = getTopPerformers();
   const metrics = calculatePortfolioMetrics();
 
   const formatPrice = (value: number) => `₹${Number(value).toFixed(2)}`;
   const formatPercentage = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+
+  // Loading component
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-slate-600">Loading your portfolio...</p>
+      </div>
+    </div>
+  );
+
+  if (initialLoading) {
+    return (
+      <div className={cn(
+        "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
+        "min-h-screen"
+      )}>
+        <SideBar />
+        <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50">
+          <LoadingSpinner />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn(
@@ -189,73 +182,91 @@ const Dashboard = () => {
         {/* Portfolio Summary Cards */}
         {portfolio.length > 0 && <PortfolioSummary portfolio={portfolio} />}
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Portfolio Performance Chart */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-slate-800">Portfolio Performance</h2>
-              <div className="flex items-center gap-2">
-                <div className="flex bg-slate-100 rounded-lg p-1">
-                  {['1D', '1W', '1M', '3M', '1Y'].map((timeframe) => (
-                    <button
-                      key={timeframe}
-                      onClick={() => setSelectedTimeframe(timeframe)}
-                      className={`px-3 py-1 text-sm rounded-md transition-colors ${selectedTimeframe === timeframe
-                        ? 'bg-white text-slate-800 shadow-sm'
-                        : 'text-slate-600 hover:text-slate-800'
-                        }`}
-                    >
-                      {timeframe}
-                    </button>
-                  ))}
+        {/* Current Plan Section */}
+        <div className="mb-8">
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Crown className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-800">Current Plan: Free Beta</h3>
+                    <p className="text-sm text-slate-600">Enjoy all features during our beta phase</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <Zap className="w-3 h-3 inline mr-1" />
+                    Active
+                  </div>
+                  {/* <Button variant="outline" className="text-blue-600 border-blue-200 hover:bg-blue-50">
+                    Learn More
+                  </Button> */}
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            {portfolio.length > 0 ? (
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="time" stroke="#64748b" fontSize={12} />
-                    <YAxis stroke="#64748b" fontSize={12} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                      }}
-                      formatter={(value: number) => [formatPrice(value), 'Portfolio Value']}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      fill="url(#colorValue)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="h-80 flex items-center justify-center text-gray-500">
-                <div className="text-center">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg mb-2">No portfolio data available</p>
-                  <p className="text-sm">Add stocks to see your performance chart</p>
-                </div>
-              </div>
-            )}
+        {/* Quick Actions Grid */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/portfolio">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-blue-50 rounded-lg w-fit mx-auto mb-3">
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-slate-800">Portfolio</h3>
+                  <p className="text-sm text-slate-600 mt-1">View & manage your investments</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/news">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-green-50 rounded-lg w-fit mx-auto mb-3">
+                    <Newspaper className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-slate-800">Market News</h3>
+                  <p className="text-sm text-slate-600 mt-1">Latest financial updates</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/stock-analysis">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
+                    <TrendingUp className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-slate-800">Stock Analysis</h3>
+                  <p className="text-sm text-slate-600 mt-1">Research & analyze stocks</p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/search">
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 bg-orange-50 rounded-lg w-fit mx-auto mb-3">
+                    <Search className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold text-slate-800">Stock Search</h3>
+                  <p className="text-sm text-slate-600 mt-1">Find & explore stocks</p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
+        </div>
 
+        {/* Main Content Grid */}
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-8"> */}
+        <div>
           {/* Portfolio Allocation */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold text-slate-800 mb-6">Portfolio Allocation</h2>
@@ -304,81 +315,59 @@ const Dashboard = () => {
               </div>
             )}
           </div>
+
+          {/* Top Performers */}
+          {/* <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h2 className="text-xl font-semibold text-slate-800 mb-6">Top Performers</h2>
+
+            {portfolio.length > 0 ? (
+              <div className="space-y-4">
+                {topPerformers.slice(0, 5).map((stock, index) => (
+                  <div key={stock.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <div className="font-medium text-gray-900">{stock.symbol}</div>
+                      <div className="text-sm text-gray-500 truncate">{stock.name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium text-gray-900">{formatPrice(stock.currentPrice)}</div>
+                      <div className={`text-sm font-medium flex items-center gap-1 ${stock.gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                        {stock.gainLossPercentage >= 0 ? (
+                          <TrendingUp className="w-3 h-3" />
+                        ) : (
+                          <TrendingUp className="w-3 h-3 rotate-180" />
+                        )}
+                        {formatPercentage(stock.gainLossPercentage)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <TrendingUp className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg mb-2">No performance data</p>
+                  <p className="text-sm">Add stocks to see top performers</p>
+                </div>
+              </div>
+            )}
+          </div> */}
         </div>
-
-        {/* Top Performers Section */}
-        {/* {portfolio.length > 0 && (
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <Card className="bg-white shadow-sm border border-slate-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  Top Performers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {topPerformers.slice(0, 3).map((stock, index) => (
-                    <div key={stock.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-gray-900">{stock.symbol}</div>
-                        <div className="text-sm text-gray-500 truncate">{stock.name}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium text-gray-900">{formatPrice(stock.currentPrice)}</div>
-                        <div className={`text-sm font-medium ${stock.gainLossPercentage >= 0 ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                          {formatPercentage(stock.gainLossPercentage)}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white shadow-sm border border-slate-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-blue-600" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {portfolio.slice(0, 3).map((item, index) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <div className="font-medium text-gray-900">{item.stock?.symbol}</div>
-                        <div className="text-sm text-gray-500">
-                          {item.quantity} shares • {formatPrice(item.buyPrice)}
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {item.realTimePrice?.updatedAt ?
-                          new Date(item.realTimePrice.updatedAt).toLocaleDateString() :
-                          'Recently added'
-                        }
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )} */}
 
         {/* Empty State */}
         {portfolio.length === 0 && !initialLoading && (
-          <div className="text-center py-12">
+          <div className="text-center py-12 mt-8">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-md mx-auto">
               <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Start Building Your Portfolio</h3>
               <p className="text-gray-600 mb-6">Add your first stock to begin tracking your investments and see detailed analytics.</p>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors">
-                <Plus className="w-4 h-4" />
-                Add Your First Stock
-              </Button>
+              <Link href="/portfolio">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors">
+                  <Plus className="w-4 h-4" />
+                  Add Your First Stock
+                </Button>
+              </Link>
             </div>
           </div>
         )}

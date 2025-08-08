@@ -229,7 +229,18 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={onRefresh}
+          // onClick={onRefresh}
+          onClick={() => {
+            console.log('🔄 Refresh button clicked!');
+            console.log('📊 onRefresh function:', typeof onRefresh);
+            if (typeof onRefresh === 'function') {
+              console.log('✅ Calling onRefresh...');
+              onRefresh();
+            } else {
+              console.error('❌ onRefresh is not a function!');
+            }
+          }}
+
           disabled={isLoading || !shouldEnableRefresh}
           className="flex items-center space-x-1"
           title={getRefreshButtonTooltip()}
@@ -266,7 +277,13 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
           )}
         </span>
       </div>
-      
+      {/* Debug Info - Remove this in production */}
+      <div className="mt-2 p-2 bg-gray-50 rounded text-xs text-gray-600">
+        <strong>Debug:</strong> Button enabled: {shouldEnableRefresh ? '✅' : '❌'} |
+        Market hours: {withinMarketHours ? '✅' : '❌'} |
+        Updates stale: {updatesStale ? '✅' : '❌'} |
+        Status active: {status.isActive ? '✅' : '❌'}
+      </div>
     </div>
   );
 };
