@@ -1,4 +1,5 @@
-import React from 'react';
+"use client";
+import React, { useEffect, useState } from 'react';
 import { RefreshCw, Clock, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RealTimePortfolioStatus } from '@/lib/hooks/useRealTimePortfolio';
@@ -20,8 +21,19 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
   const isWithinMarketHours = () => {
     const now = new Date();
 
+    const [currentTime, setCurrentTime] = useState(new Date());
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, []);
+
+
     // Convert to IST
     const nowIST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    console.log('Current IST time:', nowIST.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
 
     // Check if today is a trading day (Monday = 1, Friday = 5)
     const dayOfWeek = nowIST.getDay();
@@ -254,6 +266,7 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
           )}
         </span>
       </div>
+      
     </div>
   );
 };

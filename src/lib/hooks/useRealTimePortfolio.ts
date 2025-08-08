@@ -51,27 +51,27 @@ export const useRealTimePortfolio = (initialPortfolio: any[] = []) => {
 
     try {
       const response = await fetch('/api/portfolio');
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch portfolio data');
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setPortfolio(data.data);
-        
+
         const now = new Date().toISOString();
         const nextUpdate = new Date(Date.now() + 60000).toISOString(); // Next update in 1 minute
-        
+
         // Get the latest price update time from the portfolio data
         const latestPriceUpdate = data.data.reduce((latest: string | null, item: any) => {
           // Try real-time price first, then intraday, then stock lastRefreshedAt, then updatedAt
-          const priceUpdatedAt = item.realTimePrice?.updatedAt || 
-                                item.intradayPrice?.updatedAt || 
-                                item.stock?.lastRefreshedAt || 
-                                item.updatedAt;
-          
+          const priceUpdatedAt = item.realTimePrice?.updatedAt ||
+            item.intradayPrice?.updatedAt ||
+            item.stock?.lastRefreshedAt ||
+            item.updatedAt;
+
           // Debug log the updatedAt value (only for first item to reduce noise)
           if (data.data.indexOf(item) === 0) {
             console.log('Sample price updatedAt for', item.stock?.symbol, ':', {
@@ -82,40 +82,42 @@ export const useRealTimePortfolio = (initialPortfolio: any[] = []) => {
               selected: priceUpdatedAt
             });
           }
-          
+
           if (!priceUpdatedAt) {
             console.warn('No update timestamp found for stock:', item.stock?.symbol);
             return latest;
           }
-          
+
           // Validate the date string before using it
           const updateDate = new Date(priceUpdatedAt);
           if (isNaN(updateDate.getTime())) {
             console.warn('Invalid date found:', priceUpdatedAt, 'for stock:', item.stock?.symbol);
             return latest;
           }
-          
+
           if (!latest) return priceUpdatedAt;
-          
+
           const latestDate = new Date(latest);
           if (isNaN(latestDate.getTime())) {
             console.warn('Invalid latest date found:', latest);
             return priceUpdatedAt;
           }
-          
+
           if (updateDate > latestDate) {
             return priceUpdatedAt;
           }
           return latest;
         }, null);
-        
+
         console.log('Latest price update timestamp:', latestPriceUpdate);
 
+        // In the fetchPortfolioData function, after setting the status, add this:
         setStatus(prev => ({
           ...prev,
           lastUpdate: now,
           nextUpdate,
-          portfolioLastUpdated: latestPriceUpdate
+          portfolioLastUpdated: latestPriceUpdate,
+          isActive: isRealTimeUpdateNeeded() // Add this line to update active status
         }));
 
         console.log('Portfolio data updated successfully');
@@ -155,9 +157,9 @@ export const useRealTimePortfolio = (initialPortfolio: any[] = []) => {
     const marketClose = new Date(`${today}T15:45:00.000+05:30`);
 
     const isWithinHours = nowIST >= marketOpen && nowIST <= marketClose;
-    
+
     console.log(`Market hours check: ${nowIST.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}, Trading day: ${isTradingDay}, Within hours: ${isWithinHours}`);
-    
+
     // Check if within market hours
     return isWithinHours;
   }, []);
@@ -223,7 +225,7 @@ export const useRealTimePortfolio = (initialPortfolio: any[] = []) => {
   // Set up activity listeners and auto-start on mount
   useEffect(() => {
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-    
+
     events.forEach(event => {
       document.addEventListener(event, trackUserActivity, { passive: true });
     });
