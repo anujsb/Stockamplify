@@ -16,35 +16,72 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
   error,
   onRefresh,
 }) => {
+  // Check if current time is within market hours (9:00 AM - 3:45 PM IST, Mon-Fri)
+  const isWithinMarketHours = () => {
+    const now = new Date();
+
+    // Convert to IST
+    const nowIST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+
+    // Check if today is a trading day (Monday = 1, Friday = 5)
+    const dayOfWeek = nowIST.getDay();
+    const isTradingDay = dayOfWeek >= 1 && dayOfWeek <= 5;
+
+    if (!isTradingDay) {
+      return false;
+    }
+
+    // Get today's date in IST
+    const today = nowIST.toISOString().split('T')[0];
+
+    // Create market times for today in IST
+    const marketOpen = new Date(`${today}T09:00:00.000+05:30`);
+    const marketClose = new Date(`${today}T15:45:00.000+05:30`);
+
+    return nowIST >= marketOpen && nowIST <= marketClose;
+  };
+
+  // Check if automatic updates are stale (more than 1 minute without update during market hours)
+  const areUpdatesStale = () => {
+    if (!status.isActive || !status.lastUpdate) return false;
+
+    const lastUpdate = new Date(status.lastUpdate);
+    const now = new Date();
+    const timeSinceLastUpdate = now.getTime() - lastUpdate.getTime();
+    const oneMinuteInMs = 60 * 1000;
+
+    return timeSinceLastUpdate > oneMinuteInMs;
+  };
+
   const formatTime = (dateString: string | null) => {
     if (!dateString) return 'Never';
-    
+
     try {
       const date = new Date(dateString);
-      
+
       // Check if date is valid
       if (isNaN(date.getTime())) {
         return 'Invalid date';
       }
-      
+
       const now = new Date();
-      
+
       // Check if it's today
       const isToday = date.toDateString() === now.toDateString();
-      
+
       if (isToday) {
-        return date.toLocaleTimeString('en-IN', { 
+        return date.toLocaleTimeString('en-IN', {
           timeZone: 'Asia/Kolkata',
-          hour: '2-digit', 
+          hour: '2-digit',
           minute: '2-digit',
           second: '2-digit'
         });
       } else {
-        return date.toLocaleString('en-IN', { 
+        return date.toLocaleString('en-IN', {
           timeZone: 'Asia/Kolkata',
           month: 'short',
           day: 'numeric',
-          hour: '2-digit', 
+          hour: '2-digit',
           minute: '2-digit'
         });
       }
@@ -56,20 +93,20 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
 
   const getTimeAgo = (dateString: string | null) => {
     if (!dateString) return '';
-    
+
     try {
       const date = new Date(dateString);
-      
+
       // Check if date is valid
       if (isNaN(date.getTime())) {
         return '';
       }
-      
+
       const now = new Date();
       const diffMs = now.getTime() - date.getTime();
       const diffSecs = Math.floor(diffMs / 1000);
       const diffMins = Math.floor(diffSecs / 60);
-      
+
       if (diffSecs < 0) {
         return 'just now';
       } else if (diffSecs < 60) {
@@ -93,20 +130,38 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
 
   const getNextUpdateTime = () => {
     if (!status.nextUpdate || !status.isActive) return null;
-    
+
     const nextUpdate = new Date(status.nextUpdate);
     const now = new Date();
     const diffMs = nextUpdate.getTime() - now.getTime();
     const diffSecs = Math.floor(diffMs / 1000);
-    
+
     if (diffSecs <= 0) return 'Updating now...';
     if (diffSecs < 60) return `${diffSecs}s`;
-    
+
     const diffMins = Math.floor(diffSecs / 60);
     return `${diffMins}m ${diffSecs % 60}s`;
   };
 
   const nextUpdateCountdown = getNextUpdateTime();
+  const withinMarketHours = isWithinMarketHours();
+  const updatesStale = areUpdatesStale();
+
+  // Enable refresh button only when:
+  // 1. Outside market hours: DISABLED
+  // 2. Within market hours AND automatic updates are working: DISABLED
+  // 3. Within market hours AND automatic updates are stale (>1 min): ENABLED
+  const shouldEnableRefresh = withinMarketHours && (updatesStale || !status.isActive);
+
+  const getRefreshButtonTooltip = () => {
+    if (!withinMarketHours) {
+      return 'Refresh is only available during market hours (9:00 AM - 3:45 PM IST, Mon-Fri)';
+    }
+    if (status.isActive && !updatesStale) {
+      return 'Automatic updates are working. Manual refresh not needed.';
+    }
+    return 'Click to refresh portfolio data';
+  };
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
@@ -163,8 +218,9 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
           variant="outline"
           size="sm"
           onClick={onRefresh}
-          disabled={isLoading}
+          disabled={isLoading || !shouldEnableRefresh}
           className="flex items-center space-x-1"
+          title={getRefreshButtonTooltip()}
         >
           <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
@@ -181,9 +237,22 @@ const RealTimeStatus: React.FC<RealTimeStatusProps> = ({
       )}
 
       {/* Market Hours Info */}
-      <div className="mt-3 text-xs text-gray-500">
-        Real-time updates run during market hours (9:00 AM - 3:45 PM IST, Mon-Fri).
-        {!status.isActive && ' Outside market hours, updates only on login/refresh.'}
+      <div className="mt-3 text-xs text-gray-500 flex justify-between items-center">
+        <span>
+          Real-time updates run during market hours (9:00 AM - 3:45 PM IST, Mon-Fri).
+          {!status.isActive && ' Outside market hours, updates only on login/refresh.'}
+        </span>
+        <span className="">
+          {!withinMarketHours && (
+            <span className="text-orange-500 "> Refresh disabled outside market hours.</span>
+          )}
+          {withinMarketHours && status.isActive && !updatesStale && (
+            <span className="text-green-500 "> Automatic updates active - manual refresh disabled.</span>
+          )}
+          {withinMarketHours && updatesStale && (
+            <span className="text-yellow-500"> Automatic updates may be stale - manual refresh available.</span>
+          )}
+        </span>
       </div>
     </div>
   );
