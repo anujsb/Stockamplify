@@ -14,6 +14,13 @@ import { getHorizonOptions } from '@/lib/utils/investmentHorizons';
 import { transformAIResponseToFrontend, validateIndianStockSymbol, formatStockSymbol, getRecommendationColor, getTrendIcon,  type AnalysisData } from '@/lib/utils/dataTransformers';
 import { languageOptions, getTranslation, translateAnalysisData, type Language } from '@/lib/utils/languageUtils';
 import { formatDate, formatPrice, formatLargeNumber, formatSymbol, formatPercentage } from "@/lib/utils/stockUtils";
+import { useUser } from '@clerk/nextjs';
+
+interface RateLimit {
+  count: number;
+  remaining: number;
+  limit: number;
+}
 
 const StockAnalytics = () => {
   const [stockSymbol, setStockSymbol] = useState('');
@@ -24,6 +31,28 @@ const StockAnalytics = () => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [rateLimit, setRateLimit] = useState<RateLimit>({ count: 0, remaining: 15, limit: 15 });
+  const { isSignedIn } = useUser();
+
+  // For demo purposes - in real app, get this from your auth
+  const [userId, setUserId] = useState('demo-user-123');
+
+  // Fetch current rate limit status
+  const fetchTokenStatus = async () => {
+    try {
+      const response = await fetch('/api/rate-limit-status');
+      if (response.ok) {
+        const data = await response.json();
+        setRateLimit(data);
+      } else {
+        // Could be unauthorized if user is not signed in
+        const err = await response.json();
+        setError(err.error || 'Failed to get rate limit');
+      }
+    } catch (err) {
+      console.error('Failed to fetch status:', err);
+    }
+  };
 
   const investmentOptions = getHorizonOptions();
 
@@ -41,7 +70,6 @@ const StockAnalytics = () => {
 
   useEffect(() => {
     if (!isAnalyzing) return;
-
     const interval = setInterval(() => {
       setMessageIndex((i) => (i + 1) % waitMessages.length);
     }, 4500); // change every 4.5 seconds
@@ -53,6 +81,7 @@ const StockAnalytics = () => {
     setSelectedStock(stock);
     setStockSymbol(stock.symbol);
   };
+  
 
   const handleAnalyze = async () => {
     if (!stockSymbol || !investmentHorizon) {
@@ -62,6 +91,11 @@ const StockAnalytics = () => {
 
     if (!validateIndianStockSymbol(stockSymbol)) {
       setError(getTranslation(language, 'selectValidStock'));
+      return;
+    }
+
+    if (rateLimit.remaining <= 0) {
+      setError('You have reached your daily limit of 15 analyses');
       return;
     }
 
@@ -95,6 +129,8 @@ const StockAnalytics = () => {
         // Translate the analysis data to the selected language
         const translatedData = translateAnalysisData(transformedData, language);
         setAnalysisData(translatedData);
+        fetchTokenStatus();
+        setRateLimit(data.rateLimit);
         setSuccess(`${getTranslation(language, 'analysisCompleted')} ${stockSymbol}`);
       } else {
         throw new Error('Invalid response from analysis service');
@@ -106,6 +142,8 @@ const StockAnalytics = () => {
       setIsAnalyzing(false);
     }
   };
+
+  const isLimitReached = rateLimit.remaining <= 0;
 
   const getTrendIconComponent = (trend: string) => {
     const trendType = getTrendIcon(trend);
@@ -198,7 +236,7 @@ const StockAnalytics = () => {
                   </label>
                   <Button
                     onClick={handleAnalyze}
-                    disabled={!stockSymbol || !investmentHorizon || isAnalyzing}
+                    disabled={!stockSymbol || !investmentHorizon || isAnalyzing || isLimitReached}
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 h-10"
                   >
                     {isAnalyzing ? (
@@ -211,6 +249,13 @@ const StockAnalytics = () => {
                     )}
                   </Button>
                 </div>
+                
+              {/* Analysis Token Used */}
+              {analysisData && (<div className="text-sm font-small text-gray-700">
+                <p>
+                  Tokens Used: {rateLimit.count} / {rateLimit.limit} ({rateLimit.remaining} remaining)
+                </p>
+              </div>)}
               </div>
 
               {/* Error and Success Messages */}

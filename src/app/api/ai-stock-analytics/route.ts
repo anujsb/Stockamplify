@@ -3,6 +3,8 @@ import { ChartService, TimeInterval, TimeRange } from '@/lib/services/chartServi
 import { getHorizonConfig } from '@/lib/utils/investmentHorizons';
 import { buildAnalysisPrompt } from '@/lib/utils/aiPromptBuilder';
 import { callGeminiAI, validateAnalysisResponse, transformAnalysisResponse } from '@/lib/services/aiAnalysisService';
+import { checkLimit, incrementCount } from '@/lib/rateLimit/rateLimit';
+import { auth } from '@clerk/nextjs/server';
 
 export interface AIStockAnalysisRequest {
   symbol: string;
@@ -55,6 +57,25 @@ export interface AIStockAnalysisResponse {
 
 export async function POST(request: NextRequest) {
   try {
+
+    // Rate limit check
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Please log in' },
+        { status: 401 }
+      );
+    }
+    const { allowed, remaining, count, limit } = await checkLimit(userId);
+
+    if (!allowed) {
+      return NextResponse.json({ 
+        error: 'Daily limit exceeded', 
+        message: `You have used all ${limit} analyses today. Try again tomorrow.`,
+        remaining, 
+        count 
+      }, { status: 429 });
+    }
     const body: AIStockAnalysisRequest = await request.json();
     const { symbol, investmentHorizon, interval, period, language = 'english' } = body;
 
@@ -90,10 +111,16 @@ export async function POST(request: NextRequest) {
 
     // Build AI prompt using the utility function
     const prompt = buildAnalysisPrompt(analysisData);
+    
+    // Increment count AFTER validation but BEFORE analysis
+    await incrementCount(userId);
 
     // Call Gemini AI using the service
     const aiResponse = await callGeminiAI(prompt);
-    
+
+    // Get updated remaining count
+    const updated = await checkLimit(userId);
+
     if (!aiResponse.success) {
       return NextResponse.json({ 
         error: aiResponse.error || 'AI analysis failed',
@@ -123,6 +150,11 @@ export async function POST(request: NextRequest) {
           hasChart: !!chart,
           dataPoints: chart?.quotes?.length || 0
         }
+      },
+      rateLimit: {
+        count: updated.count,
+        remaining: updated.remaining,
+        limit: updated.limit
       }
     });
 

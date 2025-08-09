@@ -8,9 +8,10 @@ import { cn } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
 import { useRealTimePortfolio } from '@/lib/hooks/useRealTimePortfolio';
-import { Plus, RefreshCw, TrendingUp, Activity, PieChart as PieChartIcon, ArrowRight, Crown, Newspaper, BarChart3, Search, Zap } from 'lucide-react';
+import { Plus, RefreshCw, TrendingUp, Activity, PieChart as PieChartIcon, ArrowRight, Crown, Newspaper, BarChart3, Search, Zap, CheckCircle2, Target } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Link from 'next/link';
+import { CheckCircle } from "lucide-react";
 
 const Dashboard = () => {
   const { user } = useUser();
@@ -192,8 +193,23 @@ const Dashboard = () => {
                     <Crown className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-800">Current Plan: Free Beta</h3>
-                    <p className="text-sm text-slate-600">Enjoy all features during our beta phase</p>
+                    <h3 className="text-lg font-semibold text-slate-800">
+                      Current Plan: Free (Beta)
+                    </h3>
+                    <p className="text-sm text-slate-600">
+                      Enjoy all premium features during our beta phase
+                    </p>
+                    <ul className="mt-2 space-y-1 text-sm text-slate-700">
+                      <li className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        All premium features unlocked
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-blue-500" />
+                        15 AI Analysis tokens{" "}
+                        <span className="text-slate-500">(1 token = 1 analysis)</span>
+                      </li>
+                    </ul>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
