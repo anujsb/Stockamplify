@@ -174,6 +174,24 @@ export class UserService {
     }
   }
 
+   /**
+   * Get user by Clerk ID
+   */
+  static async getUserByClerkId(clerkId: string) {
+    try {
+      const dbUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.clerkId, clerkId))
+        .limit(1);
+
+      return dbUser.length > 0 ? dbUser[0] : null;
+    } catch (error) {
+      console.error('Error fetching user by Clerk ID:', error);
+      return null;
+    }
+  }
+
   /**
    * Get user's portfolio with complete stock details
    */

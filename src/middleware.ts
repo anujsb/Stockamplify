@@ -1,4 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { UserService } from '@/lib/services/userService';
+import { NextResponse } from 'next/server';
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -9,18 +11,37 @@ const isPublicRoute = createRouteMatcher([
 
 // Define protected routes that require authentication
 const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
+  //'/dashboard(.*)',
   '/portfolio(.*)',
-  '/stocks(.*)'
+  '/stocks(.*)',
+  '/ai-stock-analytics(.*)',
+  '/search(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   // Protect specific routes
   if (isProtectedRoute(req)) {
     await auth.protect();
-  }
-  // Allow public routes to pass through
-});
+
+    const { userId } = await auth();
+    if (userId) {
+      try {
+        const dbUser = await UserService.getUserByClerkId(userId);
+
+        if (dbUser && dbUser.isActive) {
+                const dashboardUrl = new URL('/dashboard', req.url);
+                dashboardUrl.searchParams.set('inactive', '1');
+                return NextResponse.redirect(dashboardUrl);
+              }
+            } catch (err) {
+              // Fallback redirect
+              const dashboardUrl = new URL('/dashboard', req.url);
+              return NextResponse.redirect(dashboardUrl);
+            }
+          }
+
+          return NextResponse.next();
+}});
 
 export const config = {
   matcher: [
@@ -30,6 +51,8 @@ export const config = {
     '/(api|trpc)(.*)',
   ],
 };
+
+
 
 
 // import { NextResponse } from "next/server";

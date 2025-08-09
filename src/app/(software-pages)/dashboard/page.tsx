@@ -12,12 +12,22 @@ import { Plus, RefreshCw, TrendingUp, Activity, PieChart as PieChartIcon, ArrowR
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import Link from 'next/link';
 import { CheckCircle } from "lucide-react";
+import { useSearchParams } from 'next/navigation';
 
 const Dashboard = () => {
   const { user } = useUser();
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const searchParams = useSearchParams();
+  const [showInactiveBanner, setShowInactiveBanner] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('inactive') === '1') {
+      setShowInactiveBanner(true);
+    }
+  }, [searchParams]);
 
   // Initial portfolio fetch
   useEffect(() => {
@@ -163,6 +173,11 @@ const Dashboard = () => {
             <h1 className="text-3xl font-bold text-slate-800">Hello, {user?.firstName || 'Investor'}!</h1>
             <p className="text-slate-600 mt-1">Welcome back! Here's your portfolio overview.</p>
           </div>
+          {showInactiveBanner && (
+            <div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-800 rounded">
+              🚫 Your account is currently inactive. Please contact support.
+            </div>
+          )}
           <div className="flex items-center gap-4">
             <Button
               onClick={refreshPortfolio}
