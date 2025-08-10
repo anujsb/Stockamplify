@@ -28,7 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
       try {
         const dbUser = await UserService.getUserByClerkId(userId);
 
-        if (dbUser && dbUser.isActive) {
+        if (!dbUser || !dbUser.isActive) {
                 const dashboardUrl = new URL('/dashboard', req.url);
                 dashboardUrl.searchParams.set('inactive', '1');
                 return NextResponse.redirect(dashboardUrl);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SideBar } from '@/components/SideBar';
@@ -14,7 +14,8 @@ import Link from 'next/link';
 import { CheckCircle } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 
-const Dashboard = () => {
+// Separate component that uses useSearchParams
+const DashboardContent = () => {
   const { user } = useUser();
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -278,8 +279,6 @@ const Dashboard = () => {
               </Card>
             </Link>
 
-
-
             <Link href="/search">
               <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
                 <CardContent className="p-6 text-center">
@@ -364,6 +363,33 @@ const Dashboard = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Loading fallback component
+const DashboardLoading = () => (
+  <div className={cn(
+    "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
+    "min-h-screen"
+  )}>
+    <SideBar />
+    <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50">
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="text-slate-600">Loading your Dashboard...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// Main dashboard component with suspense boundary
+const Dashboard = () => {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 };
 
