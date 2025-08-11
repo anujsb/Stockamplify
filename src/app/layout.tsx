@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import ClientLayout from "./ClientLayout";
 import "./globals.css";
+import SiteGuard from "@/components/SiteGuard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -92,9 +93,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <SiteGuard disableCopy={false} showAlert={false} />
           <ClientLayout>
             {children}
           </ClientLayout>

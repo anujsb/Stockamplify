@@ -4,6 +4,8 @@ import {ArrowRight, BarChart3, Brain, Eye, FileText, TrendingUp, Upload, Users, 
 import Link from 'next/link';
 import Header from "@/components/header";
 import { Metadata } from 'next';
+import WatchDemoModal from "@/components/WatchDemoModal";
+
 
 export const metadata: Metadata = {
   title: "AI-Powered Stock Analysis & Portfolio Management Platform",
@@ -109,9 +111,7 @@ export default function HomePage() {
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="#demo" className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-8 py-4 text-lg font-medium text-white hover:bg-white/20 transition-all">
-              Watch Demo
-            </Link>
+<WatchDemoModal />
           </div>
         </div>
         
