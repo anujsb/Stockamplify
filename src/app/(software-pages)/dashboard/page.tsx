@@ -202,13 +202,13 @@ const DashboardContent = () => {
         {/* Current Plan Section */}
         <div className="mb-8">
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <CardContent className="p-6">              
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex flex-col items-center md:flex-row md:items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <Crown className="h-6 w-6 text-blue-600" />
                   </div>
-                  <div>
+                  <div className="text-center md:text-left">
                     <h3 className="text-lg font-semibold text-slate-800">
                       Current Plan: Free (Beta)
                     </h3>
@@ -216,22 +216,16 @@ const DashboardContent = () => {
                       Enjoy all premium features during our beta phase
                     </p>
                     <ul className="mt-2 space-y-1 text-sm text-slate-700">
-                      <li className="flex items-center gap-2">
+                      <li className="flex items-center gap-2 justify-center md:justify-start">
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                         All premium features unlocked
                       </li>
-                      <li className="flex items-center gap-2">
+                      <li className="flex items-center gap-2 justify-center md:justify-start">
                         <Target className="w-4 h-4 text-blue-500" />
-                        15 AI Analysis tokens{" "}
+                        15 AI Analysis tokens per day{" "}
                         <span className="text-slate-500">(1 token = 1 analysis)</span>
                       </li>
                     </ul>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
-                    <Zap className="w-3 h-3 inline mr-1" />
-                    Active
                   </div>
                 </div>
               </div>
