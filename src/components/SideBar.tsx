@@ -1,72 +1,62 @@
 "use client";
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  IconHome2,
-  IconChartBar,
-  IconEye,
-  IconNews,
-  IconPlus,
-  IconSearch,
-  IconSettings,
-  IconBell,
-  IconHome
-} from "@tabler/icons-react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { SignedIn, UserButton } from "@clerk/nextjs";
-import { Activity, BrainCircuit, Clock } from "lucide-react";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
-
+import { SignedIn, UserButton } from "@clerk/nextjs";
+import {
+  IconAntennaBars5,
+  IconBulb,
+  IconChartBar,
+  IconHome2,
+  IconNews,
+  IconSearch,
+} from "@tabler/icons-react";
+import { motion } from "framer-motion";
+import { Activity, BrainCircuit, Clock } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 export function SideBar() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
   const links = [
     {
       label: "Dashboard",
       href: "/dashboard",
-      icon: <IconHome2 className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+      icon: IconHome2,
     },
     {
       label: "Portfolio",
       href: "/portfolio",
-      icon: <IconChartBar className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+      icon: IconChartBar,
     },
-    // {
-    //   label: "Watchlist",
-    //   href: "/watchlist",
-    //   icon: <IconEye className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    // },
+    {
+      label: "AI Portfolio Advisor",
+      href: "/ai-portfolio-advisor",
+      icon: IconBulb,
+    },
     {
       label: "AI Stock Analysis",
       href: "/ai-stock-analytics",
-      icon: <BrainCircuit className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+      icon: BrainCircuit,
+    },
+    {
+      label: "Trade Signals",
+      href: "/trade-signals",
+      icon: IconAntennaBars5,
     },
     {
       label: "Market News",
       href: "/news",
-      icon: <IconNews className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+      icon: IconNews,
     },
     {
       label: "Search Stocks",
       href: "/search",
-      icon: <IconSearch className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
+      icon: IconSearch,
     },
-    // {
-    //   label: "Recommendations",
-    //   href: "/recommendations",
-    //   icon: <IconBell className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    // },
-    // {
-    //   label: "Settings",
-    //   href: "/settings",
-    //   icon: <IconSettings className="h-5 w-5 flex-shrink-0" aria-hidden="true" />,
-    // },
   ];
-
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
 
   const updateManager = useUpdateManager();
 
@@ -77,21 +67,36 @@ export function SideBar() {
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {open ? <Logo /> : <LogoIcon />}
             <nav className="mt-8 flex flex-col gap-2" aria-label="Sidebar navigation">
-              {links.map((link, idx) => (
-                <SidebarLink
-                  key={idx}
-                  link={link}
-                  className={`${pathname === link.href
-                    ? "bg-secondary px-1 rounded-lg"
-                    : "bg-transparent px-1 rounded-lg"
+              {links.map((link, idx) => {
+                const isActive = pathname === link.href;
+                const Icon = link.icon;
+
+                return (
+                  <SidebarLink
+                    key={idx}
+                    link={{
+                      ...link,
+                      icon: (
+                        <Icon
+                          className={`h-5 w-5 flex-shrink-0 transition-colors duration-200 ${
+                            isActive ? "text-blue-600" : "text-gray-800"
+                          }`}
+                          aria-hidden="true"
+                        />
+                      ),
+                    }}
+                    className={`${
+                      isActive
+                        ? "bg-secondary px-1 rounded-lg text-blue-600 font-semibold"
+                        : "bg-transparent px-1 rounded-lg text-gray-800 hover:text-blue-600"
                     }`}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                />
-              ))}
+                    aria-current={isActive ? "page" : undefined}
+                  />
+                );
+              })}
             </nav>
           </div>
           <div>
-
             <div className="flex flex-col space-y-2">
               <SignedIn>
                 {open ? (
@@ -120,8 +125,8 @@ export function SideBar() {
                 <UserButton
                   appearance={{
                     elements: {
-                      avatarBox: "w-8 h-8"
-                    }
+                      avatarBox: "w-8 h-8",
+                    },
                   }}
                   afterSignOutUrl="/"
                 />
@@ -145,11 +150,7 @@ export const Logo = () => {
         className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
         aria-hidden="true"
       >
-         <img 
-          src="/logo.png" 
-          alt="StockAmplify Logo" 
-          className="w-5 h-5 object-contain"
-        />
+        <img src="/logo.png" alt="StockAmplify Logo" className="w-5 h-5 object-contain" />
       </div>
       <motion.span
         initial={{ opacity: 0 }}
@@ -168,11 +169,7 @@ export const LogoIcon = () => {
       className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
       aria-label="StockAmplify logo"
     >
-               <img 
-          src="/logo.png" 
-          alt="StockAmplify Logo" 
-          className="w-5 h-5 object-contain"
-        />
+      <img src="/logo.png" alt="StockAmplify Logo" className="w-5 h-5 object-contain" />
     </div>
   );
 };
