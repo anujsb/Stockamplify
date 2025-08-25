@@ -7,23 +7,25 @@ import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
 export default function Header() {
-    const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   return (
 
     <header className="sticky top-0 z-50 bg-transparent backdrop-blur-xl backdrop-brightness-95 text-white shadow-lg">
       <nav className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
         {/* Logo + Name */}
         <div className="flex items-center space-x-4">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={48}
-            height={48}
-            className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-1"
-          />
-          <span className="text-2xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-            StockAmplify
-          </span>
+          <Link href="/" className="flex items-center space-x-6">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={48}
+              height={48}
+              className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-1"
+            />
+            <span className="text-2xl md:text-4xl font-extrabold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+              StockAmplify
+            </span>
+          </Link>
         </div>
 
         {/* Desktop Menu */}
