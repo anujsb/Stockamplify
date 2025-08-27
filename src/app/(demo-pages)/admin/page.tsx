@@ -1,12 +1,12 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { useSession } from "next-auth/react";
 import { useUpdateManager } from '@/lib/hooks/useUpdateManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Activity, Clock, RefreshCw, TrendingUp, AlertCircle, CheckCircle, BarChart3, Users, Zap} from 'lucide-react';
 import Link from 'next/link';
-import { SideBar } from '@/components/SideBar';
+import SideBar from '@/components/SideBar';
 
 // Helper function to format dates
 function formatDateTime(dateString: string | null) {
@@ -19,10 +19,10 @@ function formatDateTime(dateString: string | null) {
 }
 
 export default function AdminPage() {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const updateManager = useUpdateManager();
 
-  if (!updateManager.isSignedIn) {
+  if (!session) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -42,7 +42,7 @@ export default function AdminPage() {
       {/* Welcome Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, {user?.firstName || 'Investor'}!
+          Welcome back, {session?.user?.username || 'Investor'}!
         </h1>
         <p className="text-gray-600">
           Monitor your portfolio and track real-time stock updates

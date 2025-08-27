@@ -1,12 +1,5 @@
 "use client";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
+import { useSession, signOut } from "next-auth/react";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
 import Link from "next/link";
 import { TrendingUp, Activity, Clock, User, LogOut } from "lucide-react";
@@ -16,7 +9,7 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isSignedIn, user } = useUser();
+  const { data: session, status } = useSession();
   const updateManager = useUpdateManager();
 
   return (

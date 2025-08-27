@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { StockDataService } from '@/lib/services/stockDataService';
 import { UserService } from '@/lib/services/userService';
-import { auth } from '@clerk/nextjs/server';
 import { normalizeStockSymbol, isValidStockSymbol } from '@/lib/utils/stockUtils';
+import { auth } from "@/lib/auth";
 
 // Helper to convert BigInt and Date to string recursively
 function convertBigIntToString(obj: any): any {
@@ -26,9 +26,9 @@ export async function POST(
   { params }: { params: Promise<{ symbol: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const session = await auth();
     
-    if (!userId) {
+    if (!session?.user?.nextAuthId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -58,7 +58,7 @@ export async function POST(
     }
 
     // Get or create user in our database
-    const user = await UserService.getCurrentUser();
+    const user = await UserService.getCurrentUser(session.user.nextAuthId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -113,13 +113,10 @@ export async function GET(
   { params }: { params: Promise<{ symbol: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const session = await auth();
     
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    if (!session?.user?.nextAuthId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Await params before accessing properties
@@ -153,10 +150,7 @@ export async function GET(
     }));
 
   } catch (error) {
-    console.error('Error in GET /api/stocks/[symbol]:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error("Stock API error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

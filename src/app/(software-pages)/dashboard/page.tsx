@@ -1,47 +1,74 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SideBar } from '@/components/SideBar';
-import { cn } from '@/lib/utils';
-import { useUser } from '@clerk/nextjs';
-import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
-import { useRealTimePortfolio } from '@/lib/hooks/useRealTimePortfolio';
-import { Plus, RefreshCw, TrendingUp, Activity, PieChart as PieChartIcon, ArrowRight, Crown, Newspaper, BarChart3, Search, Zap, CheckCircle2, Target } from 'lucide-react';
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import Link from 'next/link';
-import { CheckCircle } from "lucide-react";
-import { useSearchParams } from 'next/navigation';
+import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
+import SideBar from "@/components/SideBar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
+import { useUserStatus } from "@/lib/hooks/useUserStatus";
+import { cn } from "@/lib/utils";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Crown,
+  Newspaper,
+  PieChart as PieChartIcon,
+  Plus,
+  RefreshCw,
+  Search,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import {
+  Cell,
+  Pie,
+  PieChart as RechartsPieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+
+const formatDMY = (iso?: string) => {
+  if (!iso) return "N/A";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "N/A";
+  // dd-mm-yyyy
+  return d.toLocaleDateString("en-GB").replace(/\//g, "-");
+};
 
 // Separate component that uses useSearchParams
 const DashboardContent = () => {
-  const { user } = useUser();
+  const { data: session } = useSession();
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const searchParams = useSearchParams();
-  const [showInactiveBanner, setShowInactiveBanner] = useState(false);
-
-  useEffect(() => {
-    if (searchParams.get('inactive') === '1') {
-      setShowInactiveBanner(true);
-    }
-  }, [searchParams]);
+  const { showInactiveBanner, user } = useUserStatus();
+  const planName = session?.user?.planName ?? "Free";
+  const subscriptionType = (
+    session?.user?.subscriptionType ?? "Monthly"
+  ).toLowerCase();
+  const startDate = formatDMY(session?.user?.subscriptionStartDate);
+  const endDate = formatDMY(session?.user?.subscriptionEndDate);
+  const inactive = session?.user?.isActive === false;
 
   // Initial portfolio fetch
   useEffect(() => {
     const fetchInitialPortfolio = async () => {
       setInitialLoading(true);
       try {
-        const res = await fetch('/api/portfolio');
+        const res = await fetch("/api/portfolio");
         const data = await res.json();
         if (data.success) {
           setInitialPortfolio(data.data);
         }
       } catch (err) {
-        console.error('Failed to fetch initial portfolio:', err);
+        console.error("Failed to fetch initial portfolio:", err);
       } finally {
         setInitialLoading(false);
       }
@@ -50,13 +77,8 @@ const DashboardContent = () => {
   }, [refreshKey]);
 
   // Use real-time portfolio hook
-  const {
-    portfolio,
-    status,
-    isLoading,
-    error,
-    refreshPortfolio
-  } = useRealTimePortfolio(initialPortfolio);
+  const { portfolio, status, isLoading, error, refreshPortfolio } =
+    useRealTimePortfolio(initialPortfolio);
 
   // Calculate portfolio metrics
   const calculatePortfolioMetrics = () => {
@@ -67,9 +89,10 @@ const DashboardContent = () => {
     let stockAllocations: { [key: string]: number } = {};
     let sectorAllocations: { [key: string]: number } = {};
 
-    portfolio.forEach(item => {
+    portfolio.forEach((item) => {
       const invested = Number(item.buyPrice) * item.quantity;
-      const currentValue = Number(item.realTimePrice?.price || 0) * item.quantity;
+      const currentValue =
+        Number(item.realTimePrice?.price || 0) * item.quantity;
 
       totalInvested += invested;
       totalCurrentValue += currentValue;
@@ -78,17 +101,21 @@ const DashboardContent = () => {
       stockAllocations[item.stock?.symbol] = currentValue;
 
       // Sector allocation (mock data for demo - you might want to add sector info to your stock data)
-      const sector = item.stock?.sector || 'Technology'; // Default to Technology if not available
-      sectorAllocations[sector] = (sectorAllocations[sector] || 0) + currentValue;
+      const sector = item.stock?.sector || "Technology"; // Default to Technology if not available
+      sectorAllocations[sector] =
+        (sectorAllocations[sector] || 0) + currentValue;
     });
 
     return {
       totalInvested,
       totalCurrentValue,
       totalGainLoss: totalCurrentValue - totalInvested,
-      totalGainLossPercentage: totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0,
+      totalGainLossPercentage:
+        totalInvested > 0
+          ? ((totalCurrentValue - totalInvested) / totalInvested) * 100
+          : 0,
       stockAllocations,
-      sectorAllocations
+      sectorAllocations,
     };
   };
 
@@ -97,13 +124,21 @@ const DashboardContent = () => {
     const metrics = calculatePortfolioMetrics();
     if (!metrics) return [];
 
-    const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#f97316'];
+    const colors = [
+      "#3b82f6",
+      "#ef4444",
+      "#10b981",
+      "#f59e0b",
+      "#8b5cf6",
+      "#06b6d4",
+      "#f97316",
+    ];
 
     return Object.entries(metrics.stockAllocations)
       .map(([symbol, value], index) => ({
         name: symbol,
         value: Number(((value / metrics.totalCurrentValue) * 100).toFixed(1)),
-        color: colors[index % colors.length]
+        color: colors[index % colors.length],
       }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 6); // Top 6 holdings
@@ -114,17 +149,18 @@ const DashboardContent = () => {
     if (!portfolio.length) return [];
 
     return portfolio
-      .map(item => {
+      .map((item) => {
         const currentPrice = Number(item.realTimePrice?.price || 0);
         const buyPrice = Number(item.buyPrice);
-        const gainLossPercentage = buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0;
+        const gainLossPercentage =
+          buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0;
 
         return {
           symbol: item.stock?.symbol,
           name: item.stock?.name,
           gainLossPercentage,
           currentPrice,
-          previousPrice: buyPrice
+          previousPrice: buyPrice,
         };
       })
       .sort((a, b) => b.gainLossPercentage - a.gainLossPercentage)
@@ -136,7 +172,8 @@ const DashboardContent = () => {
   const metrics = calculatePortfolioMetrics();
 
   const formatPrice = (value: number) => `₹${Number(value).toFixed(2)}`;
-  const formatPercentage = (value: number) => `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+  const formatPercentage = (value: number) =>
+    `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
 
   // Loading component
   const LoadingSpinner = () => (
@@ -150,10 +187,12 @@ const DashboardContent = () => {
 
   if (initialLoading) {
     return (
-      <div className={cn(
-        "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
-        "min-h-screen"
-      )}>
+      <div
+        className={cn(
+          "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
+          "min-h-screen"
+        )}
+      >
         <SideBar />
         <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50">
           <LoadingSpinner />
@@ -163,29 +202,35 @@ const DashboardContent = () => {
   }
 
   return (
-    <div className={cn(
-      "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
-      "min-h-screen"
-    )}>
+    <div
+      className={cn(
+        "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
+        "min-h-screen"
+      )}
+    >
       <SideBar />
       <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          {/* Greeting Section */}
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Hello, {user?.firstName || 'Investor'}!</h1>
-            <p className="text-slate-600 mt-1">Welcome back! Here's your portfolio overview.</p>
+            <h1 className="text-3xl font-bold text-slate-800">
+              Hello, {session?.user?.username || "Investor"}!
+            </h1>
+            <p className="text-slate-600 mt-1">
+              Welcome back! Here's your portfolio overview.
+            </p>
           </div>
-          {showInactiveBanner && (
-            <div className="mb-4 p-4 bg-red-100 border border-red-300 text-red-800 rounded">
-              🚫 Your account is currently inactive. Please contact support.
-            </div>
-          )}
-          <div className="flex items-center gap-4">
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3 sm:gap-4">
             <Button
               onClick={refreshPortfolio}
               variant="outline"
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
             </Button>
             <Link href="/portfolio">
               <Button className="px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -199,31 +244,90 @@ const DashboardContent = () => {
         {/* Portfolio Summary Cards */}
         {portfolio.length > 0 && <PortfolioSummary portfolio={portfolio} />}
 
+        {/* Inactive Banner */}
+        {showInactiveBanner && (
+          <div
+            role="alert"
+            aria-live="polite"
+            className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-red-800"
+          >
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5" />
+              <div>
+                <p className="font-medium">Your account is inactive</p>
+                <p className="text-sm opacity-90">
+                  Please verify your email or contact support.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Current Plan Section */}
         <div className="mb-8">
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-            <CardContent className="p-6">              
+            <CardContent className="p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex flex-col items-center md:flex-row md:items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
                     <Crown className="h-6 w-6 text-blue-600" />
                   </div>
                   <div className="text-center md:text-left">
+                    {/* Plan Details */}
                     <h3 className="text-lg font-semibold text-slate-800">
-                      Current Plan: Free (Beta)
+                      Current Plan: {planName.toUpperCase()}{" "}
+                      <Badge
+                        variant="secondary"
+                        className="rounded-full bg-blue-100 text-blue-700"
+                      >
+                        {subscriptionType}
+                      </Badge>
+                      {inactive && (
+                        <Badge variant="destructive" className="rounded-full">
+                          Inactive
+                        </Badge>
+                      )}
                     </h3>
                     <p className="text-sm text-slate-600">
-                      Enjoy all premium features during our beta phase
+                      {planName === "free"
+                        ? "Enjoy all premium features with limit access"
+                        : "You are subscribed to our premium plan"}
                     </p>
-                    <ul className="mt-2 space-y-1 text-sm text-slate-700">
-                      <li className="flex items-center gap-2 justify-center md:justify-start">
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        All premium features unlocked
+
+                    {/* Subscription Start & End Dates */}
+                    {planName.toLowerCase() !== "free" && (
+                      <div className="mt-2 text-sm text-slate-700">
+                        <p>
+                          <b>Start Date:</b> {startDate}
+                        </p>
+                        <p>
+                          <b>End Date:</b> {endDate}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Benefits List */}
+                    <ul className="mt-4 space-y-2 text-sm text-slate-700">
+                      <li className="flex items-center gap-2 text-sm text-slate-700 leading-snug">
+                        <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                        <span className="whitespace-normal text-left">
+                          {planName === "free"
+                            ? "Limited access to all premium features included"
+                            : "All premium features unlocked"}
+                        </span>
                       </li>
-                      <li className="flex items-center gap-2 justify-center md:justify-start">
-                        <Target className="w-4 h-4 text-blue-500" />
-                        15 AI Analysis tokens per day{" "}
-                        <span className="text-slate-500">(1 token = 1 analysis)</span>
+                      <li className="flex items-center gap-2 text-sm text-slate-700 leading-snug">
+                        <Target className="h-4 w-4 text-blue-500 shrink-0" />
+                        <span className="whitespace-normal text-left">
+                          {planName === "free"
+                            ? "Limited AI Analysis tokens per day"
+                            : "Unlimited AI Analysis tokens"}
+                          {planName === "free" && (
+                            <div className="text-slate-500 text-sm">
+                              (1 token = 1 analysis)
+                            </div>
+                          )}
+                        </span>
                       </li>
                     </ul>
                   </div>
@@ -235,7 +339,9 @@ const DashboardContent = () => {
 
         {/* Quick Actions Grid */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link href="/portfolio">
               <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
@@ -244,7 +350,9 @@ const DashboardContent = () => {
                     <BarChart3 className="h-6 w-6 text-blue-600" />
                   </div>
                   <h3 className="font-semibold text-slate-800">Portfolio</h3>
-                  <p className="text-sm text-slate-600 mt-1">View & manage your investments</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    View & manage your investments
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -255,8 +363,12 @@ const DashboardContent = () => {
                   <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
                     <TrendingUp className="h-6 w-6 text-purple-600" />
                   </div>
-                  <h3 className="font-semibold text-slate-800">AI Stock Analytics</h3>
-                  <p className="text-sm text-slate-600 mt-1">Research & analyze stocks</p>
+                  <h3 className="font-semibold text-slate-800">
+                    AI Stock Analytics
+                  </h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Research & analyze stocks
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -268,7 +380,9 @@ const DashboardContent = () => {
                     <Newspaper className="h-6 w-6 text-green-600" />
                   </div>
                   <h3 className="font-semibold text-slate-800">Market News</h3>
-                  <p className="text-sm text-slate-600 mt-1">Latest financial updates</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Latest financial updates
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -280,7 +394,9 @@ const DashboardContent = () => {
                     <Search className="h-6 w-6 text-orange-600" />
                   </div>
                   <h3 className="font-semibold text-slate-800">Stock Search</h3>
-                  <p className="text-sm text-slate-600 mt-1">Find & explore stocks</p>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Find & explore stocks
+                  </p>
                 </CardContent>
               </Card>
             </Link>
@@ -291,7 +407,9 @@ const DashboardContent = () => {
         <div>
           {/* Portfolio Allocation */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-semibold text-slate-800 mb-6">Portfolio Allocation</h2>
+            <h2 className="text-xl font-semibold text-slate-800 mb-6">
+              Portfolio Allocation
+            </h2>
 
             {portfolio.length > 0 ? (
               <>
@@ -311,18 +429,30 @@ const DashboardContent = () => {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value) => [`${value}%`, 'Allocation']} />
+                      <Tooltip
+                        formatter={(value) => [`${value}%`, "Allocation"]}
+                      />
                     </RechartsPieChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="space-y-2">
                   {pieData.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between">
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
-                        <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <span className="text-sm font-medium text-slate-700">
+                          {item.name}
+                        </span>
                       </div>
-                      <span className="text-sm text-slate-600">{item.value}%</span>
+                      <span className="text-sm text-slate-600">
+                        {item.value}%
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -344,8 +474,13 @@ const DashboardContent = () => {
           <div className="text-center py-12 mt-8">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-md mx-auto">
               <Activity className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Start Building Your Portfolio</h3>
-              <p className="text-gray-600 mb-6">Add your first stock to begin tracking your investments and see detailed analytics.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Start Building Your Portfolio
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Add your first stock to begin tracking your investments and see
+                detailed analytics.
+              </p>
               <Link href="/portfolio">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors">
                   <Plus className="w-4 h-4" />
@@ -362,10 +497,12 @@ const DashboardContent = () => {
 
 // Loading fallback component
 const DashboardLoading = () => (
-  <div className={cn(
-    "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
-    "min-h-screen"
-  )}>
+  <div
+    className={cn(
+      "flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row",
+      "min-h-screen"
+    )}
+  >
     <SideBar />
     <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50">
       <div className="flex items-center justify-center min-h-[400px]">

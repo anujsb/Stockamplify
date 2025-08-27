@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw, Activity, BarChart3, Target } from "lucide-react";
-import { SideBar } from "@/components/SideBar";
+import SideBar from "@/components/SideBar";
 import { formatPrice, formatPercentage, formatSymbol } from "@/lib/utils/stockUtils";
 import { cn } from "@/lib/utils";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";

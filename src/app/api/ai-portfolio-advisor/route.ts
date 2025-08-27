@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { AIPortfolioAdvisorService } from "@/lib/services/aiPortfolioAdvisorService";
+import { auth } from "@/lib/auth";
 
 /**
  * POST API → /api/ai-portfolio-advisor
@@ -9,8 +9,8 @@ import { AIPortfolioAdvisorService } from "@/lib/services/aiPortfolioAdvisorServ
 export async function POST(request: NextRequest) {
   try {
     // Authenticate user
-    const { userId } = await auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -1,92 +1,256 @@
 // src/lib/services/userService.ts
 import { db } from '@/lib/db';
-import { users, userStocks, stocks } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { currentUser } from '@clerk/nextjs/server';
-import { stockRealTimePrice } from '@/lib/db/schema';
-import { stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
+import { users, userStocks, stocks, subscriptions, plans, stockRealTimePrice, stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
+import { date } from 'drizzle-orm/mysql-core';
 
+const FREE_PLAN_NAME = "Free";
 
-export interface CreateUserParams {
-  clerkId: string;
+export interface UserData {
+  nextAuthId: string;
   email: string;
   username?: string;
 }
 
+export interface CreateUserData {
+  nextAuthId: string;
+  email: string;
+  username?: string;
+  password: string;
+}
+
 export class UserService {
+
   /**
-   * Create or get user from Clerk data
+   * Create a default 'Free' subscription for the given user.
+   * Assumes plans table has a row name='Free'.
    */
-  static async createOrGetUser(userData: CreateUserParams) {
+  private static async createDefaultFreeSubscription(userId: number) {
+    // Lookup pre-seeded Free plan
+    const freePlan = await db
+      .select({ id: plans.id })
+      .from(plans)
+      .where(eq(plans.name, FREE_PLAN_NAME))
+      .limit(1);
+
+    if (!freePlan.length) {
+      throw new Error(`Plan "${FREE_PLAN_NAME}" not found. Seed your plans table first.`);
+    }
+
+    // Choose validity: far-future end date since column is NOT NULL
+    const start = new Date();
+    const end = "2099-12-31";
+
+    await db.insert(subscriptions).values({
+      userId: userId,
+      planId: freePlan[0].id,
+      type: "monthly", // 'monthly', 'quarterly', 'yearly'
+      startDate: start.toDateString(), 
+      endDate: end,
+    });
+  }
+
+  /**
+   * Create or get user from NextAuth data
+   */
+  static async createOrGetUser(userData: UserData) {
     try {
       // Check if user already exists
       const existingUser = await db
         .select()
         .from(users)
-        .where(eq(users.clerkId, userData.clerkId))
+        .where(eq(users.nextAuthId, userData.nextAuthId))
         .limit(1);
 
-      let user;
       if (existingUser.length > 0) {
-        // Update last login
-        const updatedUser = await db
-          .update(users)
-          .set({ lastLogin: new Date() })
-          .where(eq(users.clerkId, userData.clerkId))
-          .returning();
-        
-        user = updatedUser[0];
-      } else {
-        // Create new user
-        const newUser = await db
-          .insert(users)
-          .values({
-            clerkId: userData.clerkId,
-            email: userData.email,
-            username: userData.username,
-            lastLogin: new Date(),
-          })
-          .returning();
-        
-        user = newUser[0];
+        return existingUser[0];
       }
 
-      // Removed background intraday data update - now handled by cronjob.org
+      // Create new user
+      const newUser = await db
+        .insert(users)
+        .values({
+          nextAuthId: userData.nextAuthId,
+          email: userData.email,
+          username: userData.username,
+          password: '', // This will be set during signup
+        })
+        .returning();
 
-      return user;
+      // Insert the default FREE subscription (plans table is pre-filled)
+      await this.createDefaultFreeSubscription(newUser[0].id);
+
+      return newUser[0];
     } catch (error) {
-      console.error('Error creating or getting user:', error);
-      throw new Error('Failed to create or get user');
+      console.error('Error creating/getting user:', error);
+      throw error;
     }
   }
 
   /**
-   * Get current user from Clerk
+   * Get current user from NextAuth
    */
-  static async getCurrentUser() {
+  static async getCurrentUser(nextAuthId: string) {
     try {
-      const clerkUser = await currentUser();
-      if (!clerkUser) return null;
-
-      const dbUser = await db
+      const user = await db
         .select()
         .from(users)
-        .where(eq(users.clerkId, clerkUser.id))
+        .where(eq(users.nextAuthId, nextAuthId))
         .limit(1);
 
-      if (dbUser.length === 0) {
-        // Create user if doesn't exist
-        return await this.createOrGetUser({
-          clerkId: clerkUser.id,
-          email: clerkUser.emailAddresses[0]?.emailAddress || '',
-          username: clerkUser.username || clerkUser.firstName || undefined,
-        });
+      if (user.length === 0) {
+        return null;
       }
 
-      return dbUser[0];
+      return {
+        id: user[0].id,
+        nextAuthId: user[0].nextAuthId,
+        email: user[0].email,
+        username: user[0].username,
+        isActive: user[0].isActive,
+        createdAt: user[0].createdAt,
+        lastLogin: user[0].lastLogin,
+      };
     } catch (error) {
-      console.error('Error getting current user:', error);
+      console.error('Error fetching current user:', error);
       return null;
+    }
+  }
+
+  /**
+   * Update user's last login
+   */
+  static async updateLastLogin(userId: number) {
+    try {
+      await db
+        .update(users)
+        .set({
+          lastLogin: new Date(),
+        })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error updating last login:', error);
+    }
+  }
+
+  /**
+   * Get user by NextAuth ID
+   */
+  static async getUserByNextAuthId(nextAuthId: string) {
+    try {
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.nextAuthId, nextAuthId))
+        .limit(1);
+
+      return user.length > 0 ? user[0] : null;
+    } catch (error) {
+      console.error('Error fetching user by NextAuth ID:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get user by email
+   */
+  static async getUserByEmail(email: string) {
+    try {
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      return user.length > 0 ? user[0] : null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Update user profile
+   */
+  static async updateUserProfile(userId: number, updates: Partial<{
+    username: string;
+    email: string;
+    isActive: boolean;
+  }>) {
+    try {
+      const updatedUser = await db
+        .update(users)
+        .set(updates)
+        .where(eq(users.id, userId))
+        .returning();
+
+      return updatedUser[0];
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deactivate user
+   */
+  static async deactivateUser(userId: number) {
+    try {
+      await db
+        .update(users)
+        .set({
+          isActive: false,
+        })
+        .where(eq(users.id, userId));
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all active users
+   */
+  static async getAllActiveUsers() {
+    try {
+      const activeUsers = await db
+        .select()
+        .from(users)
+        .where(eq(users.isActive, true));
+
+      return activeUsers;
+    } catch (error) {
+      console.error('Error fetching active users:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user statistics
+   */
+  static async getUserStats() {
+    try {
+      const totalUsers = await db
+        .select({ count: users.id })
+        .from(users);
+
+      const activeUsers = await db
+        .select({ count: users.id })
+        .from(users)
+        .where(eq(users.isActive, true));
+
+      return {
+        total: totalUsers.length,
+        active: activeUsers.length,
+        inactive: totalUsers.length - activeUsers.length,
+      };
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+      return {
+        total: 0,
+        active: 0,
+        inactive: 0,
+      };
     }
   }
 
@@ -171,24 +335,6 @@ export class UserService {
     } catch (error) {
       console.error('Error getting user portfolio:', error);
       return [];
-    }
-  }
-
-   /**
-   * Get user by Clerk ID
-   */
-  static async getUserByClerkId(clerkId: string) {
-    try {
-      const dbUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.clerkId, clerkId))
-        .limit(1);
-
-      return dbUser.length > 0 ? dbUser[0] : null;
-    } catch (error) {
-      console.error('Error fetching user by Clerk ID:', error);
-      return null;
     }
   }
 

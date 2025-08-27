@@ -1,8 +1,8 @@
 // src/app/api/portfolio/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { UserService } from '@/lib/services/userService';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { UserService } from "@/lib/services/userService";
 import { StockDataService } from '@/lib/services/stockDataService';
-import { auth } from '@clerk/nextjs/server';
 import { eq, and } from 'drizzle-orm';
 import { normalizeStockSymbol, isValidStockSymbol } from '@/lib/utils/stockUtils';
 
@@ -36,17 +36,17 @@ function convertBigIntToString(obj: any): any {
   return obj;
 }
 
-// GET /api/portfolio - Get user's portfolio
-export async function GET(req: NextRequest): Promise<NextResponse<PortfolioResponse>> {
+export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const session = await auth();
+    
+    if (!session?.user?.nextAuthId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await UserService.getCurrentUser();
+    const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const portfolio = await UserService.getUserPortfolioWithDetails(user.id);
@@ -55,23 +55,20 @@ export async function GET(req: NextRequest): Promise<NextResponse<PortfolioRespo
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error in GET /api/portfolio:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error("Portfolio API error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // POST /api/portfolio - Add stock to user's portfolio
 export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResponse>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.user?.nextAuthId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const user = await UserService.getCurrentUser();
+    const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
@@ -137,11 +134,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResp
 // DELETE /api/portfolio - Delete stock from user's portfolio
 export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioResponse>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const session = await auth();
+    if (!session?.user?.nextAuthId) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
-    const user = await UserService.getCurrentUser();
+    const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
       return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }

@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { db } from '@/lib/db';
 import { stocks } from '@/lib/db/schema';
 import { StockDataService } from '@/lib/services/stockDataService';
@@ -55,8 +55,13 @@ async function processStockBatch(stockBatch: any[], batchSize: number = 5) {
   return results;
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    
+    if (!session?.user?.nextAuthId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     console.log('Starting real-time stock price update...');
     
@@ -94,11 +99,7 @@ export async function POST() {
     });
     
   } catch (error) {
-    console.error('Error updating real-time prices for all stocks:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error',
-      message: 'Failed to update stock prices'
-    }, { status: 500 });
+    console.error("Real-time update API error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

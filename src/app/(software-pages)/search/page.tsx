@@ -1,17 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import SideBar from "@/components/SideBar";
 import StockSearch, { StockSearchResult } from "@/components/StockSearch";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { formatDate, formatPrice, formatLargeNumber, formatSymbol, formatPercentage } from "@/lib/utils/stockUtils";
-import { SideBar } from "@/components/SideBar";
+import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3, Calendar, Users, Building, AlertCircle, Plus, RefreshCw,
-  Target, PieChart, Activity, Calculator} from "lucide-react";
+import { formatLargeNumber, formatPercentage, formatPrice, formatSymbol } from "@/lib/utils/stockUtils";
+import {
+  Activity,
+  AlertCircle,
+  BarChart3,
+  Building,
+  Calculator,
+  Calendar,
+  DollarSign,
+  PieChart,
+  Plus, RefreshCw,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import React, { useState } from "react";
 
 const formatDateTime = (date: string | Date | null | undefined) => {
   if (!date) return 'N/A';
@@ -87,6 +102,23 @@ const SearchPage = () => {
   const [buyPrice, setBuyPrice] = useState<string>("");
   const [addingToPortfolio, setAddingToPortfolio] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const { data: session, status } = useSession();
+  
+  if (status === "unauthenticated") {
+    return (
+      <div className="p-6">
+        <p className="text-gray-700">
+          Please sign in to use AI Stock Analytics.
+        </p>
+        <link rel="stylesheet" href="/sign-in" />
+      </div>
+    );
+  }
+
+  // Pass redirectIfInactive = true so inactive users are bounced to dashboard
+  const { isActive, user } = useUserStatus({
+    redirectIfInactive: true,
+  });
 
   const handleStockSelect = (stock: StockSearchResult) => {
     setSymbol(stock.symbol);

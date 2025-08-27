@@ -1,18 +1,19 @@
-"use client"
-import { SideBar } from '@/components/SideBar'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
-import { useUser } from '@clerk/nextjs';
-import PortfolioTable from '@/components/portfolio/PortfolioTable'
-import AddStockModal from '@/components/portfolio/AddStockModal';
-import PortfolioSummary from '@/components/portfolio/PortfolioSummary';
-import RealTimeStatus from '@/components/portfolio/RealTimeStatus';
-import { useRealTimePortfolio } from '@/lib/hooks/useRealTimePortfolio';
-import { cn } from '@/lib/utils'
+"use client";
+import AddStockModal from "@/components/portfolio/AddStockModal";
+import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
+import PortfolioTable from "@/components/portfolio/PortfolioTable";
+import RealTimeStatus from "@/components/portfolio/RealTimeStatus";
+import SideBar from "@/components/SideBar";
+import { Button } from "@/components/ui/button";
+import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
+import { useUserStatus } from "@/lib/hooks/useUserStatus";
+import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
-const PortfolioPage = () => {
-  const { user } = useUser();
+export default function PortfolioPage() {
+  const { data: session } = useSession();
   const [showAddModal, setShowAddModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
@@ -20,20 +21,25 @@ const PortfolioPage = () => {
 
   const handleAddClick = () => setShowAddModal(true);
   const handleCloseModal = () => setShowAddModal(false);
-  const handleSuccess = () => setRefreshKey(k => k + 1);
+  const handleSuccess = () => setRefreshKey((k) => k + 1);
+
+  // Pass redirectIfInactive = true so inactive users are bounced to dashboard
+  const { isActive, user } = useUserStatus({
+    redirectIfInactive: true,
+  });
 
   // Initial portfolio fetch (only on mount and after adding stocks)
   useEffect(() => {
     const fetchInitialPortfolio = async () => {
       setInitialLoading(true);
       try {
-        const res = await fetch('/api/portfolio');
+        const res = await fetch("/api/portfolio");
         const data = await res.json();
         if (data.success) {
           setInitialPortfolio(data.data);
         }
       } catch (err) {
-        console.error('Failed to fetch initial portfolio:', err);
+        console.error("Failed to fetch initial portfolio:", err);
       } finally {
         setInitialLoading(false);
       }
@@ -42,26 +48,23 @@ const PortfolioPage = () => {
   }, [refreshKey]);
 
   // Use real-time portfolio hook
-  const {
-    portfolio,
-    status,
-    isLoading,
-    error,
-    refreshPortfolio
-  } = useRealTimePortfolio(initialPortfolio);
+  const { portfolio, status, isLoading, error, refreshPortfolio } =
+    useRealTimePortfolio(initialPortfolio);
 
   return (
-    <div className={cn(
+    <div
+      className={cn(
         " flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row ",
-        "min-h-screen",
-      )}>
+        "min-h-screen"
+      )}
+    >
       <SideBar />
       <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
-              {user?.firstName || 'Investor'}'s Portfolio.
+              {session?.user?.username || "Investor"}'s Portfolio.
             </h1>
           </div>
           <div className="flex gap-3 w-full sm:w-auto">
@@ -71,12 +74,16 @@ const PortfolioPage = () => {
             </Button>
           </div>
         </header>
-        
-        <AddStockModal open={showAddModal} onClose={handleCloseModal} onSuccess={handleSuccess} />
-        
+
+        <AddStockModal
+          open={showAddModal}
+          onClose={handleCloseModal}
+          onSuccess={handleSuccess}
+        />
+
         {/* Body */}
         <main className="max-w-7xl mx-auto px-0 sm:px-2 lg:px-6 py-2 sm:py-6">
-          <RealTimeStatus 
+          <RealTimeStatus
             status={status}
             isLoading={isLoading}
             error={error}
@@ -91,7 +98,5 @@ const PortfolioPage = () => {
         </main>
       </div>
     </div>
-  )
+  );
 }
-
-export default PortfolioPage

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+import { SessionProvider } from "next-auth/react";
 import ClientLayout from "./ClientLayout";
 import "./globals.css";
 import SiteGuard from "@/components/SiteGuard";
+import { auth } from '@/lib/auth';
+import { Providers } from './providers';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -85,21 +87,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
-    <ClerkProvider>
+    <SessionProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
           <SiteGuard disableCopy={false} showAlert={false} />
           <ClientLayout>
-            {children}
+            <Providers session={session}>{children}</Providers>
           </ClientLayout>
         </body>
       </html>
-    </ClerkProvider>
+    </SessionProvider>
   );
 }

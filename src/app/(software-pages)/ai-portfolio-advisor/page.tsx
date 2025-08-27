@@ -1,6 +1,6 @@
 "use client";
 
-import { SideBar } from "@/components/SideBar";
+import SideBar from "@/components/SideBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
 import { cn } from "@/lib/utils";

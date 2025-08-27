@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useRealTimeUpdates } from './useRealTimeUpdates';
 import { useIntradayUpdates } from './useIntradayUpdates';
 
@@ -22,8 +22,8 @@ export interface UpdateManagerStatus {
   isInitialized: boolean;
 }
 
-export const useUpdateManager = () => {
-  const { user, isSignedIn } = useUser();
+export function useUpdateManager() {
+  const { data: session } = useSession();
   const realTimeUpdates = useRealTimeUpdates();
   const intradayUpdates = useIntradayUpdates();
   
@@ -46,8 +46,8 @@ export const useUpdateManager = () => {
 
   // Initialize updates when user signs in
   useEffect(() => {
-    if (isSignedIn && user && !status.isInitialized) {
-      console.log('Initializing update manager for user:', user.id);
+    if (session && !status.isInitialized) {
+      console.log('Initializing update manager for user:', session.user?.id);
       
       // Real-time updates are already auto-started by useRealTimeUpdates hook
       // Intraday updates are now handled by cronjob.org
@@ -56,7 +56,7 @@ export const useUpdateManager = () => {
         ...prev,
         isInitialized: true
       }));
-    } else if (!isSignedIn && status.isInitialized) {
+    } else if (!session && status.isInitialized) {
       // User signed out, stop all updates
       console.log('User signed out, stopping all updates');
       realTimeUpdates.stopRealTimeUpdates();
@@ -66,7 +66,7 @@ export const useUpdateManager = () => {
         isInitialized: false
       }));
     }
-  }, [isSignedIn, user, status.isInitialized, realTimeUpdates]);
+  }, [session, status.isInitialized, realTimeUpdates]);
 
   // Update status based on real-time hook
   useEffect(() => {
@@ -95,33 +95,33 @@ export const useUpdateManager = () => {
   }, [intradayUpdates.lastUpdateResult]);
 
   // Manual controls
-  const startRealTimeUpdates = useCallback(() => {
-    if (isSignedIn) {
+  const startRealTimeUpdates = () => {
+    if (session) {
       realTimeUpdates.startRealTimeUpdates();
     } else {
       setError('Please sign in to start real-time updates');
     }
-  }, [isSignedIn, realTimeUpdates]);
+  };
 
-  const stopRealTimeUpdates = useCallback(() => {
+  const stopRealTimeUpdates = () => {
     realTimeUpdates.stopRealTimeUpdates();
-  }, [realTimeUpdates]);
+  };
 
-  const triggerIntradayUpdate = useCallback(async () => {
-    if (!isSignedIn) {
+  const triggerIntradayUpdate = async () => {
+    if (!session) {
       setError('Please sign in to trigger intraday updates');
       return null;
     }
     
     return await intradayUpdates.triggerUpdate();
-  }, [isSignedIn, intradayUpdates]);
+  };
 
   return {
     status,
     isLoading: isLoading || realTimeUpdates.isLoading || intradayUpdates.isLoading,
     error: error || realTimeUpdates.error || intradayUpdates.error,
-    isSignedIn,
-    user,
+    isSignedIn: !!session,
+    user: session?.user,
     // Controls
     startRealTimeUpdates,
     stopRealTimeUpdates,
