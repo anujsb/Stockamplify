@@ -1,8 +1,7 @@
 // src/lib/services/userService.ts
 import { db } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
-import { users, userStocks, stocks, subscriptions, plans, stockRealTimePrice, stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
-import { date } from 'drizzle-orm/mysql-core';
+import { analystRating, plans, stockFinancialData, stockFundamentalData, stockIntraDayPrice, stockRealTimePrice, stocks, stockStatistics, subscriptions, users, userStocks } from '@/lib/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 const FREE_PLAN_NAME = "Free";
 
@@ -45,7 +44,7 @@ export class UserService {
       userId: userId,
       planId: freePlan[0].id,
       type: "monthly", // 'monthly', 'quarterly', 'yearly'
-      startDate: start.toDateString(), 
+      startDate: start.toDateString(),
       endDate: end,
     });
   }
@@ -351,7 +350,7 @@ export class UserService {
           buyPrice: userStocks.buyPrice,
           addedAt: userStocks.addedAt,
           updatedAt: userStocks.updatedAt,
-          
+
           // Stock basic info
           stock: {
             id: stocks.id,
@@ -363,14 +362,14 @@ export class UserService {
             currency: stocks.currency,
             lastRefreshedAt: stocks.lastRefreshedAt,
           },
-          
+
           // Real-time price data
           realTimePrice: {
             price: stockRealTimePrice.price,
             volume: stockRealTimePrice.volume,
             updatedAt: stockRealTimePrice.updatedAt,
           },
-          
+
           // Intraday price data
           intradayPrice: {
             previousClose: stockIntraDayPrice.previousClose,
@@ -386,7 +385,7 @@ export class UserService {
             marketCap: stockIntraDayPrice.marketCap,
             updatedAt: stockIntraDayPrice.updatedAt,
           },
-          
+
           // Fundamental data
           fundamentalData: {
             epsTTM: stockFundamentalData.epsTTM,
@@ -397,7 +396,7 @@ export class UserService {
             priceToBook: stockFundamentalData.priceToBook,
             updatedAt: stockFundamentalData.updatedAt,
           },
-          
+
           // Financial data
           financialData: {
             totalRevenue: stockFinancialData.totalRevenue,
@@ -416,7 +415,7 @@ export class UserService {
             earningsGrowth: stockFinancialData.earningsGrowth,
             updatedAt: stockFinancialData.updatedAt,
           },
-          
+
           // Statistics data
           statistics: {
             sharesHeldByInstitutions: stockStatistics.sharesHeldByInstitutions,
@@ -425,11 +424,12 @@ export class UserService {
             lastSplitDate: stockStatistics.lastSplitDate,
             lastDividendValue: stockStatistics.lastDividendValue,
             lastDividendDate: stockStatistics.lastDividendDate,
+            beta: stockStatistics.beta,
             earningsDate: stockStatistics.earningsDate,
             earningsCallDate: stockStatistics.earningsCallDate,
             updatedAt: stockStatistics.updatedAt,
           },
-          
+
           // Analyst ratings
           analystRating: {
             recommendation: analystRating.recommendation,

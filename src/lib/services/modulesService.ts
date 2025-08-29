@@ -36,6 +36,7 @@ export interface YahooModulesData {
     lastSplitDate?: number;
     lastDividendValue?: number;
     lastDividendDate?: number;
+    beta?: number;
   };
   calendarEvents?: {
     earnings?: {
@@ -59,6 +60,9 @@ export class ModulesService {
           'calendarEvents'
         ]
       });
+
+
+
       return modules as YahooModulesData;
     } catch (error) {
       console.error(`Error fetching modules data for ${symbol}:`, error);

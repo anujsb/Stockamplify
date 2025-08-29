@@ -81,14 +81,14 @@ export class AIPortfolioAdvisorService {
             pe < 10
               ? "0-10"
               : pe < 15
-              ? "10-15"
-              : pe < 20
-              ? "15-20"
-              : pe < 25
-              ? "20-25"
-              : pe < 30
-              ? "25-30"
-              : "30+";
+                ? "10-15"
+                : pe < 20
+                  ? "15-20"
+                  : pe < 25
+                    ? "20-25"
+                    : pe < 30
+                      ? "25-30"
+                      : "30+";
           const existing = peDistributionData.find((p) => p.range.trim() === peRange);
 
           if (existing) {
@@ -111,8 +111,8 @@ export class AIPortfolioAdvisorService {
             marketCapCrores > 100000
               ? "Large Cap"
               : marketCapCrores > 20000
-              ? "Mid Cap"
-              : "Small Cap",
+                ? "Mid Cap"
+                : "Small Cap",
           value: currentValue,
           weight: (currentValue / totalCurrentValue) * 100,
         });
@@ -149,21 +149,22 @@ export class AIPortfolioAdvisorService {
         });
       }
 
-      // 5️⃣ Risk vs Return Analysis (Mock Volatility)
+      // 5️⃣ Risk vs Return Analysis (Real Beta from Yahoo Finance)
+      const stockBeta = item.statistics?.beta || 1.0; // Use real beta or default to 1.0
       const volatility = 15 + Math.random() * 25;
-      const alpha = returnPct - beta * 12;
+      const alpha = returnPct - stockBeta * 12;
 
       riskReturnData.push({
         symbol,
         risk: volatility,
         return: returnPct,
         size: currentValue,
-        beta,
+        beta: stockBeta,
         alpha,
         color: colors[index % colors.length],
       });
 
-      weightedBeta += beta * weight;
+      weightedBeta += stockBeta * weight;
 
       // 6️⃣ Sector Allocations
       if (!sectorAllocations[sector]) {

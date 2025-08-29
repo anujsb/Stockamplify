@@ -1,11 +1,18 @@
 // src/lib/services/stockDataService.ts
 import { db } from '@/lib/db';
-import { stocks, stockRealTimePrice, stockIntraDayPrice, stockFundamentalData, stockFinancialData, stockStatistics, 
-  analystRating } from '../db/schema';
-import { QuoteService, YahooQuoteData } from './quoteService';
-import { ModulesService, YahooModulesData } from './modulesService';
-import { eq, and } from 'drizzle-orm';
 import { normalizeStockSymbol } from '@/lib/utils/stockUtils';
+import { and, eq } from 'drizzle-orm';
+import {
+  analystRating,
+  stockFinancialData,
+  stockFundamentalData,
+  stockIntraDayPrice,
+  stockRealTimePrice,
+  stocks,
+  stockStatistics
+} from '../db/schema';
+import { ModulesService, YahooModulesData } from './modulesService';
+import { QuoteService, YahooQuoteData } from './quoteService';
 
 export interface StockCreationResult {
   success: boolean;
@@ -30,11 +37,11 @@ export class StockDataService {
     try {
       symbol = normalizeStockSymbol(symbol);
       // Fetch data from Yahoo Finance
-const [quote, modules] = await Promise.all([
+      const [quote, modules] = await Promise.all([
         QuoteService.getQuote(symbol),
         ModulesService.getModulesData(symbol)
       ]);
-      
+
       if (!quote || !quote.regularMarketPrice) {
         return {
           success: false,
@@ -72,7 +79,7 @@ const [quote, modules] = await Promise.all([
           })
           .where(eq(stocks.id, stockId))
           .returning();
-        
+
         stockRecord = updatedStock[0];
       } else {
         // Create new stock
@@ -88,7 +95,7 @@ const [quote, modules] = await Promise.all([
             lastRefreshedAt: new Date(),
           })
           .returning();
-        
+
         stockRecord = newStock[0];
         stockId = stockRecord.id;
       }
@@ -163,14 +170,14 @@ const [quote, modules] = await Promise.all([
         volume: quote.regularMarketVolume !== undefined ? BigInt(quote.regularMarketVolume) : null,
         updatedAt: new Date(),
       };
-  
+
       // Check if real-time price data already exists for this stock
       const existing = await db
         .select()
         .from(stockRealTimePrice)
         .where(eq(stockRealTimePrice.stockId, stockId))
         .limit(1);
-  
+
       if (existing.length > 0) {
         // Update existing record
         return await db
@@ -187,7 +194,7 @@ const [quote, modules] = await Promise.all([
       return null;
     }
   }
-  
+
   /**
    * Check if intraday data update is needed based on IST market hours.
    * Updates should happen at 9:00 AM (market open) and 3:45 PM (near market close).
@@ -195,36 +202,36 @@ const [quote, modules] = await Promise.all([
    */
   static isIntradayUpdateNeeded(lastUpdated: Date): boolean {
     const now = new Date();
-    
+
     // Convert to IST
     const nowIST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     const lastUpdatedIST = new Date(lastUpdated.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-    
+
     // Check if today is a trading day (Monday = 1, Friday = 5, Saturday = 6, Sunday = 0)
     const dayOfWeek = nowIST.getDay();
     const isTradingDay = dayOfWeek >= 1 && dayOfWeek <= 5;
-    
+
     if (!isTradingDay) {
       return false; // No updates on weekends
     }
-    
+
     // Get today's date in IST
     const today = nowIST.toISOString().split('T')[0];
-    
+
     // Create update times for today in IST
     const nineAM = new Date(`${today}T09:00:00.000+05:30`);
     const threeFortyFivePM = new Date(`${today}T15:45:00.000+05:30`);
-    
+
     // Check if current time is past 9:00 AM and data wasn't updated after 9:00 AM today
     if (nowIST >= nineAM && lastUpdatedIST < nineAM) {
       return true;
     }
-    
+
     // Check if current time is past 3:45 PM and data wasn't updated after 3:45 PM today
     if (nowIST >= threeFortyFivePM && lastUpdatedIST < threeFortyFivePM) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -365,18 +372,29 @@ const [quote, modules] = await Promise.all([
       const stats = modules.defaultKeyStatistics;
       const events = modules.calendarEvents;
 
+
+
+
+      const lastDividendValue = stats?.lastDividendValue;
+      const lastDividendDate = stats?.lastDividendDate;
+
+      const earningsDate = events?.earnings?.earningsDate?.[0];
+
       const data = {
         stockId,
         sharesHeldByInstitutions: stats?.heldPercentInstitutions?.toString() ?? null,
         sharesHeldByAllInsider: stats?.heldPercentInsiders?.toString() ?? null,
         lastSplitFactor: stats?.lastSplitFactor ?? null,
         lastSplitDate: this.safeDateFromTimestamp(stats?.lastSplitDate),
-        lastDividendValue: stats?.lastDividendValue?.toString() ?? null,
-        lastDividendDate: this.safeDateFromTimestamp(stats?.lastDividendDate),
-        earningsDate: this.safeDateFromTimestamp(events?.earnings?.earningsDate?.[0]),
+        lastDividendValue: lastDividendValue?.toString() ?? null,
+        lastDividendDate: this.safeDateFromTimestamp(lastDividendDate),
+        beta: stats?.beta?.toString() ?? null,
+        earningsDate: this.safeDateFromTimestamp(earningsDate),
         earningsCallDate: this.safeDateFromTimestamp(events?.earnings?.earningsCallDate?.[0]),
         updatedAt: new Date(),
       };
+
+
 
       const existing = await db
         .select()
@@ -385,16 +403,24 @@ const [quote, modules] = await Promise.all([
         .limit(1);
 
       if (existing.length > 0) {
-        return await db
+        const result = await db
           .update(stockStatistics)
           .set(data)
           .where(eq(stockStatistics.id, existing[0].id))
           .returning();
+        return result;
       } else {
-        return await db.insert(stockStatistics).values(data).returning();
+        const result = await db.insert(stockStatistics).values(data).returning();
+        return result;
       }
     } catch (error) {
       console.error('Error upserting statistics:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        stockId,
+        modules: modules ? 'Present' : 'Missing'
+      });
       return null;
     }
   }
@@ -440,10 +466,10 @@ const [quote, modules] = await Promise.all([
   static async updateRealTimePriceOnly(symbol: string): Promise<StockCreationResult> {
     try {
       symbol = normalizeStockSymbol(symbol);
-      
+
       // Only fetch quote data (no modules) for faster response
-const quote = await QuoteService.getQuote(symbol);
-      
+      const quote = await QuoteService.getQuote(symbol);
+
       if (!quote || !quote.regularMarketPrice) {
         return {
           success: false,
@@ -466,10 +492,10 @@ const quote = await QuoteService.getQuote(symbol);
       }
 
       const stockId = existingStock[0].id;
-      
+
       // Update ONLY real-time price data (no intraday table update)
       const realTimePriceData = await this.upsertRealTimePrice(stockId, quote);
-      
+
       // Update stock's last refreshed timestamp
       await db
         .update(stocks)
@@ -480,7 +506,7 @@ const quote = await QuoteService.getQuote(symbol);
         success: true,
         stockId,
         message: `Successfully updated real-time price for ${symbol}`,
-        data: { 
+        data: {
           stock: existingStock[0],
           realTimePrice: realTimePriceData
         }
@@ -501,10 +527,10 @@ const quote = await QuoteService.getQuote(symbol);
   static async updateIntradayPriceOnly(symbol: string): Promise<StockCreationResult> {
     try {
       symbol = normalizeStockSymbol(symbol);
-      
+
       // Only fetch quote data (no modules) for faster response
-const quote = await QuoteService.getQuote(symbol);
-      
+      const quote = await QuoteService.getQuote(symbol);
+
       if (!quote || !quote.regularMarketPrice) {
         return {
           success: false,
@@ -527,11 +553,11 @@ const quote = await QuoteService.getQuote(symbol);
       }
 
       const stockId = existingStock[0].id;
-      
+
       // Update both real-time price and intraday data
       const realTimePriceData = await this.upsertRealTimePrice(stockId, quote);
       const intraDayPriceData = await this.upsertIntraDayPrice(stockId, quote);
-      
+
       // Update stock's last refreshed timestamp
       await db
         .update(stocks)
@@ -542,7 +568,7 @@ const quote = await QuoteService.getQuote(symbol);
         success: true,
         stockId,
         message: `Successfully updated intraday data for ${symbol}`,
-        data: { 
+        data: {
           stock: existingStock[0],
           realTimePrice: realTimePriceData,
           intraDayPrice: intraDayPriceData
@@ -584,7 +610,7 @@ const quote = await QuoteService.getQuote(symbol);
         .from(stockIntraDayPrice)
         .orderBy(stockIntraDayPrice.updatedAt)
         .limit(1);
-      
+
       return result.length > 0 ? result[0].updatedAt : null;
     } catch (error) {
       console.error('Error getting oldest intraday update time:', error);
@@ -599,7 +625,7 @@ const quote = await QuoteService.getQuote(symbol);
     try {
       // Get the oldest update time to determine if any update is needed
       const oldestUpdate = await this.getOldestIntradayUpdateTime();
-      
+
       if (!oldestUpdate || !this.isIntradayUpdateNeeded(oldestUpdate)) {
         return {
           updated: false,
@@ -656,7 +682,7 @@ const quote = await QuoteService.getQuote(symbol);
   static async updateFundamentalDataForAll(): Promise<{ total: number; successful: number; failed: number; results: any[] }> {
     try {
       console.log('Starting fundamental data update for all stocks...');
-      
+
       // Get all active stocks
       const activeStocks = await db
         .select()
@@ -679,22 +705,22 @@ const quote = await QuoteService.getQuote(symbol);
       // Process stocks in batches of 3 to avoid overwhelming the API
       for (let i = 0; i < activeStocks.length; i += 3) {
         const batch = activeStocks.slice(i, i + 3);
-        
+
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including fundamental data
-const [quote, modules] = await Promise.all([
+            const [quote, modules] = await Promise.all([
               QuoteService.getQuote(stock.symbol),
               ModulesService.getModulesData(stock.symbol)
             ]);
-            
+
             if (!quote) {
               throw new Error('No quote data received');
             }
 
             // Update fundamental data
             await this.upsertFundamentalData(stock.id, quote);
-            
+
             successCount++;
             return {
               symbol: stock.symbol,
@@ -752,7 +778,7 @@ const [quote, modules] = await Promise.all([
   static async updateFinancialDataForAll(): Promise<{ total: number; successful: number; failed: number; results: any[] }> {
     try {
       console.log('Starting financial data update for all stocks...');
-      
+
       // Get all active stocks
       const activeStocks = await db
         .select()
@@ -775,22 +801,22 @@ const [quote, modules] = await Promise.all([
       // Process stocks in batches of 3 to avoid overwhelming the API
       for (let i = 0; i < activeStocks.length; i += 3) {
         const batch = activeStocks.slice(i, i + 3);
-        
+
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including financial data
-const [quote, modules] = await Promise.all([
+            const [quote, modules] = await Promise.all([
               QuoteService.getQuote(stock.symbol),
               ModulesService.getModulesData(stock.symbol)
             ]);
-            
+
             if (!modules?.financialData) {
               throw new Error('No financial data received');
             }
 
             // Update financial data
             await this.upsertFinancialData(stock.id, modules.financialData);
-            
+
             successCount++;
             return {
               symbol: stock.symbol,
@@ -848,7 +874,7 @@ const [quote, modules] = await Promise.all([
   static async updateStatisticsDataForAll(): Promise<{ total: number; successful: number; failed: number; results: any[] }> {
     try {
       console.log('Starting statistics data update for all stocks...');
-      
+
       // Get all active stocks
       const activeStocks = await db
         .select()
@@ -871,22 +897,22 @@ const [quote, modules] = await Promise.all([
       // Process stocks in batches of 3 to avoid overwhelming the API
       for (let i = 0; i < activeStocks.length; i += 3) {
         const batch = activeStocks.slice(i, i + 3);
-        
+
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including statistics
-const [quote, modules] = await Promise.all([
+            const [quote, modules] = await Promise.all([
               QuoteService.getQuote(stock.symbol),
               ModulesService.getModulesData(stock.symbol)
             ]);
-            
+
             if (!modules || (!modules.defaultKeyStatistics && !modules.calendarEvents)) {
               throw new Error('No statistics data received');
             }
 
             // Update statistics data
             await this.upsertStatistics(stock.id, modules);
-            
+
             successCount++;
             return {
               symbol: stock.symbol,
@@ -944,7 +970,7 @@ const [quote, modules] = await Promise.all([
   static async updateAnalystRatingsForAll(): Promise<{ total: number; successful: number; failed: number; results: any[] }> {
     try {
       console.log('Starting analyst ratings update for all stocks...');
-      
+
       // Get all active stocks
       const activeStocks = await db
         .select()
@@ -967,22 +993,22 @@ const [quote, modules] = await Promise.all([
       // Process stocks in batches of 3 to avoid overwhelming the API
       for (let i = 0; i < activeStocks.length; i += 3) {
         const batch = activeStocks.slice(i, i + 3);
-        
+
         const batchPromises = batch.map(async (stock) => {
           try {
             // Get comprehensive data including analyst ratings
-const [quote, modules] = await Promise.all([
+            const [quote, modules] = await Promise.all([
               QuoteService.getQuote(stock.symbol),
               ModulesService.getModulesData(stock.symbol)
             ]);
-            
+
             if (!modules?.financialData?.recommendationKey) {
               throw new Error('No analyst rating data received');
             }
 
             // Update analyst ratings
             await this.upsertAnalystRating(stock.id, modules.financialData);
-            
+
             successCount++;
             return {
               symbol: stock.symbol,

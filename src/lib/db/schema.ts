@@ -1,6 +1,6 @@
 // src/lib/db/schema.ts
-import { pgTable, serial, varchar, boolean, timestamp, decimal, bigint, integer, date, unique } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { bigint, boolean, date, decimal, integer, pgTable, serial, timestamp, unique, varchar } from 'drizzle-orm/pg-core';
 
 // Users table (integrates with NextAuth)
 export const users = pgTable('users', {
@@ -17,54 +17,54 @@ export const users = pgTable('users', {
 
 // =================== PLANS ===================
 export const plans = pgTable("plans", {
-id: serial("id").primaryKey(),
-name: varchar("name", { length: 50 }).notNull().unique(),
-description: varchar("description"),
-active: boolean("active").default(true),
-createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(),
+  description: varchar("description"),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // =================== SUBSCRIPTIONS ===================
 export const subscriptions = pgTable("subscriptions", {
-id: serial("id").primaryKey(),
-userId: integer("user_id").notNull(),
-planId: integer("plan_id").notNull(),
-type: varchar("type", { length: 20 }).notNull(), // 'monthly', 'quarterly', 'yearly'
-startDate: date("start_date").notNull(),
-endDate: date("end_date").notNull(),
-createdAt: timestamp("created_at").defaultNow().notNull(),
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  planId: integer("plan_id").notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // 'monthly', 'quarterly', 'yearly'
+  startDate: date("start_date").notNull(),
+  endDate: date("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // =================== FEATURES ===================
 export const features = pgTable("features", {
-id: serial("id").primaryKey(),
-code: varchar("code", { length: 50 }).notNull().unique(),
-name: varchar("name", { length: 100 }).notNull(),
-description: varchar("description"),
-createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: varchar("description"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // =================== PLAN FEATURES ===================
 export const planFeatures = pgTable("plan_features", {
-id: serial("id").primaryKey(),
-planId: integer("plan_id").notNull(),
-featureId: integer("feature_id").notNull(),
-quota: integer("quota").notNull(),
-resetInterval: varchar("reset_interval", { length: 20 }).notNull(),
-createdAt: timestamp("created_at").defaultNow().notNull(),
-updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id").notNull(),
+  featureId: integer("feature_id").notNull(),
+  quota: integer("quota").notNull(),
+  resetInterval: varchar("reset_interval", { length: 20 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // =================== FEATURE USAGE ===================
 export const featureUsage = pgTable("feature_usage", {
-id: serial("id").primaryKey(),
-userId: integer("user_id").notNull(),
-featureCode: varchar("feature_code", { length: 50 }).notNull(),
-periodStart: date("period_start").notNull(),
-periodEnd: date("period_end").notNull(),
-usedCount: integer("used_count").default(0).notNull(),
-createdAt: timestamp("created_at").defaultNow().notNull(),
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  featureCode: varchar("feature_code", { length: 50 }).notNull(),
+  periodStart: date("period_start").notNull(),
+  periodEnd: date("period_end").notNull(),
+  usedCount: integer("used_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 },
   (table) => ({
     dailyUniq: unique("feature_usage_daily_unique").on(
@@ -167,12 +167,13 @@ export const stockFinancialData = pgTable('stock_financial_data', {
 export const stockStatistics = pgTable('stock_statistics', {
   id: serial('id').primaryKey(),
   stockId: integer('stock_id').references(() => stocks.id).notNull(),
-  sharesHeldByInstitutions: varchar('shares_held_by_institutions', { length: 5 }),
-  sharesHeldByAllInsider: varchar('shares_held_by_all_insider', { length: 5 }),
-  lastSplitFactor: varchar('last_split_factor', { length: 5 }),
+  sharesHeldByInstitutions: varchar('shares_held_by_institutions', { length: 10 }),
+  sharesHeldByAllInsider: varchar('shares_held_by_all_insider', { length: 10 }),
+  lastSplitFactor: varchar('last_split_factor', { length: 10 }),
   lastSplitDate: date('last_split_date'),
   lastDividendValue: decimal('last_dividend_value', { precision: 4, scale: 2 }),
   lastDividendDate: date('last_dividend_date'),
+  beta: decimal('beta', { precision: 6, scale: 3 }),
   earningsDate: date('earnings_date'),
   earningsCallDate: date('earnings_call_date'),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -227,38 +228,38 @@ export const userStocksRelations = relations(userStocks, ({ one }) => ({
 }));
 
 export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
-user: one(users, {
-fields: [subscriptions.userId],
-references: [users.id],
-}),
-plan: one(plans, {
-fields: [subscriptions.planId],
-references: [plans.id],
-}),
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+  plan: one(plans, {
+    fields: [subscriptions.planId],
+    references: [plans.id],
+  }),
 }));
 
 export const planRelations = relations(plans, ({ many }) => ({
-features: many(planFeatures),
+  features: many(planFeatures),
 }));
 
 export const planFeatureRelations = relations(planFeatures, ({ one }) => ({
-plan: one(plans, {
-fields: [planFeatures.planId],
-references: [plans.id],
-}),
-feature: one(features, {
-fields: [planFeatures.featureId],
-references: [features.id],
-}),
+  plan: one(plans, {
+    fields: [planFeatures.planId],
+    references: [plans.id],
+  }),
+  feature: one(features, {
+    fields: [planFeatures.featureId],
+    references: [features.id],
+  }),
 }));
 
 export const featureRelations = relations(features, ({ many }) => ({
-planMappings: many(planFeatures),
+  planMappings: many(planFeatures),
 }));
 
 export const featureUsageRelations = relations(featureUsage, ({ one }) => ({
-user: one(users, {
-fields: [featureUsage.userId],
-references: [users.id],
-}),
+  user: one(users, {
+    fields: [featureUsage.userId],
+    references: [users.id],
+  }),
 }));

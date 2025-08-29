@@ -1,5 +1,4 @@
-import React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const TechnicalTab = ({ item }: { item: any }) => {
   return (
@@ -118,16 +117,24 @@ const TechnicalTab = ({ item }: { item: any }) => {
                   {/* <span className="text-sm font-medium">{item.statistics.lastSplitDate}</span> */}
                 </div>
                 <div className="flex justify-between gap-4">
-                  <span className="text-sm text-gray-600">Last Dividend alue</span>
-                  {/* <span className="text-sm font-medium">{item.statistics.lastDividendValue}</span> */}
+                  <span className="text-sm text-gray-600">Last Dividend Value</span>
+                  <span className="text-sm font-medium">{item.statistics?.lastDividendValue || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-sm text-gray-600">Last Dividend Date</span>
+                  <span className="text-sm font-medium">{item.statistics?.lastDividendDate || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-sm text-gray-600">Beta</span>
+                  <span className="text-sm font-medium">{item.statistics?.beta || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Earnings Date</span>
-                  {/* <span className="text-sm font-medium">{item.statistics.earningsDate}</span> */}
+                  <span className="text-sm font-medium">{item.statistics?.earningsDate || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between gap-4">
                   <span className="text-sm text-gray-600">Earnings Call Date</span>
-                  {/* <span className="text-sm font-medium">{item.statistics.earningsCallDate}</span> */}
+                  <span className="text-sm font-medium">{item.statistics?.earningsCallDate || 'N/A'}</span>
                 </div>
 
               </div>

@@ -61,6 +61,7 @@ export interface YahooModulesData {
     lastSplitDate?: number;
     lastDividendValue?: number;
     lastDividendDate?: number;
+    beta?: number;
   };
   calendarEvents?: {
     earnings?: {
@@ -169,8 +170,8 @@ export class YahooFinanceService {
    * Get historical data for a stock symbol
    */
   static async getHistoricalData(
-    symbol: string, 
-    period: TimeRange = '1mo', 
+    symbol: string,
+    period: TimeRange = '1mo',
     interval: TimeInterval = '1d'
   ): Promise<YahooHistoricalData[]> {
     try {
@@ -218,8 +219,8 @@ export class YahooFinanceService {
    * Get chart data for a stock symbol (alternative method)
    */
   static async getChartData(
-    symbol: string, 
-    period: TimeRange = '1mo', 
+    symbol: string,
+    period: TimeRange = '1mo',
     interval: TimeInterval = '1d'
   ): Promise<YahooChartData | null> {
     try {
@@ -254,23 +255,23 @@ export class YahooFinanceService {
           // fiftyTwoWeekHigh: chart.meta.fiftyTwoWeekHigh,
           // fiftyTwoWeekLow: chart.meta.fiftyTwoWeekLow,
           currentTradingPeriod: {
-            pre: { 
-              timezone: chart.meta.currentTradingPeriod?.pre?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.pre?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.pre?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.pre?.gmtoffset || 0 
+            pre: {
+              timezone: chart.meta.currentTradingPeriod?.pre?.timezone || '',
+              start: chart.meta.currentTradingPeriod?.pre?.start?.getTime() || 0,
+              end: chart.meta.currentTradingPeriod?.pre?.end?.getTime() || 0,
+              gmtoffset: chart.meta.currentTradingPeriod?.pre?.gmtoffset || 0
             },
-            regular: { 
-              timezone: chart.meta.currentTradingPeriod?.regular?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.regular?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.regular?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.regular?.gmtoffset || 0 
+            regular: {
+              timezone: chart.meta.currentTradingPeriod?.regular?.timezone || '',
+              start: chart.meta.currentTradingPeriod?.regular?.start?.getTime() || 0,
+              end: chart.meta.currentTradingPeriod?.regular?.end?.getTime() || 0,
+              gmtoffset: chart.meta.currentTradingPeriod?.regular?.gmtoffset || 0
             },
-            post: { 
-              timezone: chart.meta.currentTradingPeriod?.post?.timezone || '', 
-              start: chart.meta.currentTradingPeriod?.post?.start?.getTime() || 0, 
-              end: chart.meta.currentTradingPeriod?.post?.end?.getTime() || 0, 
-              gmtoffset: chart.meta.currentTradingPeriod?.post?.gmtoffset || 0 
+            post: {
+              timezone: chart.meta.currentTradingPeriod?.post?.timezone || '',
+              start: chart.meta.currentTradingPeriod?.post?.start?.getTime() || 0,
+              end: chart.meta.currentTradingPeriod?.post?.end?.getTime() || 0,
+              gmtoffset: chart.meta.currentTradingPeriod?.post?.gmtoffset || 0
             }
           },
           dataGranularity: chart.meta.dataGranularity || '',
@@ -288,8 +289,8 @@ export class YahooFinanceService {
    * Get comprehensive stock data for AI analysis
    */
   static async getStockDataForAnalysis(
-    symbol: string, 
-    period: TimeRange = '1mo', 
+    symbol: string,
+    period: TimeRange = '1mo',
     interval: TimeInterval = '1d'
   ): Promise<{
     quote: YahooQuoteData | null;
@@ -308,11 +309,11 @@ export class YahooFinanceService {
       return { quote, modules, historical, chart };
     } catch (error) {
       console.error(`Error fetching comprehensive data for ${symbol}:`, error);
-      return { 
-        quote: null, 
-        modules: null, 
-        historical: [], 
-        chart: null 
+      return {
+        quote: null,
+        modules: null,
+        historical: [],
+        chart: null
       };
     }
   }

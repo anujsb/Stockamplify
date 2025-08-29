@@ -1,0 +1,1 @@
+ALTER TABLE "stock_statistics" ADD COLUMN "beta" numeric(6, 3);

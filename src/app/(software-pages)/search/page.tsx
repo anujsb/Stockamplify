@@ -41,12 +41,12 @@ const formatDateTime = (date: string | Date | null | undefined) => {
   }).format(dateObj);
 };
 
-const MetricCard = ({ 
-  label, 
-  value, 
-  icon: Icon, 
+const MetricCard = ({
+  label,
+  value,
+  icon: Icon,
   className = "",
-  trend = null 
+  trend = null
 }: {
   label: string;
   value: string | number;
@@ -70,11 +70,11 @@ const MetricCard = ({
   </div>
 );
 
-const SectionCard = ({ 
-  title, 
-  icon: Icon, 
-  children, 
-  className = "" 
+const SectionCard = ({
+  title,
+  icon: Icon,
+  children,
+  className = ""
 }: {
   title: string;
   icon?: any;
@@ -103,7 +103,7 @@ const SearchPage = () => {
   const [addingToPortfolio, setAddingToPortfolio] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { data: session, status } = useSession();
-  
+
   if (status === "unauthenticated") {
     return (
       <div className="p-6">
@@ -130,7 +130,7 @@ const SearchPage = () => {
     setStockData(null);
     setLoading(true);
     if (!selectedSymbol) return;
-    
+
     try {
       const res = await fetch(`/api/stocks/${encodeURIComponent(selectedSymbol)}`);
       const data = await res.json();
@@ -230,7 +230,7 @@ const SearchPage = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <MetricCard
                     label="Sector"
@@ -495,6 +495,11 @@ const SearchPage = () => {
                   <MetricCard
                     label="Earnings Call"
                     value={stockData.statistics[0].earningsCallDate}
+                  />
+                  <MetricCard
+                    label="Beta"
+                    value={stockData.statistics[0].beta ? `${stockData.statistics[0].beta}` : 'N/A'}
+                    className="bg-blue-50 border-blue-200"
                   />
                 </div>
               </SectionCard>

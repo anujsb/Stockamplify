@@ -1,17 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { plans, users, stocks, analystRating, stockFinancialData, stockFundamentalData, userStocks, stockIntradayPrice, stockRealtimePrice, stockStatistics } from "./schema";
-
-export const usersRelations = relations(users, ({one, many}) => ({
-	plan: one(plans, {
-		fields: [users.defaultPlanId],
-		references: [plans.id]
-	}),
-	userStocks: many(userStocks),
-}));
-
-export const plansRelations = relations(plans, ({many}) => ({
-	users: many(users),
-}));
+import { stocks, analystRating, stockFinancialData, stockFundamentalData, users, userStocks, stockStatistics, stockIntradayPrice, stockRealtimePrice, plans } from "./schema";
 
 export const analystRatingRelations = relations(analystRating, ({one}) => ({
 	stock: one(stocks, {
@@ -25,9 +13,9 @@ export const stocksRelations = relations(stocks, ({many}) => ({
 	stockFinancialData: many(stockFinancialData),
 	stockFundamentalData: many(stockFundamentalData),
 	userStocks: many(userStocks),
+	stockStatistics: many(stockStatistics),
 	stockIntradayPrices: many(stockIntradayPrice),
 	stockRealtimePrices: many(stockRealtimePrice),
-	stockStatistics: many(stockStatistics),
 }));
 
 export const stockFinancialDataRelations = relations(stockFinancialData, ({one}) => ({
@@ -55,6 +43,21 @@ export const userStocksRelations = relations(userStocks, ({one}) => ({
 	}),
 }));
 
+export const usersRelations = relations(users, ({one, many}) => ({
+	userStocks: many(userStocks),
+	plan: one(plans, {
+		fields: [users.defaultPlanId],
+		references: [plans.id]
+	}),
+}));
+
+export const stockStatisticsRelations = relations(stockStatistics, ({one}) => ({
+	stock: one(stocks, {
+		fields: [stockStatistics.stockId],
+		references: [stocks.id]
+	}),
+}));
+
 export const stockIntradayPriceRelations = relations(stockIntradayPrice, ({one}) => ({
 	stock: one(stocks, {
 		fields: [stockIntradayPrice.stockId],
@@ -69,9 +72,6 @@ export const stockRealtimePriceRelations = relations(stockRealtimePrice, ({one})
 	}),
 }));
 
-export const stockStatisticsRelations = relations(stockStatistics, ({one}) => ({
-	stock: one(stocks, {
-		fields: [stockStatistics.stockId],
-		references: [stocks.id]
-	}),
+export const plansRelations = relations(plans, ({many}) => ({
+	users: many(users),
 }));

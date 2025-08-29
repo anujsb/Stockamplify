@@ -1,38 +1,7 @@
-import { pgTable, serial, integer, varchar, date, timestamp, unique, boolean, foreignKey, numeric, bigint } from "drizzle-orm/pg-core"
+import { pgTable, unique, serial, varchar, timestamp, integer, date, foreignKey, numeric, bigint, boolean } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
-
-export const subscriptions = pgTable("subscriptions", {
-	id: serial().primaryKey().notNull(),
-	userId: integer("user_id").notNull(),
-	planId: integer("plan_id").notNull(),
-	type: varchar({ length: 20 }).notNull(),
-	startDate: date("start_date").notNull(),
-	endDate: date("end_date").notNull(),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-});
-
-export const planFeatures = pgTable("plan_features", {
-	id: serial().primaryKey().notNull(),
-	planId: integer("plan_id").notNull(),
-	featureId: integer("feature_id").notNull(),
-	quota: integer().notNull(),
-	resetInterval: varchar("reset_interval", { length: 20 }).notNull(),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
-});
-
-export const plans = pgTable("plans", {
-	id: serial().primaryKey().notNull(),
-	name: varchar({ length: 50 }).notNull(),
-	description: varchar(),
-	active: boolean().default(true),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	unique("plans_name_unique").on(table.name),
-]);
 
 export const features = pgTable("features", {
 	id: serial().primaryKey().notNull(),
@@ -44,52 +13,25 @@ export const features = pgTable("features", {
 	unique("features_code_unique").on(table.code),
 ]);
 
-export const featureUsage = pgTable("feature_usage", {
+export const planFeatures = pgTable("plan_features", {
+	id: serial().primaryKey().notNull(),
+	planId: integer("plan_id").notNull(),
+	featureId: integer("feature_id").notNull(),
+	quota: integer().notNull(),
+	resetInterval: varchar("reset_interval", { length: 20 }).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const subscriptions = pgTable("subscriptions", {
 	id: serial().primaryKey().notNull(),
 	userId: integer("user_id").notNull(),
-	featureCode: varchar("feature_code", { length: 50 }).notNull(),
-	periodStart: date("period_start").notNull(),
-	periodEnd: date("period_end").notNull(),
-	usedCount: integer("used_count").default(0).notNull(),
+	planId: integer("plan_id").notNull(),
+	type: varchar({ length: 20 }).notNull(),
+	startDate: date("start_date").notNull(),
+	endDate: date("end_date").notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	unique("feature_usage_daily_unique").on(table.userId, table.featureCode, table.periodStart, table.periodEnd),
-]);
-
-export const users = pgTable("users", {
-	id: serial().primaryKey().notNull(),
-	username: varchar({ length: 100 }),
-	email: varchar({ length: 100 }).notNull(),
-	isActive: boolean("is_active").default(false).notNull(),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-	lastLogin: timestamp("last_login", { mode: 'string' }),
-	nextauthId: varchar("nextauth_id", { length: 100 }).notNull(),
-	password: varchar({ length: 255 }),
-	defaultPlanId: integer("default_plan_id").default(1),
-}, (table) => [
-	foreignKey({
-			columns: [table.defaultPlanId],
-			foreignColumns: [plans.id],
-			name: "users_default_plan_id_plans_id_fk"
-		}),
-	unique("users_email_unique").on(table.email),
-	unique("users_nextauth_id_unique").on(table.nextauthId),
-]);
-
-export const stocks = pgTable("stocks", {
-	id: serial().primaryKey().notNull(),
-	symbol: varchar({ length: 20 }).notNull(),
-	exchange: varchar({ length: 10 }).notNull(),
-	currency: varchar({ length: 5 }).default('INR').notNull(),
-	name: varchar({ length: 255 }),
-	sector: varchar({ length: 50 }),
-	industry: varchar({ length: 50 }),
-	isActive: boolean("is_active").default(true).notNull(),
-	lastRefreshedAt: timestamp("last_refreshed_at", { mode: 'string' }),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-}, (table) => [
-	unique("symbol_exchange_unique").on(table.symbol, table.exchange),
-]);
+});
 
 export const analystRating = pgTable("analyst_rating", {
 	id: serial().primaryKey().notNull(),
@@ -175,15 +117,25 @@ export const userStocks = pgTable("user_stocks", {
 		}),
 ]);
 
-export const emailVerificationTokens = pgTable("email_verification_tokens", {
+export const stockStatistics = pgTable("stock_statistics", {
 	id: serial().primaryKey().notNull(),
-	email: varchar({ length: 255 }).notNull(),
-	token: varchar({ length: 255 }).notNull(),
-	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
-	isUsed: boolean("is_used").default(false).notNull(),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	stockId: integer("stock_id").notNull(),
+	sharesHeldByInstitutions: varchar("shares_held_by_institutions", { length: 5 }),
+	sharesHeldByAllInsider: varchar("shares_held_by_all_insider", { length: 5 }),
+	lastSplitFactor: varchar("last_split_factor", { length: 5 }),
+	lastSplitDate: date("last_split_date"),
+	lastDividendValue: numeric("last_dividend_value", { precision: 4, scale:  2 }),
+	lastDividendDate: date("last_dividend_date"),
+	earningsDate: date("earnings_date"),
+	earningsCallDate: date("earnings_call_date"),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+	beta: numeric({ precision: 6, scale:  3 }),
 }, (table) => [
-	unique("email_verification_tokens_token_unique").on(table.token),
+	foreignKey({
+			columns: [table.stockId],
+			foreignColumns: [stocks.id],
+			name: "stock_statistics_stock_id_stocks_id_fk"
+		}),
 ]);
 
 export const stockIntradayPrice = pgTable("stock_intraday_price", {
@@ -212,6 +164,21 @@ export const stockIntradayPrice = pgTable("stock_intraday_price", {
 		}),
 ]);
 
+export const stocks = pgTable("stocks", {
+	id: serial().primaryKey().notNull(),
+	symbol: varchar({ length: 20 }).notNull(),
+	exchange: varchar({ length: 10 }).notNull(),
+	name: varchar({ length: 255 }),
+	sector: varchar({ length: 50 }),
+	industry: varchar({ length: 50 }),
+	isActive: boolean("is_active").default(true).notNull(),
+	lastRefreshedAt: timestamp("last_refreshed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	currency: varchar({ length: 5 }).default('INR').notNull(),
+}, (table) => [
+	unique("symbol_exchange_unique").on(table.symbol, table.exchange),
+]);
+
 export const stockRealtimePrice = pgTable("stock_realtime_price", {
 	id: serial().primaryKey().notNull(),
 	stockId: integer("stock_id").notNull(),
@@ -227,22 +194,56 @@ export const stockRealtimePrice = pgTable("stock_realtime_price", {
 		}),
 ]);
 
-export const stockStatistics = pgTable("stock_statistics", {
+export const users = pgTable("users", {
 	id: serial().primaryKey().notNull(),
-	stockId: integer("stock_id").notNull(),
-	sharesHeldByInstitutions: varchar("shares_held_by_institutions", { length: 5 }),
-	sharesHeldByAllInsider: varchar("shares_held_by_all_insider", { length: 5 }),
-	lastSplitFactor: varchar("last_split_factor", { length: 5 }),
-	lastSplitDate: date("last_split_date"),
-	lastDividendValue: numeric("last_dividend_value", { precision: 4, scale:  2 }),
-	lastDividendDate: date("last_dividend_date"),
-	earningsDate: date("earnings_date"),
-	earningsCallDate: date("earnings_call_date"),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+	nextauthId: varchar("nextauth_id", { length: 100 }).notNull(),
+	username: varchar({ length: 100 }),
+	email: varchar({ length: 100 }).notNull(),
+	isActive: boolean("is_active").default(false).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	lastLogin: timestamp("last_login", { mode: 'string' }),
+	password: varchar({ length: 255 }),
+	defaultPlanId: integer("default_plan_id").default(1),
 }, (table) => [
 	foreignKey({
-			columns: [table.stockId],
-			foreignColumns: [stocks.id],
-			name: "stock_statistics_stock_id_stocks_id_fk"
+			columns: [table.defaultPlanId],
+			foreignColumns: [plans.id],
+			name: "users_default_plan_id_plans_id_fk"
 		}),
+	unique("users_nextauth_id_unique").on(table.nextauthId),
+	unique("users_email_unique").on(table.email),
+]);
+
+export const plans = pgTable("plans", {
+	id: serial().primaryKey().notNull(),
+	name: varchar({ length: 50 }).notNull(),
+	description: varchar(),
+	active: boolean().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	unique("plans_name_unique").on(table.name),
+]);
+
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+	id: serial().primaryKey().notNull(),
+	email: varchar({ length: 255 }).notNull(),
+	token: varchar({ length: 255 }).notNull(),
+	expiresAt: timestamp("expires_at", { mode: 'string' }).notNull(),
+	isUsed: boolean("is_used").default(false).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	unique("email_verification_tokens_token_unique").on(table.token),
+]);
+
+export const featureUsage = pgTable("feature_usage", {
+	id: serial().primaryKey().notNull(),
+	userId: integer("user_id").notNull(),
+	featureCode: varchar("feature_code", { length: 50 }).notNull(),
+	periodStart: date("period_start").notNull(),
+	periodEnd: date("period_end").notNull(),
+	usedCount: integer("used_count").default(0).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	unique("feature_usage_daily_unique").on(table.userId, table.featureCode, table.periodStart, table.periodEnd),
 ]);

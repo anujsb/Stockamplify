@@ -1,15 +1,15 @@
 // src/app/api/stocks/update-monthly-data/route.ts
-import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { stocks, stockFundamentalData, stockFinancialData, stockStatistics, analystRating } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { QuoteService } from '@/lib/services/quoteService';
+import { analystRating, stockFinancialData, stockFundamentalData, stocks, stockStatistics } from '@/lib/db/schema';
 import { ModulesService } from '@/lib/services/modulesService';
+import { QuoteService } from '@/lib/services/quoteService';
+import { eq } from 'drizzle-orm';
+import { NextResponse } from 'next/server';
 
 // Shared function to update monthly data
 async function updateMonthlyData() {
   console.log('Starting monthly data update for all stocks...');
-  
+
   // Get all active stocks
   const activeStocks = await db
     .select()
@@ -37,15 +37,15 @@ async function updateMonthlyData() {
   // Process stocks in batches to avoid overwhelming the API
   for (let i = 0; i < activeStocks.length; i += 2) {
     const batch = activeStocks.slice(i, i + 2);
-    
+
     const batchPromises = batch.map(async (stock) => {
       try {
         // Fetch comprehensive data from Yahoo Finance
-const [quote, modules] = await Promise.all([
+        const [quote, modules] = await Promise.all([
           QuoteService.getQuote(stock.symbol),
           ModulesService.getModulesData(stock.symbol)
         ]);
-        
+
         if (!quote) {
           throw new Error(`Unable to fetch valid data for ${stock.symbol}`);
         }
@@ -128,34 +128,40 @@ const [quote, modules] = await Promise.all([
 
         // Update statistics data
         try {
-          const statisticsData = {
-            stockId: stock.id,
-            sharesHeldByInstitutions: null,
-            sharesHeldByAllInsider: null,
-            lastSplitFactor: null,
-            lastSplitDate: null,
-            lastDividendValue: null,
-            lastDividendDate: null,
-            earningsDate: null,
-            earningsCallDate: null,
-            updatedAt: new Date(),
-          };
+          if (modules?.defaultKeyStatistics || modules?.calendarEvents) {
+            const stats = modules.defaultKeyStatistics;
+            const events = modules.calendarEvents;
 
-          const existingStatistics = await db
-            .select()
-            .from(stockStatistics)
-            .where(eq(stockStatistics.stockId, stock.id))
-            .limit(1);
+            const statisticsData = {
+              stockId: stock.id,
+              sharesHeldByInstitutions: stats?.heldPercentInstitutions?.toString() ?? null,
+              sharesHeldByAllInsider: stats?.heldPercentInsiders?.toString() ?? null,
+              lastSplitFactor: stats?.lastSplitFactor ?? null,
+              lastSplitDate: stats?.lastSplitDate ? new Date(stats.lastSplitDate * 1000).toISOString().split('T')[0] : null,
+              lastDividendValue: stats?.lastDividendValue?.toString() ?? null,
+              lastDividendDate: stats?.lastDividendDate ? new Date(stats.lastDividendDate * 1000).toISOString().split('T')[0] : null,
+              beta: stats?.beta?.toString() ?? null,
+              earningsDate: events?.earnings?.earningsDate?.[0] ? new Date(events.earnings.earningsDate[0] * 1000).toISOString().split('T')[0] : null,
+              earningsCallDate: events?.earnings?.earningsCallDate?.[0] ? new Date(events.earnings.earningsCallDate[0] * 1000).toISOString().split('T')[0] : null,
+              updatedAt: new Date(),
+            };
 
-          if (existingStatistics.length > 0) {
-            await db
-              .update(stockStatistics)
-              .set(statisticsData)
-              .where(eq(stockStatistics.id, existingStatistics[0].id));
-          } else {
-            await db.insert(stockStatistics).values(statisticsData);
+            const existingStatistics = await db
+              .select()
+              .from(stockStatistics)
+              .where(eq(stockStatistics.stockId, stock.id))
+              .limit(1);
+
+            if (existingStatistics.length > 0) {
+              await db
+                .update(stockStatistics)
+                .set(statisticsData)
+                .where(eq(stockStatistics.id, existingStatistics[0].id));
+            } else {
+              await db.insert(stockStatistics).values(statisticsData);
+            }
+            results.statistics.successful++;
           }
-          results.statistics.successful++;
         } catch (error) {
           results.statistics.failed++;
           console.error(`Failed to update statistics for ${stock.symbol}:`, error);
@@ -168,9 +174,9 @@ const [quote, modules] = await Promise.all([
               stockId: stock.id,
               recommendation: modules.financialData.recommendationKey,
               numberOfAnalysts: modules.financialData.numberOfAnalystOpinions || null,
-              targetPriceHigh: modules.financialData.targetHighPrice !== undefined ? 
+              targetPriceHigh: modules.financialData.targetHighPrice !== undefined ?
                 modules.financialData.targetHighPrice.toString() : null,
-              targetLowPrice: modules.financialData.targetLowPrice !== undefined ? 
+              targetLowPrice: modules.financialData.targetLowPrice !== undefined ?
                 modules.financialData.targetLowPrice.toString() : null,
               updatedAt: new Date(),
             };
@@ -244,7 +250,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error updating monthly data:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -261,7 +267,7 @@ export async function POST() {
   } catch (error) {
     console.error('Error updating monthly data:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error'
