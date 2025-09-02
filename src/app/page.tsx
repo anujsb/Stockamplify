@@ -247,6 +247,8 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Eye className="h-12 w-12 text-red-400 mb-6" />
                 <h3 className="text-2xl font-bold text-white mb-4">Smart Watchlist</h3>
+
+
                 <p className="text-gray-300 mb-6">
                   Monitor potential investments and track stocks you're interested in but don't own
                   yet. Get alerts when opportunities arise.
