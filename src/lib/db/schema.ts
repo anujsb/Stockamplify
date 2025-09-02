@@ -10,7 +10,6 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 100 }).notNull().unique(),
   password: varchar('password', { length: 255 }),
   isActive: boolean('is_active').default(false).notNull(),
-  defaultPlanId: integer('default_plan_id').references(() => plans.id).default(1), // Default to free plan (ID: 1)
   createdAt: timestamp('created_at').defaultNow().notNull(),
   lastLogin: timestamp('last_login'),
 });
@@ -21,6 +20,7 @@ export const plans = pgTable("plans", {
   name: varchar("name", { length: 50 }).notNull().unique(),
   description: varchar("description"),
   active: boolean("active").default(true),
+  IsDefaultPlan: boolean("is_default_plan").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
