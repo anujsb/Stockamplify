@@ -7,6 +7,7 @@ import NextAuth from "next-auth";
 import "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import { UserService } from "./services/userService";
 
 declare module "next-auth" {
   interface Session {
@@ -220,7 +221,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-  // Disable CSRF protection for development
+  events: {
+    /* runs once after a successful sign-in (all providers) */
+    async signIn({ user }) {
+      try {
+        let userId: number | null = null;
+
+        // Credentials flow: you already return dbUserId in authorize()
+        if (typeof (user as any).dbUserId === "number") {
+          userId = (user as any).dbUserId;
+        }
+        // OAuth flow: resolve userId by email
+        else if (user?.email) {
+          const [row] = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(eq(users.email, user.email))
+            .limit(1);
+          userId = row?.id ?? null;
+        }
+
+        if (userId) {
+          await UserService.updateLastLogin(userId);
+        } else {
+          console.warn("signIn event: could not resolve db user id for last_login update");
+        }
+      } catch (err) {
+        console.error("Failed to update last_login on sign-in:", err);
+      }
+    },
+  },
+
   trustHost: true,
 });
 
@@ -245,11 +276,7 @@ export async function upsertUserForAuth(opts: {
   const email = opts.email.trim().toLowerCase();
   const usernameFallback = email.split("@")[0];
 
-  const existing = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
+  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
   // If user already exists, update minimally based on provider
   if (existing.length) {
@@ -303,9 +330,7 @@ export async function upsertUserForAuth(opts: {
     throw new Error("Password is required for credentials signup.");
   }
 
-  const hashed = isCredentials
-    ? await bcrypt.hash(String(opts.password), 12)
-    : null;
+  const hashed = isCredentials ? await bcrypt.hash(String(opts.password), 12) : null;
 
   const [created] = await db
     .insert(users)
