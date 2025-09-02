@@ -2,14 +2,10 @@
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
 import {
-  IconAntennaBars5,
-  IconBriefcase,
-  IconBulb,
   IconChartBar,
-  IconHome,
   IconHome2,
   IconNews,
-  IconSearch,
+  IconSearch
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { BrainCircuit, LogOut } from "lucide-react";
@@ -33,21 +29,21 @@ export default function SideBar() {
       href: "/portfolio",
       icon: IconChartBar,
     },
-    {
-      label: "AI Portfolio Advisor",
-      href: "/ai-portfolio-advisor",
-      icon: IconBulb,
-    },
+    // {
+    //   label: "AI Portfolio Advisor",
+    //   href: "/ai-portfolio-advisor",
+    //   icon: IconBulb,
+    // },
     {
       label: "AI Stock Analysis",
       href: "/ai-stock-analytics",
       icon: BrainCircuit,
     },
-    {
-      label: "Trade Signals",
-      href: "/trade-signals",
-      icon: IconAntennaBars5,
-    },
+    // {
+    //   label: "Trade Signals",
+    //   href: "/trade-signals",
+    //   icon: IconAntennaBars5,
+    // },
     {
       label: "Market News",
       href: "/news",
