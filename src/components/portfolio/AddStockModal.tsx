@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
-import StockSearch, { StockSearchResult } from '@/components/StockSearch';
-import { Button } from '@/components/ui/button';
+import StockSearch, { StockSearchResult } from "@/components/StockSearch";
+import { Button } from "@/components/ui/button";
+import { formatSymbol } from "@/lib/utils/stockUtils";
+import React, { useRef, useState } from "react";
 
 interface AddStockModalProps {
   open: boolean;
@@ -10,8 +11,8 @@ interface AddStockModalProps {
 
 const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess }) => {
   const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
-  const [quantity, setQuantity] = useState('');
-  const [buyPrice, setBuyPrice] = useState('');
+  const [quantity, setQuantity] = useState("");
+  const [buyPrice, setBuyPrice] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
@@ -19,8 +20,8 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
   React.useEffect(() => {
     if (open) {
       setSelectedStock(null);
-      setQuantity('');
-      setBuyPrice('');
+      setQuantity("");
+      setBuyPrice("");
       setError(null);
     }
   }, [open]);
@@ -34,15 +35,15 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
   const handleAddStock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStock || !quantity || !buyPrice) {
-      setError('Please fill all fields');
+      setError("Please fill all fields");
       return;
     }
     setAdding(true);
     setError(null);
     try {
-      const res = await fetch('/api/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           symbol: selectedStock.symbol,
           quantity,
@@ -54,10 +55,10 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
         onClose();
         onSuccess();
       } else {
-        setError(data.error || 'Failed to add stock');
+        setError(data.error || "Failed to add stock");
       }
     } catch (err) {
-      setError('Failed to add stock');
+      setError("Failed to add stock");
     } finally {
       setAdding(false);
     }
@@ -75,7 +76,9 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
         >
           ×
         </button>
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">Add Stock to Portfolio</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-900">
+          Add Stock to Portfolio
+        </h2>
         <div className="mb-4">
           <StockSearch onStockSelect={handleStockSelect} />
         </div>
@@ -83,7 +86,11 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
           <form className="space-y-4" onSubmit={handleAddStock}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-              <div className="font-semibold text-gray-800 bg-gray-50 rounded px-3 py-2 border border-gray-200">{selectedStock.symbol} - {selectedStock.name}</div>
+              <div className="font-semibold text-gray-800 bg-gray-50 rounded px-3 py-2 border border-gray-200">
+                {formatSymbol(selectedStock.symbol)}{" "}
+                <span className="text-xs text-gray-400"> ({selectedStock.exchange})</span> -{" "}
+                {selectedStock.name}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
@@ -93,7 +100,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
                 min="1"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none"
                 value={quantity}
-                onChange={e => setQuantity(e.target.value)}
+                onChange={(e) => setQuantity(e.target.value)}
                 required
                 placeholder="Enter quantity"
               />
@@ -106,7 +113,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
                 step="0.01"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none"
                 value={buyPrice}
-                onChange={e => setBuyPrice(e.target.value)}
+                onChange={(e) => setBuyPrice(e.target.value)}
                 required
                 placeholder="Enter buy price"
               />
@@ -121,7 +128,7 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
                 Cancel
               </button>
               <Button type="submit" disabled={adding} className="px-6 py-2 rounded-lg">
-                {adding ? 'Adding...' : 'Add to Portfolio'}
+                {adding ? "Adding..." : "Add to Portfolio"}
               </Button>
             </div>
           </form>
@@ -131,4 +138,4 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
   );
 };
 
-export default AddStockModal; 
+export default AddStockModal;

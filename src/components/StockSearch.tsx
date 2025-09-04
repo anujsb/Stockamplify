@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Search, ChevronDown } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
+import { formatSymbol } from "@/lib/utils/stockUtils";
+import { ChevronDown, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export interface StockSearchResult {
   symbol: string;
@@ -16,7 +17,7 @@ export interface StockSearchResult {
   exchange?: string;
   sector?: string;
   industry?: string;
-  source: 'database' | 'yahoo';
+  source: "database" | "yahoo";
 }
 
 interface StockSearchProps {
@@ -25,17 +26,17 @@ interface StockSearchProps {
   className?: string;
 }
 
-export default function StockSearch({ 
-  onStockSelect, 
-  placeholder = "Search for stocks...", 
-  className = "" 
+export default function StockSearch({
+  onStockSelect,
+  placeholder = "Search for stocks...",
+  className = "",
 }: StockSearchProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<StockSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -46,8 +47,8 @@ export default function StockSearch({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const searchStocks = async (searchQuery: string) => {
@@ -63,20 +64,20 @@ export default function StockSearch({
 
     try {
       const response = await fetch(`/api/stocks/search?q=${encodeURIComponent(searchQuery)}`);
-      
+
       if (response.ok) {
         const data = await response.json();
         setResults(data);
         setShowDropdown(true);
       } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.error || 'Could not search stocks. Please try again.');
+        setErrorMessage(errorData.error || "Could not search stocks. Please try again.");
         setResults([]);
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       setResults([]);
-      setErrorMessage('Could not search stocks. Please try again.');
+      setErrorMessage("Could not search stocks. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -97,25 +98,27 @@ export default function StockSearch({
   };
 
   const handleStockSelect = (stock: StockSearchResult) => {
-    setQuery(`${stock.symbol} - ${stock.name}`);
+    setQuery(`${formatSymbol(stock.symbol)}`);
     setShowDropdown(false);
     setResults([]);
     onStockSelect(stock);
   };
 
   const highlightMatch = (text: string, query: string) => {
-    if (!query || !text) return text || '';
-    
+    if (!query || !text) return text || "";
+
     try {
-      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
       const parts = text.split(regex);
-      
-      return parts.map((part, index) => 
+
+      return parts.map((part, index) =>
         regex.test(part) ? (
           <span key={index} className="bg-yellow-200 font-medium">
             {part}
           </span>
-        ) : part
+        ) : (
+          part
+        )
       );
     } catch (error) {
       // If regex fails, return original text
@@ -147,9 +150,7 @@ export default function StockSearch({
         )}
       </div>
 
-      {errorMessage && (
-        <div className="text-xs text-red-600 mt-1 px-2">{errorMessage}</div>
-      )}
+      {errorMessage && <div className="text-xs text-red-600 mt-1 px-2">{errorMessage}</div>}
 
       {showDropdown && results.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
@@ -162,19 +163,18 @@ export default function StockSearch({
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="font-semibold text-gray-900">
-                    {highlightMatch(stock.symbol, query)}
+                    {highlightMatch(formatSymbol(stock.symbol), query)}{" "}
+                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+                      {stock.exchange || "N/A"}
+                    </span>
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
                     {highlightMatch(stock.name, query)}
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
-                      {stock.type || 'Equity'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {stock.region} • {stock.currency}
-                    </span>
-                    {stock.source === 'database' && (
+                    <span className="text-xs py-1 text-gray-600">{stock.type || "Equity"}</span>
+                    <span className="text-xs text-gray-500">{stock.region}</span>
+                    {stock.source === "database" && (
                       <span className="text-xs px-2 py-1 bg-green-100 text-green-600 rounded-full">
                         Saved
                       </span>
