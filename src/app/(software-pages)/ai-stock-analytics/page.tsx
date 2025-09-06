@@ -360,9 +360,9 @@ export default function AIStockAnalyticsPage() {
 
           {/* Analysis Results */}
           {analysisData && (
-            <div className="space-y-6">
+            <div className="space-y-6 relative z-10">
               {/* Main Recommendation */}
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">
@@ -422,7 +422,7 @@ export default function AIStockAnalyticsPage() {
               </Card>
 
               {/* Price Targets - */}
-              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                 <CardHeader className="">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Target className="h-5 w-5 text-green-600" />
@@ -479,7 +479,7 @@ export default function AIStockAnalyticsPage() {
               {/* Detailed Analysis Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {/* Trend Analysis */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Activity className="h-5 w-5 text-blue-600" />
@@ -521,7 +521,7 @@ export default function AIStockAnalyticsPage() {
                 </Card>
 
                 {/* Support & Resistance */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <BarChart3 className="h-5 w-5 text-purple-600" />
@@ -567,7 +567,7 @@ export default function AIStockAnalyticsPage() {
                 </Card>
 
                 {/* Technical Indicators */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Activity className="h-5 w-5 text-orange-600" />
@@ -594,7 +594,7 @@ export default function AIStockAnalyticsPage() {
                 </Card>
 
                 {/* Risk & Volatility */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <AlertTriangle className="h-5 w-5 text-red-600" />
@@ -641,7 +641,7 @@ export default function AIStockAnalyticsPage() {
                 </Card>
 
                 {/* 52-Week Range */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Calendar className="h-5 w-5 text-indigo-600" />
@@ -688,7 +688,7 @@ export default function AIStockAnalyticsPage() {
                 </Card>
 
                 {/* Sentiment Summary */}
-                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+                <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <ChartNoAxesGantt className="h-5 w-5 text-green-600" />
