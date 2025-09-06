@@ -231,7 +231,7 @@ export default function AIStockAnalyticsPage() {
       )}
     >
       <SideBar />
-      <div className="flex-1 overflow-y-auto min-h-screen bg-gray-50 p-3 sm:p-6">
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
           <div className="text-center">
@@ -241,7 +241,7 @@ export default function AIStockAnalyticsPage() {
           </div>
 
           {/* Input Section */}
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm relative z-20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-blue-600" />
@@ -251,7 +251,7 @@ export default function AIStockAnalyticsPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Stock Symbol */}
-                <div className="space-y-2 md:col-span-1">
+                <div className="space-y-2 md:col-span-1 relative z-30">
                   <label className="text-sm font-medium text-gray-700">
                     {getTranslation(language, "stockSymbol")}
                   </label>
@@ -263,7 +263,7 @@ export default function AIStockAnalyticsPage() {
                 </div>
 
                 {/* Investment Horizon */}
-                <div className="space-y-2 md:col-span-1">
+                <div className="space-y-2 md:col-span-1 relative z-30">
                   <label className="text-sm font-medium text-gray-700">
                     {getTranslation(language, "investmentHorizon")}
                   </label>
@@ -285,7 +285,7 @@ export default function AIStockAnalyticsPage() {
                 </div>
 
                 {/* Language */}
-                <div className="space-y-2 md:col-span-1">
+                <div className="space-y-2 md:col-span-1 relative z-30">
                   <label className="text-sm font-medium text-gray-700">
                     {getTranslation(language, "language")}
                   </label>
@@ -307,7 +307,7 @@ export default function AIStockAnalyticsPage() {
                 </div>
 
                 {/* Analyze Button */}
-                <div className="space-y-2 md:col-span-1">
+                <div className="space-y-2 md:col-span-1 relative z-30">
                   <label className="text-sm font-medium text-gray-700 opacity-0">
                     Action
                   </label>
