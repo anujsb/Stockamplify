@@ -1,4 +1,5 @@
 // src/lib/services/aiPortfolioAdvisorService.ts
+import { computeAnalystBlock } from "@/lib/services/shared/analytics";
 import { AlertTriangle, Shield, Target } from "lucide-react";
 
 export class AIPortfolioAdvisorService {
@@ -19,6 +20,7 @@ export class AIPortfolioAdvisorService {
     let totalCurrentValue = 0;
     let weightedBeta = 0;
     let weightedPE = 0;
+    let peWeightSum = 0;
     let weightedROE = 0;
     let weightedPB = 0;
     let totalDividendYield = 0;
@@ -30,7 +32,8 @@ export class AIPortfolioAdvisorService {
       const currentPrice = Number(item.realTimePrice?.price || item.buyPrice);
       const currentValue = currentPrice * item.quantity;
       const returnPct = invested > 0 ? ((currentValue - invested) / invested) * 100 : 0;
-      const beta = Number(item.financialData?.beta || 1);
+      const beta = Number(item.statistics?.beta || 1);
+      const displaySize = Math.sqrt(Math.max(currentValue, 0)); // bubble size
 
       totalInvested += invested;
       totalCurrentValue += currentValue;
@@ -59,24 +62,44 @@ export class AIPortfolioAdvisorService {
 
       // 2️⃣ Valuation Metrics
       if (item.fundamentalData) {
-        const pe = Number(item.fundamentalData.trailingPE || 0);
-        const pb = Number(item.fundamentalData.priceToBook || 0);
-        const forwardPE = Number(item.fundamentalData.forwardPE || 0);
+        const pe = Number(item.fundamentalData.trailingPE);
+        const pb = Number(item.fundamentalData.priceToBook);
+        const forwardPE = Number(item.fundamentalData.forwardPE);
 
-        weightedPE += pe * weight;
-        weightedPB += pb * weight;
+        // only use valid, reasonable P/E values in the weighted average
+        if (Number.isFinite(pe) && pe > 0 && pe < 200) {
+          weightedPE += pe * weight; // weight = currentValue
+          peWeightSum += weight; // <-- NEW
+        }
+
+        if (Number.isFinite(pb) && pb > 0 && pb < 50) {
+          weightedPB += pb * weight;
+          // you can also add a pbWeightSum if you want PB average too
+        }
 
         valuationMetrics.push({
           symbol,
-          trailingPE: pe,
-          forwardPE,
-          priceToBook: pb,
-          peCategory: pe < 15 ? "Undervalued" : pe < 25 ? "Fair" : "Overvalued",
-          pbCategory: pb < 1.5 ? "Undervalued" : pb < 3 ? "Fair" : "Overvalued",
+          trailingPE: Number.isFinite(pe) ? pe : null,
+          forwardPE: Number.isFinite(forwardPE) ? forwardPE : null,
+          priceToBook: Number.isFinite(pb) ? pb : null,
+          peCategory: Number.isFinite(pe)
+            ? pe < 15
+              ? "Undervalued"
+              : pe < 25
+                ? "Fair"
+                : "Overvalued"
+            : "N/A",
+          pbCategory: Number.isFinite(pb)
+            ? pb < 1.5
+              ? "Undervalued"
+              : pb < 3
+                ? "Fair"
+                : "Overvalued"
+            : "N/A",
         });
 
-        // P/E Distribution Buckets
-        if (pe > 0 && pe < 100) {
+        // P/E distribution buckets (keep your existing logic, guard with isFinite)
+        if (Number.isFinite(pe) && pe > 0 && pe < 100) {
           const peRange =
             pe < 10
               ? "0-10"
@@ -89,13 +112,10 @@ export class AIPortfolioAdvisorService {
                     : pe < 30
                       ? "25-30"
                       : "30+";
-          const existing = peDistributionData.find((p) => p.range.trim() === peRange);
 
-          if (existing) {
-            existing.count++;
-          } else {
-            peDistributionData.push({ range: peRange, count: 1, avgPE: pe });
-          }
+          const existing = peDistributionData.find((p) => p.range.trim() === peRange);
+          if (existing) existing.count++;
+          else peDistributionData.push({ range: peRange, count: 1, avgPE: pe });
         }
       }
 
@@ -119,18 +139,16 @@ export class AIPortfolioAdvisorService {
       }
 
       // 4️⃣ Analyst Targets & Upside
-      if (item.analystRating?.targetPriceHigh) {
-        const upside =
-          ((Number(item.analystRating.targetPriceHigh) - currentPrice) / currentPrice) * 100;
-        analystTargetData.push({
+      if (item.analystRating?.targetPriceHigh || item.analystRating?.recommendation) {
+        const block = computeAnalystBlock({
           symbol,
           currentPrice,
-          targetHigh: Number(item.analystRating.targetPriceHigh),
-          targetLow: Number(item.analystRating.targetLowPrice || currentPrice * 0.8),
-          upside,
-          recommendation: item.analystRating.recommendation,
-          analysts: Number(item.analystRating.numberOfAnalysts || 0),
+          targetPriceHigh: item.analystRating?.targetPriceHigh,
+          targetPriceLow: item.analystRating?.targetLowPrice ?? currentPrice * 0.8,
+          recommendation: item.analystRating?.recommendation,
+          numberOfAnalysts: item.analystRating?.numberOfAnalysts,
         });
+        analystTargetData.push(block);
       }
 
       // Dividend Analysis
@@ -150,7 +168,7 @@ export class AIPortfolioAdvisorService {
       }
 
       // 5️⃣ Risk vs Return Analysis (Real Beta from Yahoo Finance)
-      const stockBeta = item.statistics?.beta || 1.0; // Use real beta or default to 1.0
+      const stockBeta = beta;
       const volatility = 15 + Math.random() * 25;
       const alpha = returnPct - stockBeta * 12;
 
@@ -158,7 +176,7 @@ export class AIPortfolioAdvisorService {
         symbol,
         risk: volatility,
         return: returnPct,
-        size: currentValue,
+        size: displaySize,
         beta: stockBeta,
         alpha,
         color: colors[index % colors.length],
@@ -184,6 +202,9 @@ export class AIPortfolioAdvisorService {
     const concentrationRisk =
       herfindahlIndex > 0.25 ? "High" : herfindahlIndex > 0.15 ? "Medium" : "Low";
 
+    // Use peWeightSum (not totalCurrentValue) for the P/E average
+    const avgPE = peWeightSum > 0 ? weightedPE / peWeightSum : NaN;
+
     // 8️⃣ Smart Alerts
     alerts.push(
       ...generateSmartAlerts(portfolio, {
@@ -207,10 +228,11 @@ export class AIPortfolioAdvisorService {
       sectorAllocations,
       concentrationRisk,
       herfindahlIndex,
-      portfolioBeta: weightedBeta,
+      portfolioBeta: totalCurrentValue > 0 ? +(weightedBeta / totalCurrentValue).toFixed(2) : 1,
       totalCurrentValue,
       dividendData,
       totalDividendYield,
+      weightedPE: Number.isFinite(avgPE) ? +avgPE.toFixed(1) : null,
     };
   }
 }
@@ -222,9 +244,14 @@ export class AIPortfolioAdvisorService {
 function generateSmartAlerts(portfolio: any[], data: any) {
   const alerts: any[] = [];
 
+  // Temporary grouped alerts
+  const riskAlerts: any[] = [];
+  const opportunityAlerts: any[] = [];
+  const valuationAlerts: any[] = [];
+
   // Concentration risk alert
   if (data.concentrationRisk === "High") {
-    alerts.push({
+    riskAlerts.push({
       type: "risk",
       severity: "high",
       title: "High Concentration Risk",
@@ -235,9 +262,9 @@ function generateSmartAlerts(portfolio: any[], data: any) {
   }
 
   // Analyst upgrade opportunities
-  data.analystTargetData.forEach((stock: any) => {
+  data.analystTargetData?.forEach((stock: any) => {
     if (stock.upside > 20) {
-      alerts.push({
+      opportunityAlerts.push({
         type: "opportunity",
         severity: "low",
         title: "High Upside Potential",
@@ -248,10 +275,10 @@ function generateSmartAlerts(portfolio: any[], data: any) {
     }
   });
 
-  // valuation alerts
+  // Valuation alerts
   data.valuationMetrics?.forEach((stock: any) => {
     if (stock.trailingPE > 40) {
-      alerts.push({
+      valuationAlerts.push({
         type: "valuation",
         severity: "high",
         title: "High Valuation Alert",
@@ -262,5 +289,10 @@ function generateSmartAlerts(portfolio: any[], data: any) {
     }
   });
 
-  return alerts.slice(0, 8); // Limit to 8 alerts
+  // Take max 3 from each (or less if not available)
+  alerts.push(...riskAlerts.slice(0, 3));
+  alerts.push(...opportunityAlerts.slice(0, 4));
+  alerts.push(...valuationAlerts.slice(0, 3));
+
+  return alerts;
 }

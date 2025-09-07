@@ -1,13 +1,13 @@
 // src/app/trade-signals/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RefreshCw, Activity, BarChart3, Target } from "lucide-react";
 import SideBar from "@/components/SideBar";
-import { formatPrice, formatPercentage, formatSymbol } from "@/lib/utils/stockUtils";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
+import { cn } from "@/lib/utils";
+import { formatPrice, formatSymbol } from "@/lib/utils/stockUtils";
+import { Activity, BarChart3, RefreshCw, Target } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // ---- Minimal types for metrics items (keeps UI the same) ----
 type VolumeAnalysisItem = {
@@ -43,6 +43,7 @@ type MovingAverageItem = {
 
 type TradeSignalsMetrics = {
   volumeAnalysisData: VolumeAnalysisItem[];
+  volumeAnalysisTop: VolumeAnalysisItem[]; // optional top N subset
   weekRangeData: WeekRangeItem[];
   movingAverageData: MovingAverageItem[];
 };
@@ -160,8 +161,8 @@ const TradeSignalsPage = () => {
         </div>
 
         <div className="space-y-8">
-          {/* Volume vs Price Analysis & Technical breakout */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Volume vs Price Analysis & Technical breakout */}
             <Card className="bg-white shadow-sm border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -171,33 +172,38 @@ const TradeSignalsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {volumeAnalysisData.slice(0, 6).map((stock: VolumeAnalysisItem) => (
-                    <div key={stock.symbol} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg" >
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <div className="font-medium">{formatSymbol(stock.symbol)}</div>
-                          <div className="text-sm text-gray-500">{stock.activity} Activity</div>
+                  {(metrics.volumeAnalysisTop ?? metrics.volumeAnalysisData)
+                    ?.slice(0, 6)
+                    .map((stock: VolumeAnalysisItem) => (
+                      <div
+                        key={stock.symbol}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div>
+                            <div className="font-medium">{formatSymbol(stock.symbol)}</div>
+                            <div className="text-sm text-gray-500">{stock.activity} Activity</div>
+                          </div>
+                          <div
+                            className={`w-3 h-3 rounded-full ${
+                              stock.volumeRatio > 2
+                                ? "bg-red-500"
+                                : stock.volumeRatio > 1.5
+                                  ? "bg-orange-500"
+                                  : stock.volumeRatio > 1
+                                    ? "bg-green-500"
+                                    : "bg-gray-400"
+                            }`}
+                          ></div>
                         </div>
-                        <div
-                          className={`w-3 h-3 rounded-full ${
-                            stock.volumeRatio > 2
-                              ? "bg-red-500"
-                              : stock.volumeRatio > 1.5
-                              ? "bg-orange-500"
-                              : stock.volumeRatio > 1
-                              ? "bg-green-500"
-                              : "bg-gray-400"
-                          }`}
-                        ></div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">{Number(stock.volumeRatio).toFixed(1)}x</div>
-                        <div className="text-sm text-gray-500">
-                          {(Number(stock.currentVolume) / 1000000).toFixed(1)}M vol
+                        <div className="text-right">
+                          <div className="font-medium">{Number(stock.volumeRatio).toFixed(1)}x</div>
+                          <div className="text-sm text-gray-500">
+                            {(Number(stock.currentVolume) / 1000000).toFixed(1)}M vol
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <div className="text-sm">
@@ -214,6 +220,7 @@ const TradeSignalsPage = () => {
               </CardContent>
             </Card>
 
+            {/* Technical Breakout Signals */}
             <Card className="bg-white shadow-sm border border-slate-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -223,69 +230,96 @@ const TradeSignalsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {weekRangeData.slice(0, 6).map((stock: WeekRangeItem) => (
-                    <div key={stock.symbol} className="border rounded-lg p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">{formatSymbol(stock.symbol)}</span>
-                        <div className="flex gap-2">
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              stock.signal === "Near High"
-                                ? "bg-green-100 text-green-800"
-                                : stock.signal === "Near Low"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}
-                          >
-                            {stock.signal}
-                          </span>
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              stock.momentum === "Strong"
-                                ? "bg-green-100 text-green-800"
-                                : stock.momentum === "Moderate"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {stock.momentum}
-                          </span>
-                        </div>
-                      </div>
+                  {[...(weekRangeData || [])]
+                    .sort((a: WeekRangeItem, b: WeekRangeItem) => {
+                      const apos = Number(a.position);
+                      const bpos = Number(b.position);
 
-                      {/* Price position visualization */}
-                      <div className="relative mb-2">
-                        <div className="w-full bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-full h-2">
-                          <div
-                            className="absolute w-2 h-2 bg-blue-600 rounded-full transform -translate-x-1"
-                            style={{ left: `${Number(stock.position)}%`, top: 0 }}
-                          ></div>
-                        </div>
-                      </div>
+                      const aBreak = apos > 90; // breakout first
+                      const bBreak = bpos > 90;
+                      if (aBreak !== bBreak) return aBreak ? -1 : 1;
 
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between">
-                          <span>Position: {Number(stock.position).toFixed(1)}% of range</span>
-                          <span>Range: {formatPrice(Number(stock.range))}</span>
-                        </div>
-                        <div className="flex justify-between text-gray-500">
-                          <span>Low: {formatPrice(Number(stock.low))}</span>
-                          <span>High: {formatPrice(Number(stock.high))}</span>
-                        </div>
-                      </div>
+                      const aStrong = String(a.momentum).toLowerCase() === "strong"; // then strong momentum
+                      const bStrong = String(b.momentum).toLowerCase() === "strong";
+                      if (aStrong !== bStrong) return aStrong ? -1 : 1;
 
-                      {Number(stock.position) > 90 && (
-                        <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded">
-                          ⚡ Breakout alert: Trading at new highs
+                      const aNearHigh = a.signal === "Near High"; // then "Near High" before others
+                      const bNearHigh = b.signal === "Near High";
+                      if (aNearHigh !== bNearHigh) return aNearHigh ? -1 : 1;
+
+                      // finally, closer to highs first
+                      return bpos - apos;
+                    })
+                    .slice(0, 6)
+                    .map((stock: WeekRangeItem) => {
+                      const pos = Number(stock.position);
+                      const low = Number(stock.low);
+                      const high = Number(stock.high);
+
+                      return (
+                        <div key={stock.symbol} className="border rounded-lg p-3">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium">{formatSymbol(stock.symbol)}</span>
+                            <div className="flex gap-2">
+                              <span
+                                className={`text-xs px-2 py-1 rounded ${
+                                  stock.signal === "Near High"
+                                    ? "bg-green-100 text-green-800"
+                                    : stock.signal === "Near Low"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-blue-100 text-blue-800"
+                                }`}
+                              >
+                                {stock.signal}
+                              </span>
+                              <span
+                                className={`text-xs px-2 py-1 rounded ${
+                                  stock.momentum === "Strong"
+                                    ? "bg-green-100 text-green-800"
+                                    : stock.momentum === "Moderate"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {stock.momentum}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Price position visualization */}
+                          <div className="relative mb-2">
+                            <div className="w-full bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-full h-2" />
+                            <div
+                              className="absolute w-2 h-2 bg-blue-600 rounded-full -translate-x-1 -translate-y-1/2"
+                              style={{ left: `${pos}%`, top: "50%" }}
+                              title={`Position: ${pos.toFixed(1)}%`}
+                            />
+                          </div>
+
+                          <div className="text-xs space-y-1">
+                            <div className="flex justify-between">
+                              <span>Position: {pos.toFixed(1)}% of range</span>
+                              <span>Range: {formatPrice(high - low)}</span>
+                            </div>
+                            <div className="flex justify-between text-gray-500">
+                              <span>Low: {formatPrice(low)}</span>
+                              <span>High: {formatPrice(high)}</span>
+                            </div>
+                          </div>
+
+                          {pos > 90 && (
+                            <div className="mt-2 text-xs bg-green-50 text-green-700 p-2 rounded">
+                              ⚡ Breakout alert: Trading at new highs
+                            </div>
+                          )}
+                          {pos < 10 && (
+                            <div className="mt-2 text-xs bg-red-50 text-red-700 p-2 rounded">
+                              ⚠️ Support test: Near 52-week lows
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {Number(stock.position) < 10 && (
-                        <div className="mt-2 text-xs bg-red-50 text-red-700 p-2 rounded">
-                          ⚠️ Support test: Near 52-week lows
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </CardContent>
             </Card>
@@ -342,19 +376,39 @@ const TradeSignalsPage = () => {
                     <div className="mt-2 space-y-1 text-xs">
                       <div className="flex justify-between">
                         <span>Current:</span>
-                        <span className="font-medium">{formatPrice(Number(stock.currentPrice))}</span>
+                        <span className="font-medium">
+                          {formatPrice(Number(stock.currentPrice))}
+                        </span>
                       </div>
+
                       <div className="flex justify-between">
                         <span>MA50:</span>
-                        <span className={stock.priceVsMa50 > 0 ? "text-green-600" : "text-red-600"}>
-                          {formatPrice(Number(stock.ma50))} ({formatPercentage(Number(stock.priceVsMa50))})
-                        </span>
+                        {(() => {
+                          const v = Number(stock.priceVsMa50);
+                          const cls =
+                            Number.isFinite(v) && v >= 0 ? "text-green-600" : "text-red-600";
+                          return (
+                            <span className={cls}>
+                              {formatPrice(Number(stock.ma50))} (
+                              {Number.isFinite(v) ? `${v.toFixed(2)}%` : "—"})
+                            </span>
+                          );
+                        })()}
                       </div>
+
                       <div className="flex justify-between">
                         <span>MA200:</span>
-                        <span className={stock.priceVsMa200 > 0 ? "text-green-600" : "text-red-600"}>
-                          {formatPrice(Number(stock.ma200))} ({formatPercentage(Number(stock.priceVsMa200))})
-                        </span>
+                        {(() => {
+                          const v = Number(stock.priceVsMa200);
+                          const cls =
+                            Number.isFinite(v) && v >= 0 ? "text-green-600" : "text-red-600";
+                          return (
+                            <span className={cls}>
+                              {formatPrice(Number(stock.ma200))} (
+                              {Number.isFinite(v) ? `${v.toFixed(2)}%` : "—"})
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
@@ -384,8 +438,8 @@ const TradeSignalsPage = () => {
                               stock.signal === "Near High"
                                 ? "bg-green-100 text-green-800"
                                 : stock.signal === "Near Low"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-blue-100 text-blue-800"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-blue-100 text-blue-800"
                             }`}
                           >
                             {stock.signal}
@@ -395,16 +449,16 @@ const TradeSignalsPage = () => {
                               stock.momentum === "Strong"
                                 ? "bg-green-100 text-green-800"
                                 : stock.momentum === "Moderate"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-gray-100 text-gray-800"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
                             }`}
                           >
                             {stock.momentum} Momentum
                           </span>
                         </div>
                         <span className="text-sm text-gray-600">
-                          {formatPrice(Number(stock.current))} ({Number(stock.position).toFixed(0)}% of
-                          range)
+                          {formatPrice(Number(stock.current))} ({Number(stock.position).toFixed(0)}%
+                          of range)
                         </span>
                       </div>
                       <div className="relative">
@@ -414,12 +468,12 @@ const TradeSignalsPage = () => {
                               Number(stock.position) > 80
                                 ? "bg-green-500"
                                 : Number(stock.position) > 60
-                                ? "bg-blue-500"
-                                : Number(stock.position) > 40
-                                ? "bg-yellow-500"
-                                : Number(stock.position) > 20
-                                ? "bg-orange-500"
-                                : "bg-red-500"
+                                  ? "bg-blue-500"
+                                  : Number(stock.position) > 40
+                                    ? "bg-yellow-500"
+                                    : Number(stock.position) > 20
+                                      ? "bg-orange-500"
+                                      : "bg-red-500"
                             }`}
                             style={{ width: `${Number(stock.position)}%` }}
                           ></div>
@@ -446,45 +500,59 @@ const TradeSignalsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {movingAverageData.slice(0, 6).map((stock: MovingAverageItem, index: number) => (
-                    <div key={`${stock.symbol}-${index}`} className="border rounded-lg p-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium">{formatSymbol(stock.symbol)}</span>
-                        <div className="flex gap-2">
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              stock.ma50Signal === "Bullish"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            MA50: {stock.ma50Signal}
-                          </span>
-                          <span
-                            className={`text-xs px-2 py-1 rounded ${
-                              stock.goldenCross ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
-                            }`}
-                          >
-                            {stock.goldenCross ? "Golden Cross" : "Normal"}
-                          </span>
+                  {movingAverageData.slice(0, 6).map((stock: MovingAverageItem, index: number) => {
+                    const cur = Number(stock.currentPrice);
+                    const ma50 = Number(stock.ma50);
+                    const ma200 = Number(stock.ma200);
+                    const vs50 = Number(stock.priceVsMa50); // already a percent from service
+                    const vs200 = Number(stock.priceVsMa200); // already a percent from service
+
+                    const pct = (v: any) =>
+                      Number.isFinite(Number(v)) ? `${Number(v).toFixed(2)}%` : "—";
+                    const signClass = (v: any) =>
+                      Number.isFinite(Number(v)) && Number(v) >= 0
+                        ? "text-green-600"
+                        : "text-red-600";
+
+                    return (
+                      <div key={`${stock.symbol}-${index}`} className="border rounded-lg p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">{formatSymbol(stock.symbol)}</span>
+                          <div className="flex gap-2">
+                            <span
+                              className={`text-xs px-2 py-1 rounded ${
+                                stock.ma50Signal === "Bullish"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              MA50: {stock.ma50Signal}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-1 rounded ${
+                                stock.goldenCross
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {stock.goldenCross ? "Golden Cross" : "Normal"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-sm space-y-1">
+                          <div className="flex justify-between">
+                            <span>Current: {formatPrice(cur)}</span>
+                            <span className={signClass(vs50)}>vs MA50: {pct(vs50)}</span>
+                          </div>
+                          <div className="flex justify-between text-gray-600">
+                            <span>MA50: {formatPrice(ma50)}</span>
+                            <span className={signClass(vs200)}>vs MA200: {pct(vs200)}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-sm space-y-1">
-                        <div className="flex justify-between">
-                          <span>Current: {formatPrice(Number(stock.currentPrice))}</span>
-                          <span className={stock.priceVsMa50 > 0 ? "text-green-600" : "text-red-600"}>
-                            vs MA50: {formatPercentage(Number(stock.priceVsMa50))}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-gray-600">
-                          <span>MA50: {formatPrice(Number(stock.ma50))}</span>
-                          <span className={stock.priceVsMa200 > 0 ? "text-green-600" : "text-red-600"}>
-                            vs MA200: {formatPercentage(Number(stock.priceVsMa200))}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
