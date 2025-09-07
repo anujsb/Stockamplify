@@ -412,6 +412,7 @@ export default function AIStockAnalyticsPage() {
                       let bgColor = "bg-gray-50";
                       let textColor = "text-gray-600";
 
+
                       // Color coding based on price target type
                       if (key.toLowerCase().includes("entry")) {
                         bgColor = "bg-blue-50";
