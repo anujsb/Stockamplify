@@ -28,7 +28,6 @@ import {
   translateAnalysisData,
   type Language,
 } from "@/lib/utils/languageUtils";
-import { formatSymbol } from "@/lib/utils/stockUtils";
 import {
   Activity,
   AlertTriangle,
@@ -53,9 +52,8 @@ interface RateLimit {
 export default function AIStockAnalyticsPage() {
   const { data: session, status } = useSession();
   const [stockSymbol, setStockSymbol] = useState("");
-  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(
-    null
-  );
+  const [stockName, setStockName] = useState("");
+  const [selectedStock, setSelectedStock] = useState<StockSearchResult | null>(null);
   const [investmentHorizon, setInvestmentHorizon] = useState("");
   const [language, setLanguage] = useState<Language>("english");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -68,16 +66,12 @@ export default function AIStockAnalyticsPage() {
     limit: 1,
     resetTime: undefined,
   });
-  const [remainingTokens, setRemainingTokens] = useState<number>(
-    rateLimit.remaining
-  );
+  const [remainingTokens, setRemainingTokens] = useState<number>(rateLimit.remaining);
 
   if (status === "unauthenticated") {
     return (
       <div className="p-6">
-        <p className="text-gray-700">
-          Please sign in to use AI Stock Analytics.
-        </p>
+        <p className="text-gray-700">Please sign in to use AI Stock Analytics.</p>
         <link rel="stylesheet" href="/sign-in" />
       </div>
     );
@@ -141,15 +135,14 @@ export default function AIStockAnalyticsPage() {
     setRemainingTokens(rateLimit.remaining);
 
     if (rateLimit.remaining <= 0) {
-      setError(
-        "You've reached your daily analysis limit. Please try again tomorrow."
-      );
+      setError("You've reached your daily analysis limit. Please try again tomorrow.");
     }
   }, [rateLimit]);
 
   const handleStockSelect = (stock: StockSearchResult) => {
     setSelectedStock(stock);
     setStockSymbol(stock.symbol);
+    setStockName(stock.name);
   };
 
   const handleAnalyze = async () => {
@@ -176,6 +169,7 @@ export default function AIStockAnalyticsPage() {
         },
         body: JSON.stringify({
           symbol: stockSymbol,
+          stockname: stockName,
           investmentHorizon: investmentHorizon,
           language: language,
         }),
@@ -194,18 +188,12 @@ export default function AIStockAnalyticsPage() {
         const translatedData = translateAnalysisData(transformedData, language);
         setAnalysisData(translatedData);
         setRateLimit(data.rateLimit);
-        setSuccess(
-          `${getTranslation(language, "analysisCompleted")} ${stockSymbol}`
-        );
+        setSuccess(`${getTranslation(language, "analysisCompleted")} ${stockSymbol}`);
       } else {
         throw new Error("Invalid response from analysis service");
       }
     } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : getTranslation(language, "unknownError")
-      );
+      setError(error instanceof Error ? error.message : getTranslation(language, "unknownError"));
     } finally {
       setIsAnalyzing(false);
     }
@@ -267,10 +255,7 @@ export default function AIStockAnalyticsPage() {
                   <label className="text-sm font-medium text-gray-700">
                     {getTranslation(language, "investmentHorizon")}
                   </label>
-                  <Select
-                    value={investmentHorizon}
-                    onValueChange={setInvestmentHorizon}
-                  >
+                  <Select value={investmentHorizon} onValueChange={setInvestmentHorizon}>
                     <SelectTrigger className="border-gray-200 focus:border-blue-500 w-full">
                       <SelectValue placeholder="Select investment horizon" />
                     </SelectTrigger>
@@ -308,16 +293,11 @@ export default function AIStockAnalyticsPage() {
 
                 {/* Analyze Button */}
                 <div className="space-y-2 md:col-span-1 relative z-30">
-                  <label className="text-sm font-medium text-gray-700 opacity-0">
-                    Action
-                  </label>
+                  <label className="text-sm font-medium text-gray-700 opacity-0">Action</label>
                   <Button
                     onClick={handleAnalyze}
                     disabled={
-                      !stockSymbol ||
-                      !investmentHorizon ||
-                      isAnalyzing ||
-                      remainingTokens <= 0
+                      !stockSymbol || !investmentHorizon || isAnalyzing || remainingTokens <= 0
                     }
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2.5 h-10"
                   >
@@ -336,8 +316,8 @@ export default function AIStockAnalyticsPage() {
                 {
                   <div className="text-sm font-small text-gray-700">
                     <p>
-                      Tokens Used: {rateLimit?.count} / {rateLimit?.limit} (
-                      {rateLimit?.remaining} remaining)
+                      Tokens Used: {rateLimit?.count} / {rateLimit?.limit} ({rateLimit?.remaining}{" "}
+                      remaining)
                     </p>
                   </div>
                 }
@@ -348,9 +328,7 @@ export default function AIStockAnalyticsPage() {
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                   <div className="flex items-center gap-2 text-red-800">
                     <AlertTriangle className="h-5 w-5" />
-                    <span className="font-medium">
-                      {getTranslation(language, "analysisError")}
-                    </span>
+                    <span className="font-medium">{getTranslation(language, "analysisError")}</span>
                   </div>
                   <p className="mt-2 text-sm text-red-700">{error}</p>
                 </div>
@@ -366,8 +344,7 @@ export default function AIStockAnalyticsPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl">
-                      {getTranslation(language, "aiAnalysisFor")}{" "}
-                      {formatSymbol(stockSymbol)}
+                      {getTranslation(language, "aiAnalysisFor")} - {stockName}
                     </CardTitle>
                   </div>
                 </CardHeader>
@@ -431,47 +408,40 @@ export default function AIStockAnalyticsPage() {
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                    {Object.entries(analysisData.priceTargets).map(
-                      ([key, value]) => {
-                        let bgColor = "bg-gray-50";
-                        let textColor = "text-gray-600";
+                    {Object.entries(analysisData.priceTargets).map(([key, value]) => {
+                      let bgColor = "bg-gray-50";
+                      let textColor = "text-gray-600";
 
-                        // Color coding based on price target type
-                        if (key.toLowerCase().includes("entry")) {
-                          bgColor = "bg-blue-50";
-                          textColor = "text-blue-600";
-                        } else if (
-                          key.toLowerCase().includes("exit") ||
-                          key.toLowerCase().includes("target")
-                        ) {
-                          bgColor = "bg-green-50";
-                          textColor = "text-green-600";
-                        } else if (key.toLowerCase().includes("stop")) {
-                          bgColor = "bg-red-50";
-                          textColor = "text-red-600";
-                        } else if (key.toLowerCase().includes("upside")) {
-                          bgColor = "bg-emerald-50";
-                          textColor = "text-emerald-600";
-                        } else if (key.toLowerCase().includes("downside")) {
-                          bgColor = "bg-orange-50";
-                          textColor = "text-orange-600";
-                        }
-
-                        return (
-                          <div
-                            key={key}
-                            className={`text-center p-3 rounded-lg ${bgColor}`}
-                          >
-                            <div className={`text-lg font-bold ${textColor}`}>
-                              {value}
-                            </div>
-                            <div className="text-xs text-gray-600 capitalize mt-1 leading-tight">
-                              {key.replace(/([A-Z])/g, " $1").trim()}
-                            </div>
-                          </div>
-                        );
+                      // Color coding based on price target type
+                      if (key.toLowerCase().includes("entry")) {
+                        bgColor = "bg-blue-50";
+                        textColor = "text-blue-600";
+                      } else if (
+                        key.toLowerCase().includes("exit") ||
+                        key.toLowerCase().includes("target")
+                      ) {
+                        bgColor = "bg-green-50";
+                        textColor = "text-green-600";
+                      } else if (key.toLowerCase().includes("stop")) {
+                        bgColor = "bg-red-50";
+                        textColor = "text-red-600";
+                      } else if (key.toLowerCase().includes("upside")) {
+                        bgColor = "bg-emerald-50";
+                        textColor = "text-emerald-600";
+                      } else if (key.toLowerCase().includes("downside")) {
+                        bgColor = "bg-orange-50";
+                        textColor = "text-orange-600";
                       }
-                    )}
+
+                      return (
+                        <div key={key} className={`text-center p-3 rounded-lg ${bgColor}`}>
+                          <div className={`text-lg font-bold ${textColor}`}>{value}</div>
+                          <div className="text-xs text-gray-600 capitalize mt-1 leading-tight">
+                            {key.replace(/([A-Z])/g, " $1").trim()}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -487,27 +457,23 @@ export default function AIStockAnalyticsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {Object.entries(analysisData.trendAnalysis).map(
-                      ([key, value]) => {
-                        if (key === "confidence") return null;
-                        return (
-                          <div
-                            key={key}
-                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                          >
-                            <span className="text-sm text-gray-600 capitalize flex-shrink-0">
-                              {key.replace(/([A-Z])/g, " $1")}
-                            </span>
-                            <div className="flex items-center gap-2 justify-end">
-                              {getTrendIconComponent(String(value))}
-                              <span className="text-sm font-medium break-words">
-                                {value}
-                              </span>
-                            </div>
+                    {Object.entries(analysisData.trendAnalysis).map(([key, value]) => {
+                      if (key === "confidence") return null;
+                      return (
+                        <div
+                          key={key}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                        >
+                          <span className="text-sm text-gray-600 capitalize flex-shrink-0">
+                            {key.replace(/([A-Z])/g, " $1")}
+                          </span>
+                          <div className="flex items-center gap-2 justify-end">
+                            {getTrendIconComponent(String(value))}
+                            <span className="text-sm font-medium break-words">{value}</span>
                           </div>
-                        );
-                      }
-                    )}
+                        </div>
+                      );
+                    })}
                     <Separator />
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">
@@ -534,16 +500,14 @@ export default function AIStockAnalyticsPage() {
                         {getTranslation(language, "supportLevels")}
                       </div>
                       <div className="space-y-1">
-                        {analysisData.supportResistance.support.map(
-                          (level, index) => (
-                            <div
-                              key={index}
-                              className="bg-green-50 px-3 py-1 rounded text-sm text-green-700 font-medium"
-                            >
-                              {level}
-                            </div>
-                          )
-                        )}
+                        {analysisData.supportResistance.support.map((level, index) => (
+                          <div
+                            key={index}
+                            className="bg-green-50 px-3 py-1 rounded text-sm text-green-700 font-medium"
+                          >
+                            {level}
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <div>
@@ -551,16 +515,14 @@ export default function AIStockAnalyticsPage() {
                         {getTranslation(language, "resistanceLevels")}
                       </div>
                       <div className="space-y-1">
-                        {analysisData.supportResistance.resistance.map(
-                          (level, index) => (
-                            <div
-                              key={index}
-                              className="bg-red-50 px-3 py-1 rounded text-sm text-red-700 font-medium"
-                            >
-                              {level}
-                            </div>
-                          )
-                        )}
+                        {analysisData.supportResistance.resistance.map((level, index) => (
+                          <div
+                            key={index}
+                            className="bg-red-50 px-3 py-1 rounded text-sm text-red-700 font-medium"
+                          >
+                            {level}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </CardContent>
@@ -575,21 +537,17 @@ export default function AIStockAnalyticsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {Object.entries(analysisData.indicators).map(
-                      ([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                        >
-                          <span className="text-sm text-gray-600 uppercase font-medium flex-shrink-0">
-                            {key}
-                          </span>
-                          <span className="text-sm font-medium text-right break-words">
-                            {value}
-                          </span>
-                        </div>
-                      )
-                    )}
+                    {Object.entries(analysisData.indicators).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                      >
+                        <span className="text-sm text-gray-600 uppercase font-medium flex-shrink-0">
+                          {key}
+                        </span>
+                        <span className="text-sm font-medium text-right break-words">{value}</span>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
 
@@ -606,10 +564,7 @@ export default function AIStockAnalyticsPage() {
                       <span className="text-sm text-gray-600">
                         {getTranslation(language, "riskLevel")}
                       </span>
-                      <Badge
-                        variant="outline"
-                        className="text-orange-600 border-orange-200"
-                      >
+                      <Badge variant="outline" className="text-orange-600 border-orange-200">
                         {analysisData.riskVolatility.riskLevel}
                       </Badge>
                     </div>
@@ -677,10 +632,7 @@ export default function AIStockAnalyticsPage() {
                       <span className="text-sm text-gray-600">
                         {getTranslation(language, "position")}
                       </span>
-                      <Badge
-                        variant="outline"
-                        className="text-green-600 border-green-200"
-                      >
+                      <Badge variant="outline" className="text-green-600 border-green-200">
                         {analysisData.weekRange.position}
                       </Badge>
                     </div>
@@ -735,23 +687,22 @@ export default function AIStockAnalyticsPage() {
                 <div className="flex flex-col space-y-1">
                   <ul className="list-disc pl-5">
                     <li>
-                      This AI-generated analysis is based solely on the provided
-                      data and does not include fundamental analysis, broader
-                      market conditions, news, or other technical indicators.
+                      This AI-generated analysis is based solely on the provided data and does not
+                      include fundamental analysis, broader market conditions, news, or other
+                      technical indicators.
                     </li>
                     <li>
-                      Stock trading involves significant risk, and past
-                      performance is not indicative of future results.
+                      Stock trading involves significant risk, and past performance is not
+                      indicative of future results.
                     </li>
                     <li>
-                      All information is for educational purposes only. We
-                      strongly recommend conducting your own research and
-                      consulting a qualified financial advisor before making any
-                      investment decisions.
+                      All information is for educational purposes only. We strongly recommend
+                      conducting your own research and consulting a qualified financial advisor
+                      before making any investment decisions.
                     </li>
                     <li>
-                      The platform does not guarantee the accuracy,
-                      completeness, or reliability of any data or analysis.
+                      The platform does not guarantee the accuracy, completeness, or reliability of
+                      any data or analysis.
                     </li>
                   </ul>
                 </div>

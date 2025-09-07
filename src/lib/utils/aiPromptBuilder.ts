@@ -3,8 +3,8 @@
  * Constructs prompts for Gemini AI based on stock data and analysis requirements
  */
 
-import { YahooChartData } from '@/lib/services/chartService';
-import { getHorizonConfig } from './investmentHorizons';
+import { YahooChartData } from "@/lib/services/chartService";
+import { formatStockSymbol } from "./dataTransformers";
 
 export interface AnalysisData {
   symbol: string;
@@ -15,39 +15,42 @@ export interface AnalysisData {
   language?: string;
 }
 
-
 /**
  * Build comprehensive AI prompt for stock analysis
  * @param data - Analysis data
  * @returns Formatted prompt string
  */
 export function buildAnalysisPrompt(data: AnalysisData): string {
-  const { symbol, chart, investmentHorizon, interval, period, language = 'english' } = data;
+  const { symbol, chart, investmentHorizon, interval, period, language = "english" } = data;
 
-   if (!chart || !chart.meta || !Array.isArray(chart.quotes) || chart.quotes.length === 0) {
-    return 'Chart data is missing or incomplete.';
+  if (!chart || !chart.meta || !Array.isArray(chart.quotes) || chart.quotes.length === 0) {
+    return "Chart data is missing or incomplete.";
   }
 
   const meta = chart.meta;
   const quotes = chart.quotes;
 
-  const jsonData = JSON.stringify({
-    fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
-    fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
-    historicalQuotes: quotes.map(q => ({
-      date: q.date,
-      open: q.open,
-      high: q.high,
-      low: q.low,
-      close: q.close,
-      volume: q.volume
-    }))
-  }, null, 2);
+  const jsonData = JSON.stringify(
+    {
+      fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
+      fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
+      historicalQuotes: quotes.map((q) => ({
+        date: q.date,
+        open: q.open,
+        high: q.high,
+        low: q.low,
+        close: q.close,
+        volume: q.volume,
+      })),
+    },
+    null,
+    2
+  );
 
   const prompt = `You are a senior financial market analyst with expertise in technical analysis.
 
   **ANALYSIS TASK:**
-  Analyze the stock ${symbol} based on price and volume data of ${getPeriodDescription(period)} with interval ${interval} (in yfinance JSON format) and the investment horizon: ${investmentHorizon}.
+  Analyze the stock ${formatStockSymbol(symbol)} based on price and volume data of ${getPeriodDescription(period)} with interval ${interval} (in yfinance JSON format) and the investment horizon: ${investmentHorizon}.
 
   Your analysis and recommendations must dynamically adapt based on BOTH the investment horizon and the data interval. Translate result in ${language} language.
 
@@ -148,23 +151,23 @@ export function buildAnalysisPrompt(data: AnalysisData): string {
 
   Here is the yfinance data for analysis:
   ${jsonData}`;
-    //console.log(prompt);
-    return prompt;
-} 
+  //console.log(prompt);
+  return prompt;
+}
 
 export function getPeriodDescription(period: string): string {
   const periodMap: Record<string, string> = {
-    '1d': '1 day',
-    '5d': '5 days',
-    '1mo': '1 month',
-    '3mo': '3 months',
-    '6mo': '6 months',
-    '1y': '1 year',
-    '2y': '2 years',
-    '5y': '5 years',
-    '10y': '10 years',
-    'ytd': 'Year-to-date',
-    'max': 'Maximum available'
+    "1d": "1 day",
+    "5d": "5 days",
+    "1mo": "1 month",
+    "3mo": "3 months",
+    "6mo": "6 months",
+    "1y": "1 year",
+    "2y": "2 years",
+    "5y": "5 years",
+    "10y": "10 years",
+    ytd: "Year-to-date",
+    max: "Maximum available",
   };
 
   return periodMap[period] || `${period}`;

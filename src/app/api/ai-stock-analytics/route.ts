@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export interface AIStockAnalysisRequest {
   symbol: string;
+  stockname?: string;
   investmentHorizon: string;
   interval?: TimeInterval;
   period?: TimeRange;
@@ -28,6 +29,7 @@ export interface AIStockAnalysisRequest {
 
 export interface AIStockAnalysisResponse {
   symbol: string;
+  stockname: string;
   trendDirection: string;
   trendByTimeframe: {
     shortTerm: string;
@@ -96,6 +98,7 @@ export async function POST(request: NextRequest) {
     const body: AIStockAnalysisRequest = await request.json();
     const {
       symbol,
+      stockname,
       investmentHorizon,
       interval,
       period,
@@ -136,6 +139,7 @@ export async function POST(request: NextRequest) {
     // Prepare data for AI analysis
     const analysisData = {
       symbol,
+      stockname,
       chart,
       investmentHorizon,
       interval: finalInterval,
@@ -187,6 +191,7 @@ export async function POST(request: NextRequest) {
       analysis,
       metadata: {
         symbol,
+        stockname: stockname,
         investmentHorizon,
         interval: finalInterval,
         period: finalPeriod,

@@ -92,7 +92,7 @@ export const translations: Record<Language, TranslationKeys> = {
   english: {
     // UI Elements
     pageTitle: 'AI Stock Analytics',
-    stockSymbol: 'Stock Symbol',
+    stockSymbol: 'Stock Name',
     investmentHorizon: 'Investment Horizon',
     language: 'Language',
     analyzeStock: 'Analyze Stock',

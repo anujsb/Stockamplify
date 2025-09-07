@@ -128,7 +128,7 @@ export function transformAIResponseToFrontend(apiResponse: AIStockAnalysisRespon
       riskLevel: apiResponse.riskLevel,
       volatility: apiResponse.volatility,
       volatilityScore: apiResponse.volatilityScore,
-      suitableFor: apiResponse.suitableFor.join(', '),
+      suitableFor: apiResponse.suitableFor.join(", "),
     },
     weekRange: {
       currentPrice: apiResponse.week52Comparison.currentPrice,
@@ -149,7 +149,7 @@ export function transformAIResponseToFrontend(apiResponse: AIStockAnalysisRespon
  * @returns True if valid
  */
 export function validateIndianStockSymbol(symbol: string): boolean {
-  const symbolPattern = /^[A-Z]{1,10}\.(NS|BO)$/;
+  const symbolPattern = /^[A-Z0-9&-]{1,12}\.(NS|BO)$/;
   return symbolPattern.test(symbol);
 }
 
@@ -169,10 +169,14 @@ export function formatStockSymbol(symbol: string): string {
  */
 export function getRecommendationColor(recommendation: string): string {
   switch (recommendation?.toLowerCase()) {
-    case 'buy': return 'bg-green-100 text-green-800 border-green-200';
-    case 'sell': return 'bg-red-100 text-red-800 border-red-200';
-    case 'hold': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    case "buy":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "sell":
+      return "bg-red-100 text-red-800 border-red-200";
+    case "hold":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 }
 
@@ -181,8 +185,8 @@ export function getRecommendationColor(recommendation: string): string {
  * @param trend - Trend string
  * @returns Icon component or null
  */
-export function getTrendIcon(trend: string): 'bullish' | 'bearish' | 'neutral' {
-  if (trend?.toLowerCase().includes('bullish')) return 'bullish';
-  if (trend?.toLowerCase().includes('bearish')) return 'bearish';
-  return 'neutral';
-} 
+export function getTrendIcon(trend: string): "bullish" | "bearish" | "neutral" {
+  if (trend?.toLowerCase().includes("bullish")) return "bullish";
+  if (trend?.toLowerCase().includes("bearish")) return "bearish";
+  return "neutral";
+}
