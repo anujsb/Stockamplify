@@ -1,12 +1,7 @@
 "use client";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
-import {
-  IconChartBar,
-  IconHome2,
-  IconNews,
-  IconSearch
-} from "@tabler/icons-react";
+import { IconChartBar, IconHome2, IconNews, IconSearch } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { BrainCircuit, LogOut } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -44,6 +39,11 @@ export default function SideBar() {
     //   href: "/trade-signals",
     //   icon: IconAntennaBars5,
     // },
+    //{
+    //  label: "Smart Money",
+    //  href: "/smart-money",
+    //  icon: Crown,
+    //},
     {
       label: "Market News",
       href: "/news",
@@ -80,16 +80,18 @@ export default function SideBar() {
                       ...link,
                       icon: (
                         <Icon
-                          className={`h-5 w-5 flex-shrink-0 transition-colors duration-200 ${isActive ? "text-blue-600" : "text-gray-800"
-                            }`}
+                          className={`h-5 w-5 flex-shrink-0 transition-colors duration-200 ${
+                            isActive ? "text-blue-600" : "text-gray-800"
+                          }`}
                           aria-hidden="true"
                         />
                       ),
                     }}
-                    className={`${isActive
-                      ? "bg-secondary px-1 rounded-lg text-blue-600 font-semibold"
-                      : "bg-transparent px-1 rounded-lg text-gray-800 hover:text-blue-600"
-                      }`}
+                    className={`${
+                      isActive
+                        ? "bg-secondary px-1 rounded-lg text-blue-600 font-semibold"
+                        : "bg-transparent px-1 rounded-lg text-gray-800 hover:text-blue-600"
+                    }`}
                     aria-current={isActive ? "page" : undefined}
                   />
                 );
@@ -100,18 +102,14 @@ export default function SideBar() {
             <div className="flex flex-col space-y-2">
               {/* User section */}
               {session && (
-                <div
-                  className={`mt-auto border-t border-gray-200 ${open ? "p-4" : "px-0 py-4"}`}
-                >
+                <div className={`mt-auto border-t border-gray-200 ${open ? "p-4" : "px-0 py-4"}`}>
                   <div
                     className={`flex items-center w-full ${open ? "space-x-3" : "justify-center"}`}
                   >
                     {/* Avatar: fixed square, won't grow/shrink, circular */}
                     <div
                       className="w-8 h-8 min-w-[32px] min-h-[32px] flex-none bg-blue-500 rounded-full flex items-center justify-center overflow-hidden"
-                      title={
-                        (session.user as any)?.username || session.user?.email
-                      }
+                      title={(session.user as any)?.username || session.user?.email}
                     >
                       <span className="text-white text-sm font-medium select-none">
                         {(session.user as any)?.username?.[0]?.toUpperCase() ||
@@ -124,8 +122,7 @@ export default function SideBar() {
                       <>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {(session.user as any)?.username ||
-                              session.user?.email}
+                            {(session.user as any)?.username || session.user?.email}
                           </p>
                         </div>
                         {/* <button
@@ -140,17 +137,14 @@ export default function SideBar() {
                           onClick={() => signOut()}
                           title="Sign out"
                           aria-label="Sign out"
-                          className={`${open
-                            ? "inline-flex items-center gap-2 px-2 py-1 rounded-md"
-                            : "p-2 rounded-full"
-                            } bg-white border border-gray-200 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 text-gray-600`}
+                          className={`${
+                            open
+                              ? "inline-flex items-center gap-2 px-2 py-1 rounded-md"
+                              : "p-2 rounded-full"
+                          } bg-white border border-gray-200 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-400 text-gray-600`}
                         >
                           <LogOut className="w-4 h-4" />
-                          {open && (
-                            <span className="text-xs font-medium">
-                              Sign out
-                            </span>
-                          )}
+                          {open && <span className="text-xs font-medium">Sign out</span>}
                         </button>
                       </>
                     )}
@@ -176,11 +170,7 @@ export const Logo = () => {
         className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
         aria-hidden="true"
       >
-        <img
-          src="/logo.png"
-          alt="StockAmplify Logo"
-          className="w-5 h-5 object-contain"
-        />
+        <img src="/logo.png" alt="StockAmplify Logo" className="w-5 h-5 object-contain" />
       </div>
       <motion.span
         initial={{ opacity: 0 }}
@@ -199,11 +189,7 @@ export const LogoIcon = () => {
       className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center"
       aria-label="StockAmplify logo"
     >
-      <img
-        src="/logo.png"
-        alt="StockAmplify Logo"
-        className="w-5 h-5 object-contain"
-      />
+      <img src="/logo.png" alt="StockAmplify Logo" className="w-5 h-5 object-contain" />
     </div>
   );
 };

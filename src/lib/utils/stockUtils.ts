@@ -141,6 +141,15 @@ export function formatDate(date: string | Date | null | undefined): string {
   }).format(dateObj);
 }
 
+export function formatQuarterDate(date: Date | null) {
+  return date
+    ? new Intl.DateTimeFormat("en-IN", {
+        year: "numeric",
+        month: "short",
+      }).format(new Date(date))
+    : "—";
+}
+
 /**
  * Calculate portfolio value
  */

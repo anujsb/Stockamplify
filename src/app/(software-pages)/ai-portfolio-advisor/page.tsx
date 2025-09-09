@@ -11,7 +11,6 @@ import {
   BarChart3,
   Bell,
   Gauge,
-  Info,
   MapPin,
   RefreshCw,
   Shield,
@@ -489,7 +488,6 @@ const AIPortfolioAdvisorPage = () => {
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
                 Risk vs Return Analysis
-                <Info className="h-4 w-4 text-gray-400 ml-2" />
               </CardTitle>
             </CardHeader>
 
@@ -551,7 +549,6 @@ const AIPortfolioAdvisorPage = () => {
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-blue-600" />
                 Beta vs Alpha Analysis
-                <span className="text-xs text-gray-400 ml-2">(X = Beta, Y = Alpha %)</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
