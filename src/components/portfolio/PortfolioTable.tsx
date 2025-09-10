@@ -2,10 +2,11 @@ import { HoldingInput, recommendForHolding } from "@/lib/services/shared/persona
 import { formatPrice, formatSymbol } from "@/lib/utils/stockUtils";
 import { ChevronRight, Eye, Info, Trash2 } from "lucide-react";
 import React, { useState } from "react";
+import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import PriceChangeIndicator from "./PriceChangeIndicator";
 import StockDetailModal from "./StockDetailModal";
 
-type SortField = "symbol" | "quantity" | "buyPrice" | "currentPrice" | "currentValue" | "gainLoss";
+type SortField = "symbol" | "quantity" | "buyPrice" | "currentPrice" | "currentValue" | "gainLoss" | "advice";
 
 interface PortfolioTableProps {
   portfolio: any[];
@@ -24,6 +25,8 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
   const [sortField, setSortField] = useState<SortField>("symbol");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [showTip, setShowTip] = useState(true);
+  const [deletingAll, setDeletingAll] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sortPortfolio = (items: any[]) => {
     return [...items].sort((a, b) => {
@@ -54,6 +57,10 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
           aValue = calculateGainLoss(a.realTimePrice?.price || 0, a.buyPrice, a.quantity).gainLoss;
           bValue = calculateGainLoss(b.realTimePrice?.price || 0, b.buyPrice, b.quantity).gainLoss;
           break;
+        case "advice":
+          aValue = getAdviceRank(a);
+          bValue = getAdviceRank(b);
+          break;
         default:
           aValue = 0;
           bValue = 0;
@@ -74,6 +81,25 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
       setSortField(field);
       setSortDirection("asc");
     }
+  };
+
+  // Order from best → worst (tweak to your liking)
+  const ADVICE_ORDER: Record<string, number> = {
+    strong_buy: 1,
+    buy: 2,
+    average_on_dips: 3,
+    hold: 4,
+    partial_sell: 5,
+    sell: 6,
+    need_attention: 7,
+  };
+
+  // Pull the decision action for a row (using your existing decisionsBySymbol)
+  const getAdviceAction = (row: any) => decisionsBySymbol.get(row.stock?.symbol)?.action ?? null;
+
+  const getAdviceRank = (row: any) => {
+    const action = getAdviceAction(row);
+    return action ? (ADVICE_ORDER[action] ?? 999) : 999; // unknowns go to bottom
   };
 
   // map rows → engine
@@ -147,6 +173,25 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
     }
   };
 
+  const handleDeleteAll = async () => {
+    setDeletingAll(true);
+    try {
+      const res = await fetch("/api/portfolio/delete-all", { method: "DELETE" });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.error || "Failed to delete all stocks");
+        return;
+      }
+      onRefresh();
+    } catch (err) {
+      console.error("Delete all failed:", err);
+      alert("Something went wrong while deleting stocks.");
+    } finally {
+      setDeletingAll(false);
+    }
+  };
+
   const handleRowClick = (stock: any) => {
     setSelectedStock(stock);
     setShowDetailModal(true);
@@ -203,15 +248,13 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
 
   return (
     <div>
-      {/* Dismissible Help Text */}
+      {/* Tip inside the same card */}
       {showTip && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-blue-700 text-sm">
-              <Info className="h-4 w-4" />
               <span>
-                💡 <strong>Tip:</strong> Click on any stock row to view detailed information and
-                charts
+                <strong>Tip:</strong> Click on any stock row to view detailed information and charts
               </span>
             </div>
             <button
@@ -231,6 +274,39 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
           </div>
         </div>
       )}
+
+      {/* Holdings toolbar */}
+      <div className="top-16 z-10 flex items-center justify-between gap-3 rounded-lg border border-gray-200 px-4 py-3 backdrop-blur">
+        <div className="flex items-center gap-2">
+          <h3 className="text-xs">Holdings</h3>
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-700">
+            {portfolio.length} {portfolio.length === 1 ? "stock" : "stocks"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {portfolio.length > 5 && (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              disabled={deletingAll}
+              className={`rounded-md px-3 py-1.5 text-xs transition ${
+                deletingAll
+                  ? "cursor-not-allowed bg-red-400 text-white"
+                  : "bg-red-600 text-white hover:bg-red-700"
+              }`}
+            >
+              {deletingAll ? "Deleting…" : "Delete All"}
+            </button>
+          )}
+
+          <DeleteConfirmationModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleDeleteAll}
+            itemCount={portfolio.length}
+          />
+        </div>
+      </div>
 
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -276,8 +352,12 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
                 >
                   Gain/Loss {sortField === "gainLoss" && (sortDirection === "asc" ? "↑" : "↓")}
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  onClick={() => handleSort("advice")}
+                >
                   Advice
+                  {sortField === "advice" && (sortDirection === "asc" ? "↑" : "↓")}
                 </th>
                 <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -361,7 +441,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center justify-center space-x-3">
                         {decision ? (
-                          <span className={`text-[11px] px-2 py-1 rounded ${recCls}`}>
+                          <span className={`text-[10px] px-2 py-1 rounded ${recCls}`}>
                             {recLabel}
                           </span>
                         ) : null}
@@ -389,13 +469,6 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
-                      </div>
-                      {/* Enhanced hover indicator */}
-                      <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="flex items-center justify-center space-x-1 text-blue-500 text-xs">
-                          <span>Click row for details</span>
-                          <ChevronRight className="h-3 w-3" />
-                        </div>
                       </div>
                     </td>
                   </tr>

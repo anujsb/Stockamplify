@@ -136,28 +136,40 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioRe
   try {
     const session = await auth();
     if (!session?.user?.nextAuthId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
     const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'Missing id parameter' }, { status: 400 });
-    }
-    // Find the portfolio entry and ensure it belongs to the user
-    // Remove by portfolio row id (userStocks.id)
-    const result = await UserService.removeStockFromPortfolioById(user.id, Number(id));
-    if (result.success) {
-      return NextResponse.json({ success: true }, { status: 200 });
+    const id = searchParams.get("id");
+    if (id) {
+      // 🔹 Single delete
+      const result = await UserService.removeStockFromPortfolioById(user.id, Number(id));
+      if (result.success) {
+        return NextResponse.json({ success: true }, { status: 200 });
+      } else {
+        return NextResponse.json(
+          { success: false, error: result.error || "Failed to remove stock" },
+          { status: 400 }
+        );
+      }
     } else {
-      return NextResponse.json({ success: false, error: result.error || 'Failed to remove stock' }, { status: 400 });
+      // 🔹 Bulk delete (delete all stocks for user)
+      const result = await UserService.removeAllStocksFromPortfolio(user.id);
+      if (result.success) {
+        return NextResponse.json({ success: true, deleted: result.deleted }, { status: 200 });
+      } else {
+        return NextResponse.json(
+          { success: false, error: result.error || "Failed to remove all stocks" },
+          { status: 400 }
+        );
+      }
     }
   } catch (error) {
-    console.error('Error in DELETE /api/portfolio:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    console.error("Error in DELETE /api/portfolio:", error);
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
 

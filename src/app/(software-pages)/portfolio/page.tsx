@@ -3,12 +3,13 @@ import AddStockModal from "@/components/portfolio/AddStockModal";
 import PortfolioSummary from "@/components/portfolio/PortfolioSummary";
 import PortfolioTable from "@/components/portfolio/PortfolioTable";
 import RealTimeStatus from "@/components/portfolio/RealTimeStatus";
+import UploadStocksModal from "@/components/portfolio/UploadStocksModal";
 import SideBar from "@/components/SideBar";
 import { Button } from "@/components/ui/button";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
 import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Plus, UploadCloud } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
@@ -18,6 +19,7 @@ export default function PortfolioPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const handleAddClick = () => setShowAddModal(true);
   const handleCloseModal = () => setShowAddModal(false);
@@ -72,12 +74,17 @@ export default function PortfolioPage() {
               <Plus className="w-4 h-4 mr-2" />
               Add Stock
             </Button>
+            <Button onClick={() => setShowUploadModal(true)} className="flex-1 sm:flex-none">
+              <UploadCloud className="w-4 h-4 mr-2" />
+              Upload Stocks
+            </Button>
           </div>
         </header>
 
-        <AddStockModal
-          open={showAddModal}
-          onClose={handleCloseModal}
+        <AddStockModal open={showAddModal} onClose={handleCloseModal} onSuccess={handleSuccess} />
+        <UploadStocksModal
+          open={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
           onSuccess={handleSuccess}
         />
 

@@ -19,7 +19,6 @@ export interface CreateUserData {
 }
 
 export class UserService {
-
   /**
    * Create a default 'Free' subscription for the given user.
    * Assumes plans table has a row name='Free'.
@@ -72,7 +71,7 @@ export class UserService {
           nextAuthId: userData.nextAuthId,
           email: userData.email,
           username: userData.username,
-          password: '', // This will be set during signup
+          password: "", // This will be set during signup
         })
         .returning();
 
@@ -81,7 +80,7 @@ export class UserService {
 
       return newUser[0];
     } catch (error) {
-      console.error('Error creating/getting user:', error);
+      console.error("Error creating/getting user:", error);
       throw error;
     }
   }
@@ -91,11 +90,7 @@ export class UserService {
    */
   static async getCurrentUser(nextAuthId: string) {
     try {
-      const user = await db
-        .select()
-        .from(users)
-        .where(eq(users.nextAuthId, nextAuthId))
-        .limit(1);
+      const user = await db.select().from(users).where(eq(users.nextAuthId, nextAuthId)).limit(1);
 
       if (user.length === 0) {
         return null;
@@ -111,7 +106,7 @@ export class UserService {
         lastLogin: user[0].lastLogin,
       };
     } catch (error) {
-      console.error('Error fetching current user:', error);
+      console.error("Error fetching current user:", error);
       return null;
     }
   }
@@ -128,7 +123,7 @@ export class UserService {
         })
         .where(eq(users.id, userId));
     } catch (error) {
-      console.error('Error updating last login:', error);
+      console.error("Error updating last login:", error);
     }
   }
 
@@ -137,15 +132,11 @@ export class UserService {
    */
   static async getUserByNextAuthId(nextAuthId: string) {
     try {
-      const user = await db
-        .select()
-        .from(users)
-        .where(eq(users.nextAuthId, nextAuthId))
-        .limit(1);
+      const user = await db.select().from(users).where(eq(users.nextAuthId, nextAuthId)).limit(1);
 
       return user.length > 0 ? user[0] : null;
     } catch (error) {
-      console.error('Error fetching user by NextAuth ID:', error);
+      console.error("Error fetching user by NextAuth ID:", error);
       return null;
     }
   }
@@ -155,15 +146,11 @@ export class UserService {
    */
   static async getUserByEmail(email: string) {
     try {
-      const user = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
+      const user = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
       return user.length > 0 ? user[0] : null;
     } catch (error) {
-      console.error('Error fetching user by email:', error);
+      console.error("Error fetching user by email:", error);
       return null;
     }
   }
@@ -171,11 +158,14 @@ export class UserService {
   /**
    * Update user profile
    */
-  static async updateUserProfile(userId: number, updates: Partial<{
-    username: string;
-    email: string;
-    isActive: boolean;
-  }>) {
+  static async updateUserProfile(
+    userId: number,
+    updates: Partial<{
+      username: string;
+      email: string;
+      isActive: boolean;
+    }>
+  ) {
     try {
       const updatedUser = await db
         .update(users)
@@ -185,7 +175,7 @@ export class UserService {
 
       return updatedUser[0];
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      console.error("Error updating user profile:", error);
       throw error;
     }
   }
@@ -202,7 +192,7 @@ export class UserService {
         })
         .where(eq(users.id, userId));
     } catch (error) {
-      console.error('Error deactivating user:', error);
+      console.error("Error deactivating user:", error);
       throw error;
     }
   }
@@ -212,14 +202,11 @@ export class UserService {
    */
   static async getAllActiveUsers() {
     try {
-      const activeUsers = await db
-        .select()
-        .from(users)
-        .where(eq(users.isActive, true));
+      const activeUsers = await db.select().from(users).where(eq(users.isActive, true));
 
       return activeUsers;
     } catch (error) {
-      console.error('Error fetching active users:', error);
+      console.error("Error fetching active users:", error);
       return [];
     }
   }
@@ -229,9 +216,7 @@ export class UserService {
    */
   static async getUserStats() {
     try {
-      const totalUsers = await db
-        .select({ count: users.id })
-        .from(users);
+      const totalUsers = await db.select({ count: users.id }).from(users);
 
       const activeUsers = await db
         .select({ count: users.id })
@@ -244,7 +229,7 @@ export class UserService {
         inactive: totalUsers.length - activeUsers.length,
       };
     } catch (error) {
-      console.error('Error fetching user stats:', error);
+      console.error("Error fetching user stats:", error);
       return {
         total: 0,
         active: 0,
@@ -267,16 +252,13 @@ export class UserService {
       const existingUserStock = await db
         .select()
         .from(userStocks)
-        .where(and(
-          eq(userStocks.userId, userId),
-          eq(userStocks.stockId, stockId)
-        ))
+        .where(and(eq(userStocks.userId, userId), eq(userStocks.stockId, stockId)))
         .limit(1);
 
       if (existingUserStock.length > 0) {
         // Update existing position (average cost basis)
         const existing = existingUserStock[0];
-        const totalValue = (existing.quantity * Number(existing.buyPrice)) + (quantity * buyPrice);
+        const totalValue = existing.quantity * Number(existing.buyPrice) + quantity * buyPrice;
         const totalQuantity = existing.quantity + quantity;
         const avgPrice = totalValue / totalQuantity;
 
@@ -302,8 +284,8 @@ export class UserService {
           .returning();
       }
     } catch (error) {
-      console.error('Error adding stock to portfolio:', error);
-      throw new Error('Failed to add stock to portfolio');
+      console.error("Error adding stock to portfolio:", error);
+      throw new Error("Failed to add stock to portfolio");
     }
   }
 
@@ -332,7 +314,7 @@ export class UserService {
         .leftJoin(stockRealTimePrice, eq(userStocks.stockId, stockRealTimePrice.stockId))
         .where(eq(userStocks.userId, userId));
     } catch (error) {
-      console.error('Error getting user portfolio:', error);
+      console.error("Error getting user portfolio:", error);
       return [];
     }
   }
@@ -449,7 +431,7 @@ export class UserService {
         .leftJoin(analystRating, eq(userStocks.stockId, analystRating.stockId))
         .where(eq(userStocks.userId, userId));
     } catch (error) {
-      console.error('Error getting user portfolio with details:', error);
+      console.error("Error getting user portfolio with details:", error);
       return [];
     }
   }
@@ -461,14 +443,11 @@ export class UserService {
     try {
       return await db
         .delete(userStocks)
-        .where(and(
-          eq(userStocks.userId, userId),
-          eq(userStocks.stockId, stockId)
-        ))
+        .where(and(eq(userStocks.userId, userId), eq(userStocks.stockId, stockId)))
         .returning();
     } catch (error) {
-      console.error('Error removing stock from portfolio:', error);
-      throw new Error('Failed to remove stock from portfolio');
+      console.error("Error removing stock from portfolio:", error);
+      throw new Error("Failed to remove stock from portfolio");
     }
   }
 
@@ -485,11 +464,27 @@ export class UserService {
       if (result.length > 0) {
         return { success: true };
       } else {
-        return { success: false, error: 'Not found or not authorized' };
+        return { success: false, error: "Not found or not authorized" };
       }
     } catch (error) {
-      console.error('Error removing stock from portfolio by id:', error);
-      return { success: false, error: 'Failed to remove stock from portfolio' };
+      console.error("Error removing stock from portfolio by id:", error);
+      return { success: false, error: "Failed to remove stock from portfolio" };
+    }
+  }
+
+  static async removeAllStocksFromPortfolio(userId: number) {
+    try {
+      // Delete all stocks belonging to the user
+      const result = await db.delete(userStocks).where(eq(userStocks.userId, userId)).returning();
+
+      if (result.length > 0) {
+        return { success: true, deleted: result.length };
+      } else {
+        return { success: false, error: "No stocks found for this user" };
+      }
+    } catch (error) {
+      console.error("Error removing all stocks from portfolio:", error);
+      return { success: false, error: "Failed to remove all stocks from portfolio" };
     }
   }
 }

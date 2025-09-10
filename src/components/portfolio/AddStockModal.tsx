@@ -120,14 +120,10 @@ const AddStockModal: React.FC<AddStockModalProps> = ({ open, onClose, onSuccess 
             </div>
             {error && <div className="text-red-600 text-sm mb-2 text-center">{error}</div>}
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                className="px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                onClick={onClose}
-              >
+              <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
-              </button>
-              <Button type="submit" disabled={adding} className="px-6 py-2 rounded-lg">
+              </Button>
+              <Button type="submit" disabled={adding}>
                 {adding ? "Adding..." : "Add to Portfolio"}
               </Button>
             </div>
