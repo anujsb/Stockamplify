@@ -1,9 +1,9 @@
 "use client";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import { useUpdateManager } from "@/lib/hooks/useUpdateManager";
-import { IconChartBar, IconHome2, IconNews, IconSearch } from "@tabler/icons-react";
+import { IconAntennaBars5, IconBulb, IconChartBar, IconHome2, IconNews, IconSearch } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { BrainCircuit, LogOut } from "lucide-react";
+import { BrainCircuit, Cpu, Crown, LogOut, Newspaper, Users } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,30 +24,30 @@ export default function SideBar() {
       href: "/portfolio",
       icon: IconChartBar,
     },
-    // {
-    //   label: "AI Portfolio Advisor",
-    //   href: "/ai-portfolio-advisor",
-    //   icon: IconBulb,
-    // },
+    {
+      label: "AI Portfolio Advisor",
+      href: "/ai-portfolio-advisor",
+      icon: Cpu,
+    },
     {
       label: "AI Stock Analysis",
       href: "/ai-stock-analytics",
       icon: BrainCircuit,
     },
-    // {
-    //   label: "Trade Signals",
-    //   href: "/trade-signals",
-    //   icon: IconAntennaBars5,
-    // },
-    //{
-    //  label: "Smart Money",
-    //  href: "/smart-money",
-    //  icon: Crown,
-    //},
+    {
+      label: "Trade Signals",
+      href: "/trade-signals",
+      icon: IconAntennaBars5,
+    },
+    {
+      label: "Smart Money",
+      href: "/smart-money",
+      icon: Users,
+    },
     {
       label: "Market News",
       href: "/news",
-      icon: IconNews,
+      icon: Newspaper,
     },
     {
       label: "Search Stocks",

@@ -26,7 +26,9 @@ export default function AdminPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in to access your dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Please sign in to use StockAmplify
+          </h1>
           <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
             Sign In
           </Link>

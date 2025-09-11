@@ -107,9 +107,7 @@ const SearchPage = () => {
   if (status === "unauthenticated") {
     return (
       <div className="p-6">
-        <p className="text-gray-700">
-          Please sign in to use AI Stock Analytics.
-        </p>
+        <p className="text-gray-700">Please sign in to use StockAmplify</p>
         <link rel="stylesheet" href="/sign-in" />
       </div>
     );

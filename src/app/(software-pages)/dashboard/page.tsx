@@ -8,31 +8,32 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
 import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
+import { FEATURE_CODES, FeatureCode } from "@/lib/utils/constants";
+import { IconChartBar } from "@tabler/icons-react";
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
   BarChart3,
+  Bolt,
+  BrainCircuit,
   CheckCircle2,
+  Cpu,
   Crown,
   Newspaper,
   PieChart as PieChartIcon,
   Plus,
   RefreshCw,
   Search,
+  Signal,
   Target,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
-import {
-  Cell,
-  Pie,
-  PieChart as RechartsPieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { Cell, Pie, PieChart as RechartsPieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 const formatDMY = (iso?: string) => {
   if (!iso) return "N/A";
@@ -42,6 +43,111 @@ const formatDMY = (iso?: string) => {
   return d.toLocaleDateString("en-GB").replace(/\//g, "-");
 };
 
+type RateLimitSummaryItem = {
+  featureCode: FeatureCode;
+  featureName?: string;
+  short?: string;
+  description?: string;
+  quota: number;
+  used: number;
+  remaining: number;
+  resetInterval?: string | null;
+  resetTime?: string | null;
+};
+
+function LocalRateLimitBadge({
+  feature,
+  map,
+}: {
+  feature: FeatureCode;
+  map: Record<string, RateLimitSummaryItem | undefined>;
+}) {
+  const val = map[feature];
+  if (!val) return <span className="text-xs text-slate-400">—</span>;
+  return (
+    <span className="inline-flex items-center gap-2 text-xs font-medium">
+      <span className="px-2 py-1 rounded-full ring-1 ring-slate-100 bg-white/80">
+        {val.remaining}/{val.quota}
+      </span>
+    </span>
+  );
+}
+
+function QuickActionCard({
+  href,
+  title,
+  desc,
+  icon,
+  feature,
+  rateLimitMap,
+}: {
+  href: string;
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  feature?: FeatureCode;
+  rateLimitMap: Record<string, RateLimitSummaryItem | undefined>;
+}) {
+  const info = feature ? rateLimitMap[feature] : undefined;
+  const blocked = info ? info.remaining <= 0 : false;
+
+  const formatResetTime = (dateStr?: string, interval?: string) => {
+    if (!dateStr) return "Reset time unknown";
+    const d = new Date(dateStr);
+    const datePart = d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    const timePart = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    return `Resets (${interval ?? "N/A"}): ${datePart} ${timePart}`;
+  };
+
+  const cardInner = (
+    <Card
+      className={cn(
+        "relative h-full flex flex-col justify-between border border-slate-200 transition-shadow",
+        blocked ? "opacity-95" : "hover:shadow-md cursor-pointer"
+      )}
+    >
+      <CardContent className="flex flex-col flex-1 p-6">
+        {/* Icon */}
+        <div className="p-3 bg-slate-50 rounded-lg w-fit mx-auto mb-3">
+          <div className="inline-flex items-center justify-center w-8 h-8">{icon}</div>
+        </div>
+
+        {/* Title */}
+        <div className="flex items-center justify-center gap-2">
+          <h3 className="font-semibold text-slate-800">{title}</h3>
+        </div>
+
+        {/* Description */}
+        <p className="text-sm text-slate-600 mt-1 text-center flex-1">{desc}</p>
+
+        {/* Bottom tokens info */}
+        {feature && info && (
+          <div className="mt-4 text-xs text-center">
+            <div className="flex justify-center items-center gap-2 font-medium">
+              <span className="text-slate-700">
+                Tokens: {info.used}/{info.quota}
+              </span>
+              {blocked && <span className="text-red-600">Limit reached</span>}
+            </div>
+            <div className="text-slate-500 mt-1">
+              {formatResetTime(info.resetTime, info.resetInterval)}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  return blocked ? <div className="h-full">{cardInner}</div> : <Link href={href}>{cardInner}</Link>;
+}
+
+
+
 // Separate component that uses useSearchParams
 const DashboardContent = () => {
   const { data: session } = useSession();
@@ -50,12 +156,53 @@ const DashboardContent = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { showInactiveBanner, user } = useUserStatus();
   const planName = session?.user?.planName ?? "Free";
-  const subscriptionType = (
-    session?.user?.subscriptionType ?? "Monthly"
-  ).toLowerCase();
+  const subscriptionType = (session?.user?.subscriptionType ?? "Monthly").toLowerCase();
   const startDate = formatDMY(session?.user?.subscriptionStartDate);
   const endDate = formatDMY(session?.user?.subscriptionEndDate);
   const inactive = session?.user?.isActive === false;
+
+  const [rateLimitMap, setRateLimitMap] = useState<
+    Record<string, RateLimitSummaryItem | undefined>
+  >({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchSummary = async () => {
+      try {
+        const res = await fetch("/api/rate-limit-summary", { cache: "no-store" });
+        const json = await res.json();
+        if (!res.ok) {
+          console.warn("Failed to load rate-limit-summary", json);
+          return;
+        }
+        if (json?.success && Array.isArray(json.data)) {
+          const map: Record<string, RateLimitSummaryItem> = {};
+          for (const row of json.data) {
+            if (!row?.featureCode) continue;
+            map[row.featureCode] = {
+              featureCode: row.featureCode,
+              featureName: row.featureName,
+              short: (row as any).short,
+              description: (row as any).description,
+              quota: Number(row.quota ?? 0),
+              used: Number(row.used ?? 0),
+              remaining: Number(row.remaining ?? 0),
+              resetInterval: row.resetInterval ?? null,
+              resetTime: row.resetTime ?? null,
+            };
+          }
+          if (!cancelled) setRateLimitMap(map);
+        }
+      } catch (err) {
+        console.error("Error fetching rate-limit-summary:", err);
+      }
+    };
+
+    fetchSummary();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Initial portfolio fetch
   useEffect(() => {
@@ -91,8 +238,7 @@ const DashboardContent = () => {
 
     portfolio.forEach((item) => {
       const invested = Number(item.buyPrice) * item.quantity;
-      const currentValue =
-        Number(item.realTimePrice?.price || 0) * item.quantity;
+      const currentValue = Number(item.realTimePrice?.price || 0) * item.quantity;
 
       totalInvested += invested;
       totalCurrentValue += currentValue;
@@ -102,8 +248,7 @@ const DashboardContent = () => {
 
       // Sector allocation (mock data for demo - you might want to add sector info to your stock data)
       const sector = item.stock?.sector || "Technology"; // Default to Technology if not available
-      sectorAllocations[sector] =
-        (sectorAllocations[sector] || 0) + currentValue;
+      sectorAllocations[sector] = (sectorAllocations[sector] || 0) + currentValue;
     });
 
     return {
@@ -111,9 +256,7 @@ const DashboardContent = () => {
       totalCurrentValue,
       totalGainLoss: totalCurrentValue - totalInvested,
       totalGainLossPercentage:
-        totalInvested > 0
-          ? ((totalCurrentValue - totalInvested) / totalInvested) * 100
-          : 0,
+        totalInvested > 0 ? ((totalCurrentValue - totalInvested) / totalInvested) * 100 : 0,
       stockAllocations,
       sectorAllocations,
     };
@@ -124,15 +267,7 @@ const DashboardContent = () => {
     const metrics = calculatePortfolioMetrics();
     if (!metrics) return [];
 
-    const colors = [
-      "#3b82f6",
-      "#ef4444",
-      "#10b981",
-      "#f59e0b",
-      "#8b5cf6",
-      "#06b6d4",
-      "#f97316",
-    ];
+    const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#06b6d4", "#f97316"];
 
     return Object.entries(metrics.stockAllocations)
       .map(([symbol, value], index) => ({
@@ -152,8 +287,7 @@ const DashboardContent = () => {
       .map((item) => {
         const currentPrice = Number(item.realTimePrice?.price || 0);
         const buyPrice = Number(item.buyPrice);
-        const gainLossPercentage =
-          buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0;
+        const gainLossPercentage = buyPrice > 0 ? ((currentPrice - buyPrice) / buyPrice) * 100 : 0;
 
         return {
           symbol: item.stock?.symbol,
@@ -172,8 +306,7 @@ const DashboardContent = () => {
   const metrics = calculatePortfolioMetrics();
 
   const formatPrice = (value: number) => `₹${Number(value).toFixed(2)}`;
-  const formatPercentage = (value: number) =>
-    `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
+  const formatPercentage = (value: number) => `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
 
   // Loading component
   const LoadingSpinner = () => (
@@ -216,9 +349,7 @@ const DashboardContent = () => {
             <h1 className="text-3xl font-bold text-slate-800">
               Hello, {session?.user?.username || "Investor"}!
             </h1>
-            <p className="text-slate-600 mt-1">
-              Welcome back! Here's your portfolio overview.
-            </p>
+            <p className="text-slate-600 mt-1">Welcome back! Here's your portfolio overview.</p>
           </div>
 
           {/* Action Buttons */}
@@ -228,9 +359,7 @@ const DashboardContent = () => {
               variant="outline"
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              <RefreshCw
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
             <Link href="/portfolio">
               <Button className="px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -255,9 +384,7 @@ const DashboardContent = () => {
               <AlertTriangle className="mt-0.5 h-5 w-5" />
               <div>
                 <p className="font-medium">Your account is inactive</p>
-                <p className="text-sm opacity-90">
-                  Please verify your email or contact support.
-                </p>
+                <p className="text-sm opacity-90">Please verify your email or contact support.</p>
               </div>
             </div>
           </div>
@@ -276,10 +403,7 @@ const DashboardContent = () => {
                     {/* Plan Details */}
                     <h3 className="text-lg font-semibold text-slate-800">
                       Current Plan: {planName.toUpperCase()}{" "}
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full bg-blue-100 text-blue-700"
-                      >
+                      <Badge variant="secondary" className="rounded-full bg-blue-100 text-blue-700">
                         {subscriptionType}
                       </Badge>
                       {inactive && (
@@ -323,9 +447,7 @@ const DashboardContent = () => {
                             ? "Limited AI Analysis tokens per day"
                             : "Unlimited AI Analysis tokens"}
                           {planName === "free" && (
-                            <div className="text-slate-500 text-sm">
-                              (1 token = 1 analysis)
-                            </div>
+                            <div className="text-slate-500 text-sm">(1 token = 1 analysis)</div>
                           )}
                         </span>
                       </li>
@@ -339,67 +461,70 @@ const DashboardContent = () => {
 
         {/* Quick Actions Grid */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">
-            Quick Actions
-          </h2>
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/portfolio">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-blue-50 rounded-lg w-fit mx-auto mb-3">
-                    <BarChart3 className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">Portfolio</h3>
-                  <p className="text-sm text-slate-600 mt-1">
-                    View & manage your investments
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            {/* Existing features */}
+            <QuickActionCard
+              href="/portfolio"
+              title="Portfolio"
+              desc="View & manage your investments"
+              icon={<IconChartBar className="h-6 w-6 text-blue-600" />}
+              rateLimitMap={rateLimitMap}
+            />
 
-            <Link href="/ai-stock-analytics">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-purple-50 rounded-lg w-fit mx-auto mb-3">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">
-                    AI Stock Analytics
-                  </h3>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Research & analyze stocks
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <QuickActionCard
+              href="/ai-stock-analytics"
+              title="AI Stock Analytics"
+              desc="Research & analyze stocks"
+              icon={<BrainCircuit className="h-6 w-6 text-purple-600" />}
+              feature={FEATURE_CODES.AI_ANALYSIS}
+              rateLimitMap={rateLimitMap}
+            />
 
-            <Link href="/news">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-green-50 rounded-lg w-fit mx-auto mb-3">
-                    <Newspaper className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">Market News</h3>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Latest financial updates
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <QuickActionCard
+              href="/news"
+              title="Market News"
+              desc="Latest financial updates"
+              icon={<Newspaper className="h-6 w-6 text-green-600" />}
+              feature={FEATURE_CODES.MARKET_NEWS}
+              rateLimitMap={rateLimitMap}
+            />
 
-            <Link href="/search">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border border-slate-200">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 bg-orange-50 rounded-lg w-fit mx-auto mb-3">
-                    <Search className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <h3 className="font-semibold text-slate-800">Stock Search</h3>
-                  <p className="text-sm text-slate-600 mt-1">
-                    Find & explore stocks
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
+            <QuickActionCard
+              href="/search"
+              title="Stock Search"
+              desc="Find & explore stocks"
+              icon={<Search className="h-6 w-6 text-orange-600" />}
+              feature={FEATURE_CODES.STOCK_SEARCH}
+              rateLimitMap={rateLimitMap}
+            />
+
+            <QuickActionCard
+              href="/ai-portfolio-advisor"
+              title="AI Portfolio Advisor"
+              desc="AI-based portfolio analysis & rebalance suggestions"
+              icon={<Cpu className="h-6 w-6 text-indigo-600" />}
+              feature={FEATURE_CODES.AI_PORTFOLIO_ADVISOR}
+              rateLimitMap={rateLimitMap}
+            />
+
+            <QuickActionCard
+              href="/trade-signals"
+              title="Trade Signals"
+              desc="Momentum & volume signals for your holdings"
+              icon={<Signal className="h-6 w-6 text-amber-600" />}
+              feature={FEATURE_CODES.TRADE_SIGNALS}
+              rateLimitMap={rateLimitMap}
+            />
+
+            <QuickActionCard
+              href="/smart-money"
+              title="Smart Money"
+              desc="See overlap with ace investors & institutions"
+              icon={<Users className="h-6 w-6 text-emerald-600" />}
+              feature={FEATURE_CODES.SMART_MONEY}
+              rateLimitMap={rateLimitMap}
+            />
           </div>
         </div>
 
@@ -407,9 +532,7 @@ const DashboardContent = () => {
         <div>
           {/* Portfolio Allocation */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-semibold text-slate-800 mb-6">
-              Portfolio Allocation
-            </h2>
+            <h2 className="text-xl font-semibold text-slate-800 mb-6">Portfolio Allocation</h2>
 
             {portfolio.length > 0 ? (
               <>
@@ -429,30 +552,21 @@ const DashboardContent = () => {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        formatter={(value) => [`${value}%`, "Allocation"]}
-                      />
+                      <Tooltip formatter={(value) => [`${value}%`, "Allocation"]} />
                     </RechartsPieChart>
                   </ResponsiveContainer>
                 </div>
                 <div className="space-y-2">
                   {pieData.map((item) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between"
-                    >
+                    <div key={item.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div
                           className="w-3 h-3 rounded-full"
                           style={{ backgroundColor: item.color }}
                         ></div>
-                        <span className="text-sm font-medium text-slate-700">
-                          {item.name}
-                        </span>
+                        <span className="text-sm font-medium text-slate-700">{item.name}</span>
                       </div>
-                      <span className="text-sm text-slate-600">
-                        {item.value}%
-                      </span>
+                      <span className="text-sm text-slate-600">{item.value}%</span>
                     </div>
                   ))}
                 </div>
@@ -478,8 +592,7 @@ const DashboardContent = () => {
                 Start Building Your Portfolio
               </h3>
               <p className="text-gray-600 mb-6">
-                Add your first stock to begin tracking your investments and see
-                detailed analytics.
+                Add your first stock to begin tracking your investments and see detailed analytics.
               </p>
               <Link href="/portfolio">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 mx-auto transition-colors">

@@ -14,6 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
+import { FEATURE_CODES, type FeatureCode } from "@/lib/utils/constants";
 import {
   getRecommendationColor,
   getTrendIcon,
@@ -71,7 +72,7 @@ export default function AIStockAnalyticsPage() {
   if (status === "unauthenticated") {
     return (
       <div className="p-6">
-        <p className="text-gray-700">Please sign in to use AI Stock Analytics.</p>
+        <p className="text-gray-700">Please sign in to use StockAmplify</p>
         <link rel="stylesheet" href="/sign-in" />
       </div>
     );
@@ -83,12 +84,15 @@ export default function AIStockAnalyticsPage() {
   });
 
   // Fetch current rate limit status
-  const fetchTokenStatus = async () => {
+  const fetchTokenStatus = async (featureCode: FeatureCode) => {
     try {
-      const response = await fetch("/api/rate-limit-status", {
-        cache: "no-store",
-      });
+      const response = await fetch(
+        `/api/rate-limit-status?feature=${encodeURIComponent(featureCode)}`,
+        { cache: "no-store" }
+      );
+
       const data = await response.json();
+
       if (response.ok) {
         setRateLimit({
           count: data.count ?? 0,
@@ -98,7 +102,7 @@ export default function AIStockAnalyticsPage() {
         });
         setRemainingTokens(data.remaining);
       } else {
-        setError(data.message || "Failed to get rate limit");
+        setError(data.message || data.error || "Failed to get rate limit");
       }
     } catch (err) {
       console.error("Failed to fetch status:", err);
@@ -121,7 +125,7 @@ export default function AIStockAnalyticsPage() {
 
   useEffect(() => {
     if (!isAnalyzing) {
-      fetchTokenStatus();
+      fetchTokenStatus(FEATURE_CODES.AI_ANALYSIS);
       return;
     }
     const interval = setInterval(() => {
@@ -411,7 +415,6 @@ export default function AIStockAnalyticsPage() {
                     {Object.entries(analysisData.priceTargets).map(([key, value]) => {
                       let bgColor = "bg-gray-50";
                       let textColor = "text-gray-600";
-
 
                       // Color coding based on price target type
                       if (key.toLowerCase().includes("entry")) {

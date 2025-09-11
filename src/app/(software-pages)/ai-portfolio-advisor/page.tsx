@@ -3,7 +3,9 @@
 import SideBar from "@/components/SideBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
+import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
+import { FEATURE_CODES, type FeatureCode } from "@/lib/utils/constants";
 import { formatLargeNumber, formatPrice } from "@/lib/utils/stockUtils";
 import {
   Activity,
@@ -17,6 +19,7 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import {
   Bar,
@@ -40,6 +43,13 @@ import {
 } from "recharts";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
+
+interface RateLimit {
+  count: number;
+  remaining: number;
+  limit: number;
+  resetTime?: string;
+}
 
 // Alert Mapping Config
 const ALERT_CONFIG: Record<string, { color: string; icon: any }> = {
@@ -149,7 +159,76 @@ const AIPortfolioAdvisorPage = () => {
 
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { data: session, status } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [rateLimit, setRateLimit] = useState<RateLimit>({
+    count: 0,
+    remaining: 1,
+    limit: 1,
+    resetTime: undefined,
+  });
+  const [remainingTokens, setRemainingTokens] = useState<number>(1);
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="p-6">
+        <p className="text-gray-700">Please sign in to use StockAmplify</p>
+        <link rel="stylesheet" href="/sign-in" />
+      </div>
+    );
+  }
+
+  // Pass redirectIfInactive = true so inactive users are bounced to dashboard
+  const { isActive, user } = useUserStatus({
+    redirectIfInactive: true,
+  });
+
+  // Fetch current rate limit status
+  const fetchTokenStatus = async (featureCode: FeatureCode) => {
+    try {
+      const response = await fetch(
+        `/api/rate-limit-status?feature=${encodeURIComponent(featureCode)}`,
+        { cache: "no-store" }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setRateLimit({
+          count: data.count ?? 0,
+          remaining: data.remaining ?? 0,
+          limit: data.limit ?? 0,
+          resetTime: data.resetTime,
+        });
+        setRemainingTokens(data.remaining);
+      } else {
+        setError(data.message || data.error || "Failed to get rate limit");
+      }
+    } catch (err) {
+      console.error("Failed to fetch status:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!FEATURE_CODES || !FEATURE_CODES.AI_PORTFOLIO_ADVISOR) {
+      setError("Server misconfiguration: feature codes missing");
+      return;
+    }
+    fetchTokenStatus(FEATURE_CODES.AI_PORTFOLIO_ADVISOR);
+  }, []);
+
+  useEffect(() => {
+    const rem = rateLimit?.remaining ?? 0;
+    setRemainingTokens(rem);
+
+    if (rem <= 0) {
+      setError("You've reached your daily limit. Please try again tomorrow.");
+    } else {
+      if (error === "You've reached your daily limit. Please try again tomorrow.") {
+        setError(null);
+      }
+    }
+  }, [rateLimit]);
 
   // 1) Initial portfolio fetch
   useEffect(() => {
@@ -158,7 +237,10 @@ const AIPortfolioAdvisorPage = () => {
       try {
         const res = await fetch("/api/portfolio");
         const data = await res.json();
-        if (data?.success) setInitialPortfolio(data.data || []);
+        if (data?.success) {
+          setInitialPortfolio(data.data || []);
+          setRateLimit(data.rateLimit);
+        }
       } catch (err) {
         console.error("Failed to fetch initial portfolio:", err);
       } finally {
@@ -166,7 +248,7 @@ const AIPortfolioAdvisorPage = () => {
       }
     };
     fetchInitialPortfolio();
-  }, [refreshKey]);
+  }, []);
 
   // 2) Live portfolio hook
   const { portfolio } = useRealTimePortfolio(initialPortfolio);
@@ -182,8 +264,9 @@ const AIPortfolioAdvisorPage = () => {
           body: JSON.stringify({ portfolio }),
         });
         const json = await res.json();
-        if (json?.success) setMetrics(json.data as AIPortfolioAdvisorMetrics);
-        else setMetrics(null);
+        if (json?.success) {
+          setMetrics(json.data as AIPortfolioAdvisorMetrics);
+        } else setMetrics(null);
       } catch (err) {
         console.error("Error fetching advisor insights:", err);
         setMetrics(null);
@@ -213,8 +296,25 @@ const AIPortfolioAdvisorPage = () => {
     return (
       <div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row min-h-screen">
         <SideBar />
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-lg text-gray-500">No advisor data available</p>
+        <div className="flex-1 p-6">
+          {/* show error if any */}
+          {error ? (
+            <div className="mb-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div className="font-medium">Error</div>
+                </div>
+                <p className="mt-2 text-sm text-red-700">
+                  {typeof error === "string" ? error : JSON.stringify(error)}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="flex items-center justify-center">
+            <p className="text-lg text-gray-500">No advisor data available</p>
+          </div>
         </div>
       </div>
     );

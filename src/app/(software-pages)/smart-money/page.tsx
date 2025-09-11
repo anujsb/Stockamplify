@@ -6,11 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { AceMatchGrouped } from "@/lib/services/aceMatches";
 import { cn } from "@/lib/utils";
+import { FEATURE_CODES, type FeatureCode } from "@/lib/utils/constants";
 import { formatQuarterDate } from "@/lib/utils/stockUtils";
-import { IconArchive, IconMoneybag, IconTarget, IconTargetArrow } from "@tabler/icons-react";
-import { BarChart2, ChartBar, CrownIcon, LogOut, PieChart, PinIcon, Target, Users } from "lucide-react";
+import { IconArchive, IconMoneybag, IconTargetArrow } from "@tabler/icons-react";
+import {
+  AlertTriangle,
+  BarChart2,
+  ChartBar,
+  CrownIcon,
+  LogOut,
+  PieChart,
+  PinIcon,
+  Users,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
+
+interface RateLimit {
+  count: number;
+  remaining: number;
+  limit: number;
+  resetTime?: string;
+}
 
 type ApiResponse =
   | {
@@ -24,7 +41,6 @@ type ApiResponse =
   | any;
 
 export default function SmartMoneyPage() {
-  const { status } = useSession();
   const { isActive } = useUserStatus({ redirectIfInactive: true });
 
   const [active, setActive] = useState<AceMatchGrouped[]>([]);
@@ -37,7 +53,63 @@ export default function SmartMoneyPage() {
   const [matchedInvestment, setMatchedInvestment] = useState<number>(0);
   const [totalStockHeldByUser, setTotalStockHeldByUser] = useState(0);
   const [aceLoading, setAceLoading] = useState(true);
-  const [aceError, setAceError] = useState<string | null>(null);
+  const { data: session, status } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [rateLimit, setRateLimit] = useState<RateLimit>({
+    count: 0,
+    remaining: 10,
+    limit: 10,
+    resetTime: undefined,
+  });
+  const [remainingTokens, setRemainingTokens] = useState<number>(1);
+
+  // Fetch current rate limit status
+  const fetchTokenStatus = async (featureCode: FeatureCode) => {
+    try {
+      const response = await fetch(
+        `/api/rate-limit-status?feature=${encodeURIComponent(featureCode)}`,
+        { cache: "no-store" }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setRateLimit({
+          count: data.count ?? 0,
+          remaining: data.remaining ?? 0,
+          limit: data.limit ?? 0,
+          resetTime: data.resetTime,
+        });
+        setRemainingTokens(data.remaining);
+      } else {
+        setError(data.message || data.error || "Failed to get rate limit");
+      }
+    } catch (err) {
+      console.error("Failed to fetch status:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!FEATURE_CODES || !FEATURE_CODES.SMART_MONEY) {
+      setError("Server misconfiguration: feature codes missing");
+      return;
+    }
+    fetchTokenStatus(FEATURE_CODES.SMART_MONEY);
+  }, []);
+
+  useEffect(() => {
+    if (rateLimit == null) return;
+    const rem = rateLimit?.remaining ?? 0;
+    setRemainingTokens(rem);
+
+    if (rem <= 0) {
+      setError("You've reached your monthly limit. Please try again next month.");
+    } else {
+      if (error === "You've reached your monthly limit. Please try again next month.") {
+        setError(null);
+      }
+    }
+  }, [rateLimit]);
 
   const normalize = (arr: any[]): AceMatchGrouped[] =>
     (arr ?? []).map((g: any) => ({
@@ -63,7 +135,7 @@ export default function SmartMoneyPage() {
     const fetchData = async () => {
       try {
         setAceLoading(true);
-        setAceError(null);
+        setError(null);
 
         const res = await fetch("/api/ace-matches");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -84,12 +156,14 @@ export default function SmartMoneyPage() {
           latest: lab?.latest ? new Date(lab.latest) : null,
           previous: lab?.previous ? new Date(lab.previous) : null,
         });
-
         setTotalInvestment(Number(root.totalInvestment ?? 0));
         setMatchedInvestment(Number(root.matchedInvestment ?? 0));
         setTotalStockHeldByUser(Number(root.totalStockHeldByUser ?? 0));
+        setRateLimit(root.rateLimit);
       } catch (e: any) {
-        if (!cancel) setAceError(e?.message ?? "Failed to load ace matches");
+        if (!cancel) {
+          setError((prev) => prev || e?.message || "Failed to load ace matches");
+        }
       } finally {
         if (!cancel) setAceLoading(false);
       }
@@ -146,7 +220,31 @@ export default function SmartMoneyPage() {
   if (status === "unauthenticated") {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-muted-foreground">Please sign in to access Ace Investor Matches.</p>
+        <p className="text-muted-foreground">Please sign in to use StockAmplify</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row min-h-screen">
+        <SideBar />
+        <div className="flex-1 p-6">
+          {/* show error if any */}
+          {error ? (
+            <div className="mb-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div className="font-medium">Error</div>
+                </div>
+                <p className="mt-2 text-sm text-red-700">
+                  {typeof error === "string" ? error : JSON.stringify(error)}
+                </p>
+              </div>
+            </div>
+          ) : null}
+        </div>
       </div>
     );
   }
@@ -173,11 +271,6 @@ export default function SmartMoneyPage() {
           </div>{" "}
         </div>{" "}
       </div>
-    );
-  }
-  if (aceError) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600 text-sm">{aceError}</div>
     );
   }
 

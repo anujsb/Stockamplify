@@ -168,7 +168,6 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
         setErrorMessage("Failed to remove stock. Please try again.");
       }
     } catch (error) {
-      console.error("Error deleting portfolio item:", error);
       setErrorMessage("Failed to remove stock. Please try again.");
     }
   };

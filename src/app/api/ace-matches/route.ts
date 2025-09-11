@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
+import { checkLimit, incrementCount } from "@/lib/rateLimit/rateLimit";
 import { getQuarterLabels, getUserAceMatches } from "@/lib/services/aceMatches";
 import { UserService } from "@/lib/services/userService";
+import { FEATURE_CODES } from "@/lib/utils/constants";
 import { NextRequest, NextResponse } from "next/server";
 
 function convertBigIntToString(obj: any): any {
@@ -50,7 +52,26 @@ export async function GET(_req: NextRequest) {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
-    const userId = user.id.toString();
+    const userId = session?.user?.dbUserId;
+
+    // Rate limit check
+    const { allowed, remaining, count, limit } = await checkLimit(
+      userId,
+      FEATURE_CODES.SMART_MONEY
+    );
+
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: `You have used all ${limit} limit today. Try again tomorrow.`,
+          message: "Daily limit exceeded",
+          remaining,
+          count,
+        },
+        { status: 429 }
+      );
+    }
+
     const cacheKey = `ace-matches:${userId}`;
     const cached = cache.get(cacheKey);
 
@@ -92,7 +113,24 @@ export async function GET(_req: NextRequest) {
       expiresAt,
     });
 
-    return NextResponse.json({ success: true, data: responseData }, { status: 200 });
+    // Increment count of rate limit
+    await incrementCount(userId, FEATURE_CODES.SMART_MONEY);
+
+    // Get updated remaining count
+    const updated = await checkLimit(userId, FEATURE_CODES.SMART_MONEY);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: responseData,
+        rateLimit: {
+          count: updated.count,
+          remaining: updated.remaining,
+          limit: updated.limit,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error?.message ?? "Internal server error" },

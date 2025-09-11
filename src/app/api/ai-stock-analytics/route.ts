@@ -1,19 +1,13 @@
 import { auth } from "@/lib/auth";
-import {
-  checkLimit,
-  FEATURE_CODES,
-  incrementCount,
-} from "@/lib/rateLimit/rateLimit";
+import { checkLimit, incrementCount } from "@/lib/rateLimit/rateLimit";
+import { FEATURE_CODES } from "@/lib/utils/constants";
+
 import {
   callGeminiAI,
   transformAnalysisResponse,
   validateAnalysisResponse,
 } from "@/lib/services/aiAnalysisService";
-import {
-  ChartService,
-  TimeInterval,
-  TimeRange,
-} from "@/lib/services/chartService";
+import { ChartService, TimeInterval, TimeRange } from "@/lib/services/chartService";
 import { buildAnalysisPrompt } from "@/lib/utils/aiPromptBuilder";
 import { getHorizonConfig } from "@/lib/utils/investmentHorizons";
 import { NextRequest, NextResponse } from "next/server";
@@ -95,15 +89,9 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
+    
     const body: AIStockAnalysisRequest = await request.json();
-    const {
-      symbol,
-      stockname,
-      investmentHorizon,
-      interval,
-      period,
-      language = "english",
-    } = body;
+    const { symbol, stockname, investmentHorizon, interval, period, language = "english" } = body;
 
     if (!symbol || !investmentHorizon) {
       return NextResponse.json(
@@ -120,17 +108,12 @@ export async function POST(request: NextRequest) {
     const finalPeriod = period || horizonConfig.period;
 
     // Fetch chart data
-    const chart = await ChartService.getChartData(
-      symbol,
-      finalPeriod,
-      finalInterval
-    );
+    const chart = await ChartService.getChartData(symbol, finalPeriod, finalInterval);
 
     if (!chart) {
       return NextResponse.json(
         {
-          error:
-            "Failed to fetch chart data. Please check the symbol and try again.",
+          error: "Failed to fetch chart data. Please check the symbol and try again.",
         },
         { status: 400 }
       );
@@ -163,10 +146,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (
-      !aiResponse.analysis ||
-      !validateAnalysisResponse(aiResponse.analysis)
-    ) {
+    if (!aiResponse.analysis || !validateAnalysisResponse(aiResponse.analysis)) {
       return NextResponse.json(
         {
           error: "Invalid AI analysis response",
@@ -176,9 +156,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const analysis = transformAnalysisResponse(
-      aiResponse.analysis
-    ) as AIStockAnalysisResponse;
+    const analysis = transformAnalysisResponse(aiResponse.analysis) as AIStockAnalysisResponse;
 
     // Increment count of rate limit
     await incrementCount(userId, FEATURE_CODES.AI_ANALYSIS);
@@ -209,9 +187,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("AI stock analytics API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

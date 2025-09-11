@@ -4,10 +4,20 @@
 import SideBar from "@/components/SideBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealTimePortfolio } from "@/lib/hooks/useRealTimePortfolio";
+import { useUserStatus } from "@/lib/hooks/useUserStatus";
 import { cn } from "@/lib/utils";
+import { FEATURE_CODES, type FeatureCode } from "@/lib/utils/constants";
 import { formatPrice, formatSymbol } from "@/lib/utils/stockUtils";
-import { Activity, BarChart3, RefreshCw, Target } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, RefreshCw, Target } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+
+interface RateLimit {
+  count: number;
+  remaining: number;
+  limit: number;
+  resetTime?: string;
+}
 
 // ---- Minimal types for metrics items (keeps UI the same) ----
 type VolumeAnalysisItem = {
@@ -55,6 +65,76 @@ const TradeSignalsPage = () => {
   const [initialPortfolio, setInitialPortfolio] = useState<any[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { data: session, status } = useSession();
+  const [error, setError] = useState<string | null>(null);
+  const [rateLimit, setRateLimit] = useState<RateLimit>({
+    count: 0,
+    remaining: 1,
+    limit: 1,
+    resetTime: undefined,
+  });
+  const [remainingTokens, setRemainingTokens] = useState<number>(1);
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="p-6">
+        <p className="text-gray-700">Please sign in to use StockAmplify</p>
+        <link rel="stylesheet" href="/sign-in" />
+      </div>
+    );
+  }
+
+  // Pass redirectIfInactive = true so inactive users are bounced to dashboard
+  const { isActive, user } = useUserStatus({
+    redirectIfInactive: true,
+  });
+
+  // Fetch current rate limit status
+  const fetchTokenStatus = async (featureCode: FeatureCode) => {
+    try {
+      const response = await fetch(
+        `/api/rate-limit-status?feature=${encodeURIComponent(featureCode)}`,
+        { cache: "no-store" }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setRateLimit({
+          count: data.count ?? 0,
+          remaining: data.remaining ?? 0,
+          limit: data.limit ?? 0,
+          resetTime: data.resetTime,
+        });
+        setRemainingTokens(data.remaining);
+      } else {
+        setError(data.message || data.error || "Failed to get rate limit");
+      }
+    } catch (err) {
+      console.error("Failed to fetch status:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!FEATURE_CODES || !FEATURE_CODES.TRADE_SIGNALS) {
+      setError("Server misconfiguration: feature codes missing");
+      return;
+    }
+    fetchTokenStatus(FEATURE_CODES.TRADE_SIGNALS);
+  }, []);
+
+  useEffect(() => {
+    const rem = rateLimit?.remaining ?? 0;
+    setRemainingTokens(rem);
+
+    if (rem <= 0) {
+      setError("You've reached your daily limit. Please try again tomorrow.");
+    } else {
+      if (error === "You've reached your daily limit. Please try again tomorrow.") {
+        setError(null);
+      }
+    }
+  }, [rateLimit]);
 
   // 1) Initial portfolio fetch from your existing /api/portfolio
   useEffect(() => {
@@ -92,6 +172,7 @@ const TradeSignalsPage = () => {
         const json = await res.json();
         if (json?.success) {
           setMetrics(json.data as TradeSignalsMetrics);
+          setRateLimit(json.rateLimit);
         } else {
           console.error("Trade signals error:", json?.error || "Unknown error");
           setMetrics(null);
@@ -107,7 +188,7 @@ const TradeSignalsPage = () => {
     fetchMetrics();
   }, [portfolio]);
 
-  if (initialLoading || isLoading || loading || !metrics) {
+  if (initialLoading || isLoading || loading) {
     return (
       <div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row min-h-screen">
         <SideBar />
@@ -115,6 +196,34 @@ const TradeSignalsPage = () => {
           <div className="text-center">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
             <p className="text-lg font-medium">Loading Trade Signals...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="flex w-full flex-1 flex-col overflow-hidden rounded-md border border-neutral-200 bg-gray-100 md:flex-row min-h-screen">
+        <SideBar />
+        <div className="flex-1 p-6">
+          {/* show error if any */}
+          {error ? (
+            <div className="mb-4">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  <div className="font-medium">Error</div>
+                </div>
+                <p className="mt-2 text-sm text-red-700">
+                  {typeof error === "string" ? error : JSON.stringify(error)}
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="flex items-center justify-center">
+            <p className="text-lg text-gray-500">No Trade Signal available</p>
           </div>
         </div>
       </div>
@@ -239,11 +348,11 @@ const TradeSignalsPage = () => {
                       const bBreak = bpos > 90;
                       if (aBreak !== bBreak) return aBreak ? -1 : 1;
 
-                      const aStrong = String(a.momentum).toLowerCase() === "strong"; // then strong momentum
+                      const aStrong = String(a.momentum).toLowerCase() === "strong";
                       const bStrong = String(b.momentum).toLowerCase() === "strong";
                       if (aStrong !== bStrong) return aStrong ? -1 : 1;
 
-                      const aNearHigh = a.signal === "Near High"; // then "Near High" before others
+                      const aNearHigh = a.signal === "Near High";
                       const bNearHigh = b.signal === "Near High";
                       if (aNearHigh !== bNearHigh) return aNearHigh ? -1 : 1;
 
