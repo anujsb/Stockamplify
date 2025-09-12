@@ -12,6 +12,10 @@ export default auth(async function middleware(req) {
     "/ai-stock-analytics",
     "/search",
     "/dashboard",
+    "/news",
+    "/ai-portfolio-advisor",
+    "/trade-signals",
+    "/smart-money",
   ];
 
   // Check if the current route is protected

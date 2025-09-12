@@ -1,10 +1,9 @@
 // src/app/api/portfolio/route.ts
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { StockDataService } from "@/lib/services/stockDataService";
 import { UserService } from "@/lib/services/userService";
-import { StockDataService } from '@/lib/services/stockDataService';
-import { eq, and } from 'drizzle-orm';
-import { normalizeStockSymbol, isValidStockSymbol } from '@/lib/utils/stockUtils';
+import { isValidStockSymbol, normalizeStockSymbol } from "@/lib/utils/stockUtils";
+import { NextRequest, NextResponse } from "next/server";
 
 // Define the response type for clarity and type safety
 interface PortfolioResponse {
@@ -17,13 +16,13 @@ interface PortfolioResponse {
 function convertBigIntToString(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(convertBigIntToString);
-  } else if (obj && typeof obj === 'object') {
+  } else if (obj && typeof obj === "object") {
     if (obj instanceof Date) {
       return obj.toISOString();
     }
     return Object.fromEntries(
       Object.entries(obj).map(([k, v]) => {
-        if (typeof v === 'bigint') {
+        if (typeof v === "bigint") {
           return [k, v.toString()];
         } else if (v instanceof Date) {
           return [k, v.toISOString()];
@@ -39,7 +38,7 @@ function convertBigIntToString(obj: any): any {
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
-    
+
     if (!session?.user?.nextAuthId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -65,31 +64,40 @@ export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResp
   try {
     const session = await auth();
     if (!session?.user?.nextAuthId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
-      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
     const body = await req.json();
     const { symbol, quantity, buyPrice } = body;
-    
+
     if (!symbol || !quantity || !buyPrice) {
-      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Missing required fields" },
+        { status: 400 }
+      );
     }
 
     // Validate input
     if (quantity <= 0 || buyPrice <= 0) {
-      return NextResponse.json({ success: false, error: 'Invalid quantity or buy price' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Invalid quantity or buy price" },
+        { status: 400 }
+      );
     }
 
     // Normalize and validate symbol format for Indian stocks
     const normalizedSymbol = normalizeStockSymbol(symbol);
     if (!isValidStockSymbol(normalizedSymbol)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid Indian stock symbol format (must be e.g. RELIANCE.NS or SBIN.BO)' },
+        {
+          success: false,
+          error: "Invalid Indian stock symbol format (must be e.g. RELIANCE.NS or SBIN.BO)",
+        },
         { status: 400 }
       );
     }
@@ -103,7 +111,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResp
       const stockResult = await StockDataService.createOrUpdateStockData(normalizedSymbol);
       if (!stockResult.success || !stockResult.stockId) {
         return NextResponse.json(
-          { success: false, error: 'Failed to fetch stock data' },
+          { success: false, error: "Failed to fetch stock data" },
           { status: 400 }
         );
       }
@@ -120,14 +128,17 @@ export async function POST(req: NextRequest): Promise<NextResponse<PortfolioResp
       parseFloat(buyPrice)
     );
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Stock added to portfolio successfully',
-      data: portfolioResult
-    }, { status: 200 });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Stock added to portfolio successfully",
+        data: portfolioResult,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error('Error in POST /api/portfolio:', error);
-    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
+    console.error("Error in POST /api/portfolio:", error);
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -140,6 +151,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioRe
     }
     const user = await UserService.getUserByNextAuthId(session.user.nextAuthId);
     if (!user) {
+      console.error("User not found for nextAuthId:", session.user.nextAuthId);
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
     const { searchParams } = new URL(req.url);
@@ -172,4 +184,3 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<PortfolioRe
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }
-

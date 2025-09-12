@@ -1,12 +1,19 @@
 import { HoldingInput, recommendForHolding } from "@/lib/services/shared/personalizedRecommender";
 import { formatPrice, formatSymbol } from "@/lib/utils/stockUtils";
-import { ChevronRight, Eye, Info, Trash2 } from "lucide-react";
+import { ChevronRight, Eye, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import PriceChangeIndicator from "./PriceChangeIndicator";
 import StockDetailModal from "./StockDetailModal";
 
-type SortField = "symbol" | "quantity" | "buyPrice" | "currentPrice" | "currentValue" | "gainLoss" | "advice";
+type SortField =
+  | "symbol"
+  | "quantity"
+  | "buyPrice"
+  | "currentPrice"
+  | "currentValue"
+  | "gainLoss"
+  | "advice";
 
 interface PortfolioTableProps {
   portfolio: any[];
@@ -159,9 +166,7 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
     }
     setErrorMessage(null);
     try {
-      const response = await fetch(`/api/portfolio/?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`/api/portfolio/?id=${id}`, { method: "DELETE" });
       if (response.ok) {
         onRefresh();
       } else {
@@ -175,17 +180,15 @@ const PortfolioTable: React.FC<PortfolioTableProps> = ({
   const handleDeleteAll = async () => {
     setDeletingAll(true);
     try {
-      const res = await fetch("/api/portfolio/delete-all", { method: "DELETE" });
+      const res = await fetch("/api/portfolio/", { method: "DELETE" });
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        alert(data.error || "Failed to delete all stocks");
         return;
       }
       onRefresh();
     } catch (err) {
       console.error("Delete all failed:", err);
-      alert("Something went wrong while deleting stocks.");
     } finally {
       setDeletingAll(false);
     }
