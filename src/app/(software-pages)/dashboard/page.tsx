@@ -135,7 +135,7 @@ function QuickActionCard({
               {blocked && <span className="text-red-600">Limit reached</span>}
             </div>
             <div className="text-slate-500 mt-1">
-              {formatResetTime(info.resetTime, info.resetInterval)}
+              {formatResetTime(info.resetTime ?? undefined, info.resetInterval ?? undefined)}
             </div>
           </div>
         )}
