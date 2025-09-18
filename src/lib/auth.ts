@@ -11,6 +11,7 @@ import { UserService } from "./services/userService";
 
 declare module "next-auth" {
   interface Session {
+    expires: string;
     user: {
       id: string;
       dbUserId: number;
@@ -55,7 +56,14 @@ declare module "next-auth/jwt" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 8 * 60 * 60, // 8 hours (seconds)
+    updateAge: 0,
+  },
+  jwt: {
+    maxAge: 8 * 60 * 60, // 8 hours (seconds)
+  },
   pages: { signIn: "/sign-in" },
   providers: [
     Google({
@@ -152,6 +160,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.nextAuthId = user.nextAuthId;
         token.username = user.username;
         token.isActive = user.isActive;
+        // Explicitly set expiry for the token
+        const expiry = 8 * 60 * 60; // seconds
+        token.exp = Math.floor(Date.now() / 1000) + expiry;
       }
       // Ensure dbId & nextAuthId are present (covers OAuth)
       if ((!token.dbUserId || !token.nextAuthId) && token.email) {
@@ -217,6 +228,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.subscriptionType = token.subscriptionType;
         session.user.subscriptionStartDate = token.subscriptionStartDate;
         session.user.subscriptionEndDate = token.subscriptionEndDate;
+
+        // Use token.exp (if present) to set session.expires so client can trust it
+        if (token.exp) {
+          session.expires = new Date((token.exp as number) * 1000) as unknown as Date & string;
+        }
       }
       return session;
     },
