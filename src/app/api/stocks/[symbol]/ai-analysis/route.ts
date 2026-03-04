@@ -1,18 +1,21 @@
 // 1. UPDATED API ROUTE - More robust data handling
 import { NextRequest, NextResponse } from 'next/server';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
+// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export async function POST(request: NextRequest) {
-  if (!GEMINI_API_KEY) {
+  // if (!GEMINI_API_KEY) {
+  if (!GROQ_API_KEY) {
     return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 });
   }
 
   try {
     const portfolioData = await request.json();
     //console.log('Received portfolio data:', JSON.stringify(portfolioData, null, 2)); // Debug log
-    
+
     // IMPROVED: More defensive data extraction with fallbacks
     const stock = portfolioData.stock || {};
     const realTimePrice = portfolioData.realTimePrice || {};
@@ -29,8 +32,8 @@ export async function POST(request: NextRequest) {
 
     // IMPROVED: Validate essential data before proceeding
     if (!stock.symbol) {
-      return NextResponse.json({ 
-        error: 'Missing required stock symbol' 
+      return NextResponse.json({
+        error: 'Missing required stock symbol'
       }, { status: 400 });
     }
 
@@ -131,7 +134,7 @@ PORTFOLIO CONTEXT:
 
       // IMPROVED: Adjusted expectations based on data availability
       const availableDataCount = Object.values(dataQuality).filter(Boolean).length;
-      const dataQualityNote = availableDataCount < 3 ? 
+      const dataQualityNote = availableDataCount < 3 ?
         "Note: Limited data available. Focus on general sector/industry analysis and acknowledge data limitations." :
         "Note: Good data availability. Provide comprehensive analysis.";
 
@@ -171,17 +174,45 @@ IMPORTANT: If data is limited, acknowledge this in your analysis but still provi
 
     const prompt = buildPrompt();
 
-    const geminiRes = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    // const geminiRes = await fetch(`${GEMINI_API_KEY}?key=${GEMINI_API_KEY}`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     contents: [{ parts: [{ text: prompt }] }],
+    //     generationConfig: {
+    //       temperature: 0.7,
+    //       topK: 40,
+    //       topP: 0.95,
+    //       maxOutputTokens: 2048,
+    //     }
+    //   })
+    // });
+
+    // replaced gemini with groq
+    // const geminiRes = await fetch(`{GROQ_API_KEY}?key=${GROQ_API_KEY}`,{
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${GROQ_API_KEY}`
+    //   },
+    //   body: JSON.stringify({
+    //     model: 'llama-3.3-70b-versatile',
+    //     max_tokens: 2048,
+    //     messages: [{ role: 'user', content: prompt }],
+    //     temperature: 0.7
+    //   }) 
+    // });
+    const geminiRes = await fetch(GROQ_API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 2048,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
       })
     });
 
@@ -192,8 +223,10 @@ IMPORTANT: If data is limited, acknowledge this in your analysis but still provi
     }
 
     const geminiData = await geminiRes.json();
-    const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
+    // const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = geminiData.choices?.[0]?.message?.content || '';
+
+
     let analysis;
     try {
       // IMPROVED: Better JSON parsing with fallback
@@ -215,8 +248,8 @@ IMPORTANT: If data is limited, acknowledge this in your analysis but still provi
       };
     }
 
-    return NextResponse.json({ 
-      analysis, 
+    return NextResponse.json({
+      analysis,
       generatedAt: new Date().toISOString(),
       dataQuality,
       debug: {
@@ -227,9 +260,9 @@ IMPORTANT: If data is limited, acknowledge this in your analysis but still provi
 
   } catch (error) {
     console.error('Internal server error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error', 
-      details: String(error) 
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: String(error)
     }, { status: 500 });
   }
 }

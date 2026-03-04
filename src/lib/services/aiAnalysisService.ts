@@ -3,8 +3,10 @@
  * Handles communication with Gemini AI for stock analysis
  */
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
+// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent';
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export interface AIAnalysisRequest {
   symbol: string;
@@ -27,7 +29,7 @@ export interface AIAnalysisResponse {
  * @returns AI response
  */
 export async function callGeminiAI(prompt: string): Promise<AIAnalysisResponse> {
-  if (!GEMINI_API_KEY) {
+  if (!GROQ_API_KEY) {
     return {
       success: false,
       error: 'Gemini API key not configured'
@@ -35,7 +37,7 @@ export async function callGeminiAI(prompt: string): Promise<AIAnalysisResponse> 
   }
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${GROQ_API_KEY}?key=${GROQ_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -60,8 +62,10 @@ export async function callGeminiAI(prompt: string): Promise<AIAnalysisResponse> 
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
+    // const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.choices?.[0]?.message?.content || '';
+
+
     let analysis;
     try {
       const cleanText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -131,8 +135,8 @@ export function transformAnalysisResponse(analysis: any): any {
     trendConfidenceScore: Number(analysis.trendConfidenceScore) || 0,
     volatilityScore: Number(analysis.volatilityScore) || 0
   };
-} 
-  
+}
+
 /**
  * Return only first and last element if array has more than 2 values
  */

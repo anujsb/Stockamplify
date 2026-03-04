@@ -243,14 +243,14 @@ export default function AIStockAnalyticsPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Stock Symbol */}
-                <div className="space-y-2 md:col-span-1 relative z-30">
+                <div className="space-y-2 md:col-span-1 relative z-50">
                   <label className="text-sm font-medium text-gray-700">
                     {getTranslation(language, "stockSymbol")}
                   </label>
                   <StockSearch
                     onStockSelect={handleStockSelect}
                     placeholder="Search for stocks..."
-                    className="w-full"
+                    className="w-full z-50"
                   />
                 </div>
 
